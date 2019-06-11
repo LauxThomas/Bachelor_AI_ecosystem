@@ -6,11 +6,10 @@ using Random = UnityEngine.Random;
 public class Spawner : MonoBehaviour
 {
     public Transform foodPrefab;
-    [Range(1, 25)] public int initialFoodCount = 10;
-    public List<Transform> allFoods;
+    private List<Transform> allFoods;
 
     public Transform[] vehiclePrefabs;
-    public List<Transform> allvehicles;
+    private List<Transform> allvehicles;
 
 
     private GameManager gm;
@@ -21,12 +20,14 @@ public class Spawner : MonoBehaviour
         allFoods = new List<Transform>();
         allvehicles = new List<Transform>();
         populateFood();
-        InvokeRepeating("SpawnOrganism", 2.0f, 2.0f);
+        //do every x seconds:
+        InvokeRepeating("SpawnOrganism", 1.0f, 10.0f);
+        InvokeRepeating("addNewFood", 1.0f, 5.0f);
     }
 
     private void populateFood()
     {
-        for (var i = 0; i < initialFoodCount; i++)
+        for (var i = 0; i < gm.initialFoodCount; i++)
         {
             addNewFood();
         }
@@ -63,5 +64,10 @@ public class Spawner : MonoBehaviour
             if (allFoods[i] == null)
                 allFoods.RemoveAt(i);
         }
+    }
+
+    public List<Transform> getAllFoods()
+    {
+        return allFoods;
     }
 }
