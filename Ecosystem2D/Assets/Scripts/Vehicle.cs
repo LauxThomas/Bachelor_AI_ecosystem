@@ -12,17 +12,24 @@ public class Vehicle : MonoBehaviour
     private Spawner spawner;
     private Transform nearestFood;
     private GameManager gm;
+    private VehicleConfig conf;
     private float health;
     private float score;
     private float viewRadius;
+    private Vector3 wanderTarget;
+    public Vector3 velocity;
+    public Vector3 acceleration;
 
 
     private void Start()
     {
         gm = FindObjectOfType<GameManager>();
         spawner = FindObjectOfType<Spawner>();
+        conf = FindObjectOfType<VehicleConfig>();
         health = gm.vehicleHealth;
         viewRadius = gm.viewRadius;
+        velocity = new Vector3(Random.Range(-gm.windowWidth, gm.windowWidth),
+            Random.Range(-gm.windowHeight, gm.windowHeight), 0);
 
         position = transform.position;
         findTarget();
@@ -45,22 +52,46 @@ public class Vehicle : MonoBehaviour
 
     private void wanderAround()
     {
-        throw new NotImplementedException();
+        Debug.Log("I'm wandering");
+        acceleration = Wander();
+        acceleration = Vector3.ClampMagnitude(acceleration, conf.maxAcceleration);
+        velocity += acceleration * Time.deltaTime;
+        velocity = Vector3.ClampMagnitude(velocity, gm.vehicleSpeed);
+        position = position + velocity * Time.deltaTime;
+        conf.wrapAround(ref position,-gm.windowWidth,gm.windowWidth,-gm.windowHeight,gm.windowHeight);
+        transform.position = position;
+    }
+
+    protected Vector3 Wander()
+    {
+        position = transform.position;
+        float jitter = conf.wanderJitter * Time.deltaTime;
+        wanderTarget += new Vector3(conf.randomBinominal() * jitter, conf.randomBinominal() * jitter, 0);
+        wanderTarget = wanderTarget.normalized;
+        wanderTarget *= conf.wanderRadius;
+        Vector3 targetInLocalSpace = wanderTarget + new Vector3(0, conf.wanderDistance, 0);
+        Vector3 targetInWorldSpace = transform.TransformPoint(targetInLocalSpace);
+        targetInWorldSpace -= position;
+        return targetInWorldSpace.normalized;
+    }
+
+    private void randomizeTarget()
+    {
+        target = new Vector3(Random.Range(-gm.windowWidth, gm.windowWidth),
+            Random.Range(-gm.windowHeight, gm.windowHeight), 0);
     }
 
     private bool looking4Food(float radius)
     {
         findTarget();
         float dist = Vector3.Distance(target, position);
-        Debug.Log(dist);
+//        Debug.Log(dist);
         if (dist <= radius)
         {
             return true;
         }
-        else
-        {
-            return false;
-        }
+
+        return false;
     }
 
     private void debugStuff()
@@ -78,7 +109,7 @@ public class Vehicle : MonoBehaviour
         if (health < 0)
         {
             Destroy(this.gameObject);
-            Debug.Log("Score: " + score);
+//            Debug.Log("Score: " + score);
         }
     }
 
