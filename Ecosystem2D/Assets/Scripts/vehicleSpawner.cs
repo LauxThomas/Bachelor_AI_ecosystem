@@ -32,4 +32,10 @@ public class vehicleSpawner : MonoBehaviour
             Instantiate(prefabs[Random.Range(0, prefabs.Length - 1)], spawnPosition, Quaternion.identity);
         vehicles.Add(newVehicle);
     }
+
+    public void cloneThis(GameObject go)
+    {
+        GameObject newVehicle = Instantiate(go, go.transform.position, go.transform.rotation);
+        vehicles.Add(newVehicle);
+    }
 }

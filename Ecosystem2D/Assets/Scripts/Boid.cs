@@ -13,19 +13,25 @@ public class Boid : MonoBehaviour
     private Vector3 steer = Vector3.zero;
     private Rigidbody rb;
     private foodSpawner foodSpawner;
+    private vehicleSpawner vehicleSpawner;
     private GameObject nearestFoodObject;
     private float health;
     private GameManager gm;
+    private float cloningRate = 20;
 
     public float maxSpeed = 5; //5
     public float maxforce = 10; //10
     public float arrivingRadius = 3;
+    private SpriteRenderer sr;
 
     private void Start()
     {
+        sr = GetComponent<SpriteRenderer>();
         gm = FindObjectOfType<GameManager>();
         health = gm.vehicleHealth;
         foodSpawner = FindObjectOfType<foodSpawner>();
+        vehicleSpawner = FindObjectOfType<vehicleSpawner>();
+        InvokeRepeating("cloneMe", cloningRate, cloningRate);
         rb = GetComponent<Rigidbody>();
     }
 
@@ -58,9 +64,9 @@ public class Boid : MonoBehaviour
         rb.AddForce(steer);
 
         //Debug:
-        Debug.DrawLine(transform.position, steer, Color.red);
-        Debug.DrawLine(transform.position, desired, Color.blue);
-        Debug.DrawLine(transform.position, velocity, Color.green);
+//        Debug.DrawLine(transform.position, steer, Color.red);
+//        Debug.DrawLine(transform.position, desired, Color.blue);
+//        Debug.DrawLine(transform.position, velocity, Color.green);
     }
 
 
@@ -74,9 +80,8 @@ public class Boid : MonoBehaviour
 
     private void recoloringBoid()
     {
-        var col = Color.Lerp(Color.red, Color.green, health / gm.vehicleHealth);
-        SpriteRenderer sr = GetComponent<SpriteRenderer>();
-        sr.color = col;
+//        var col = Color.Lerp(Color.red, Color.green, health / gm.vehicleHealth);
+        sr.color = Color.Lerp(Color.red, Color.green, health / gm.vehicleHealth);;
     }
 
     private Vector3 findNearestFood()
@@ -117,5 +122,10 @@ public class Boid : MonoBehaviour
         {
             Destroy(gameObject);
         }
+    }
+
+    private void cloneMe()
+    {
+        vehicleSpawner.cloneThis(gameObject);
     }
 }
