@@ -56,7 +56,7 @@ public class Vehicle : MonoBehaviour
         acceleration = Wander();
         acceleration = Vector3.ClampMagnitude(acceleration, conf.maxAcceleration);
         velocity += acceleration * Time.deltaTime;
-        velocity = Vector3.ClampMagnitude(velocity, gm.vehicleSpeed);
+        velocity = Vector3.ClampMagnitude(velocity, gm.vehicleMaxSpeed);
         position = position + velocity * Time.deltaTime;
         conf.wrapAround(ref position, -gm.windowWidth, gm.windowWidth, -gm.windowHeight, gm.windowHeight);
         transform.position = position;
@@ -146,7 +146,7 @@ public class Vehicle : MonoBehaviour
     {
         position = transform.position;
 
-        transform.position = Vector3.MoveTowards(position, target, gm.vehicleSpeed * Time.deltaTime);
+        transform.position = Vector3.MoveTowards(position, target, gm.vehicleMaxSpeed * Time.deltaTime);
 
 
         if (Vector3.Distance(position, target) < 0.1f)
