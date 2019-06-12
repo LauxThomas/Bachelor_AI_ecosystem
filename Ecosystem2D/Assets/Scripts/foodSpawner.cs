@@ -9,14 +9,20 @@ public class foodSpawner : MonoBehaviour
     public GameObject[] prefabs;
     private List<GameObject> edibles;
     [Range(0.5f, 5.0f)] public float spawnRate = 2.5f;
-    
-    private float width=9;
-    private float height=5;
+    [Range(5, 25)] public int initialRate = 10;
+    private GameManager gm;
 
     private void Start()
     {
         edibles = new List<GameObject>();
-        InvokeRepeating("spawnFood",0,spawnRate);
+        gm = FindObjectOfType<GameManager>();
+
+        for (int i = 0; i < initialRate; i++)
+        {
+            spawnFood();
+        }
+
+        InvokeRepeating("spawnFood", 0, spawnRate);
     }
 
     private void Update()
@@ -25,8 +31,9 @@ public class foodSpawner : MonoBehaviour
 
     private void spawnFood()
     {
-        int index= Random.Range(0,2);
-        Vector3 spawnPoint = new Vector3(Random.Range(-width,width),Random.Range(-height,height),0);
+        int index = Random.Range(0, 2);
+        Vector3 spawnPoint = new Vector3(Random.Range(-gm.windowWidth, gm.windowWidth),
+            Random.Range(-gm.windowHeight, gm.windowHeight), 0);
         GameObject newFood = Instantiate(prefabs[index], spawnPoint, Quaternion.identity);
         edibles.Add(newFood);
     }
@@ -39,5 +46,10 @@ public class foodSpawner : MonoBehaviour
     public void removeEdible(GameObject food)
     {
         edibles.Remove(food);
+    }
+
+    public bool isPoison(GameObject go)
+    {
+        return !go.name.ToLower().Contains("food");
     }
 }

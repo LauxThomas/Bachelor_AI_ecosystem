@@ -14,6 +14,8 @@ public class Boid : MonoBehaviour
     private Rigidbody rb;
     private foodSpawner foodSpawner;
     private GameObject nearestFoodObject;
+    private float health;
+    private GameManager gm;
 
     public float maxSpeed = 5; //5
     public float maxforce = 10; //10
@@ -21,6 +23,8 @@ public class Boid : MonoBehaviour
 
     private void Start()
     {
+        gm = FindObjectOfType<GameManager>();
+        health = gm.vehicleHealth;
         foodSpawner = FindObjectOfType<foodSpawner>();
         rb = GetComponent<Rigidbody>();
     }
@@ -62,10 +66,17 @@ public class Boid : MonoBehaviour
 
     private void updateValues()
     {
+        health -= Time.deltaTime;
         velocity = rb.velocity;
         target = findNearestFood();
-//        target = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-//        debugTarget.transform.position = target;
+        recoloringBoid();
+    }
+
+    private void recoloringBoid()
+    {
+        var col = Color.Lerp(Color.red, Color.green, health / gm.vehicleHealth);
+        SpriteRenderer sr = GetComponent<SpriteRenderer>();
+        sr.color = col;
     }
 
     private Vector3 findNearestFood()
@@ -86,8 +97,9 @@ public class Boid : MonoBehaviour
         if (index != -1)
         {
             nearestFoodObject = edibles[index];
-            if (dist < 0.1f)
+            if (dist < 0.5f)
             {
+                modifyHealth(foodSpawner.isPoison(nearestFoodObject));
                 foodSpawner.removeEdible(nearestFoodObject);
                 Destroy(nearestFoodObject.gameObject);
             }
@@ -96,5 +108,14 @@ public class Boid : MonoBehaviour
         }
 
         return Vector3.zero;
+    }
+
+    private void modifyHealth(bool atePoison)
+    {
+        health += atePoison ? -50 : 50;
+        if (health <= 0)
+        {
+            Destroy(gameObject);
+        }
     }
 }
