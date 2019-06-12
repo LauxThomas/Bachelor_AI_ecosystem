@@ -8,8 +8,8 @@ using Random = UnityEngine.Random;
 
 public class Boid : MonoBehaviour
 {
-    Vector3 velocity = Vector3.zero;
-    Vector3 acceleration = Vector3.zero;
+    private Vector3 velocity = Vector3.zero;
+    private Vector3 acceleration = Vector3.zero;
     private Vector3 desired = Vector3.zero;
     private Vector3 target = Vector3.zero;
     private Vector3 steer = Vector3.zero;
@@ -17,31 +17,34 @@ public class Boid : MonoBehaviour
     private foodSpawner foodSpawner;
     private vehicleSpawner vehicleSpawner;
     private GameObject nearestFoodObject;
-    private float health;
     private GameManager gm;
-    private float cloningRate = 20;
-    private VehicleConfig conf;
+    private float cloningRate;
+    private ArrayList dna;
+    public float health = GameManager.staticVehicleHealth;
+    public float viewRadius = GameManager.staticViewRadius;
+    public float maxSpeed = GameManager.staticVehicleMaxSpeed; //5
 
-    public float maxSpeed; //5
-    public float maxforce = 10; //10
-    public float arrivingRadius = 3;
+
+    private float maxforce = 10; //10
+    private float arrivingRadius = 3;
     private SpriteRenderer sr;
     private Vector3 position;
     private Vector3 wanderTarget;
     private Vector3 randomVector;
+    private float maxHealth;
+
 
     private void Start()
     {
         sr = GetComponent<SpriteRenderer>();
         gm = FindObjectOfType<GameManager>();
-        conf = FindObjectOfType<VehicleConfig>();
         foodSpawner = FindObjectOfType<foodSpawner>();
         vehicleSpawner = FindObjectOfType<vehicleSpawner>();
         rb = GetComponent<Rigidbody>();
-        health = gm.vehicleHealth;
-        maxSpeed = gm.vehicleMaxSpeed;
+        maxHealth = health;
+        cloningRate = gm.cloningRate;
         InvokeRepeating("cloneMe", cloningRate, cloningRate);
-        
+
         randomVector = new Vector3(Random.Range(-gm.getWindowWidth(), gm.getWindowWidth()),
             Random.Range(-gm.getWindowHeight(), gm.getWindowHeight()), 0);
         StartCoroutine(createRandomVector3());
@@ -57,7 +60,7 @@ public class Boid : MonoBehaviour
     private void checkForFood()
     {
         float dist = Vector3.Distance(target, transform.position);
-        if (dist < gm.viewRadius)
+        if (dist < viewRadius)
         {
             seekTarget(false);
         }
@@ -140,7 +143,7 @@ public class Boid : MonoBehaviour
         velocity = rb.velocity;
         target = findNearestFood();
         recoloringBoid();
-        
+
         //kill if necessary
         if (health <= 0)
         {
@@ -151,7 +154,7 @@ public class Boid : MonoBehaviour
     private void recoloringBoid()
     {
 //        var col = Color.Lerp(Color.red, Color.green, health / gm.vehicleHealth);
-        sr.color = Color.Lerp(Color.red, Color.green, health / gm.vehicleHealth);
+        sr.color = Color.Lerp(Color.red, Color.green, health / maxHealth);
         ;
     }
 
@@ -193,7 +196,17 @@ public class Boid : MonoBehaviour
 
     private void cloneMe()
     {
-        vehicleSpawner.cloneThis(gameObject);
+        GameObject child = vehicleSpawner.cloneThis(gameObject);
+        mutateMe(child);
     }
 
+    private void mutateMe(GameObject child)
+    {
+        Boid childStats = child.GetComponent<Boid>();
+        childStats.health = maxHealth + HelperFunctions.randomBinominal() * 0.5f * maxHealth;
+        childStats.maxHealth = childStats.health;
+        childStats.viewRadius = viewRadius + HelperFunctions.randomBinominal() * 0.5f * viewRadius;
+        childStats.maxSpeed = maxSpeed + HelperFunctions.randomBinominal() * 0.5f * maxSpeed;
+        //TODO: maxForce?
+    }
 }

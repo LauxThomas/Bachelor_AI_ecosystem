@@ -53,7 +53,7 @@ public class Vehicle : MonoBehaviour
     private void wanderAround()
     {
         Debug.Log("I'm wandering");
-        acceleration = Wander();
+//        acceleration = Wander();
         acceleration = Vector3.ClampMagnitude(acceleration, conf.maxAcceleration);
         velocity += acceleration * Time.deltaTime;
         velocity = Vector3.ClampMagnitude(velocity, gm.vehicleMaxSpeed);
@@ -62,19 +62,19 @@ public class Vehicle : MonoBehaviour
         transform.position = position;
     }
 
-    protected Vector3 Wander()
-    {
-        position = transform.position;
-        float jitter = conf.wanderJitter * Time.deltaTime;
-        wanderTarget += new Vector3(conf.randomBinominal() * jitter, conf.randomBinominal() * jitter, 0);
-        wanderTarget = wanderTarget.normalized;
-        wanderTarget *= conf.wanderRadius;
-        Vector3 targetInLocalSpace =
-            wanderTarget + new Vector3(conf.randomBinominal() * jitter, conf.randomBinominal() * jitter, 0);
-        Vector3 targetInWorldSpace = transform.TransformPoint(targetInLocalSpace);
-        targetInWorldSpace -= position;
-        return targetInWorldSpace.normalized;
-    }
+//    protected Vector3 Wander()
+//    {
+//        position = transform.position;
+//        float jitter = conf.wanderJitter * Time.deltaTime;
+////        wanderTarget += new Vector3(HelperFunctions.randomBinominal() * jitter, conf.randomBinominal() * jitter, 0);
+//        wanderTarget = wanderTarget.normalized;
+//        wanderTarget *= conf.wanderRadius;
+////        Vector3 targetInLocalSpace =
+//////            wanderTarget + new Vector3(conf.randomBinominal() * jitter, conf.randomBinominal() * jitter, 0);
+////        Vector3 targetInWorldSpace = transform.TransformPoint(targetInLocalSpace);
+////        targetInWorldSpace -= position;
+////        return targetInWorldSpace.normalized;
+//    }
 
     private void randomizeTarget()
     {

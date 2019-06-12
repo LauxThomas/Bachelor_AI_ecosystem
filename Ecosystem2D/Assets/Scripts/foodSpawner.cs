@@ -11,9 +11,11 @@ public class foodSpawner : MonoBehaviour
     [Range(0.5f, 5.0f)] public float spawnRate = 2.5f;
     [Range(5, 25)] public int initialRate = 10;
     private GameManager gm;
+    private GameObject parent;
 
     private void Start()
     {
+        parent = GameObject.Find("Edibles");
         edibles = new List<GameObject>();
         gm = FindObjectOfType<GameManager>();
 
@@ -42,6 +44,11 @@ public class foodSpawner : MonoBehaviour
             Random.Range(-gm.getWindowHeight(), gm.getWindowHeight()), 0);
         GameObject newFood = Instantiate(prefabs[index], spawnPoint, Quaternion.identity);
         edibles.Add(newFood);
+        if (parent == null)
+        {
+            parent = new GameObject("Edibles");
+        }
+        newFood.transform.parent = parent.transform;
     }
 
     public List<GameObject> getEdibles()

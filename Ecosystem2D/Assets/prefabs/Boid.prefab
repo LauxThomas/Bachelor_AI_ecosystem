@@ -94,9 +94,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f142c98151f073449f8e800ef076beb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  health: 50
+  viewRadius: 2.5
   maxSpeed: 5
-  maxforce: 10
-  arrivingRadius: 2
 --- !u!54 &1670014795730715465
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -111,5 +111,5 @@ Rigidbody:
   m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 56
+  m_Constraints: 104
   m_CollisionDetection: 0

@@ -37,8 +37,5 @@ public class VehicleConfig : MonoBehaviour
     }
 
 
-    public float randomBinominal()
-    {
-        return Random.Range(0f, 1f) - Random.Range(0f, 1f);
-    }
+    
 }
