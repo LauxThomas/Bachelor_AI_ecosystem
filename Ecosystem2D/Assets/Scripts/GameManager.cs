@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour
 {
@@ -19,6 +21,21 @@ public class GameManager : MonoBehaviour
     [Range(0.5f, 5.0f)] public static float staticViewRadius = 1f;
     [Range(0.5f, 5.0f)] public static float staticVehicleMaxSpeed = 2.5f;
     [Range(0.5f, 5.0f)]public static float staticVehicleMaxForce = 2;
+    private static List<float> dna;
+
+    private void Awake()
+    {
+        dna = new List<float>();
+//        dna.Add(1);
+//        dna.Add(1);
+        dna.Add(Random.Range(-5, 5));
+        dna.Add(Random.Range(-5, 5));
+    }
+
+    public static List<float> getDNA()
+    {
+        return dna;
+    }
 
     public float getWindowWidth()
     {

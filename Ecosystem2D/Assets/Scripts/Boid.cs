@@ -5,6 +5,7 @@ using System.IO;
 using System.Numerics;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using Quaternion = UnityEngine.Quaternion;
 using Random = UnityEngine.Random;
 using Vector3 = UnityEngine.Vector3;
 
@@ -55,17 +56,18 @@ public class Boid : MonoBehaviour
 
         randomVector = new Vector3(Random.Range(-gm.getWindowWidth(), gm.getWindowWidth()),
             Random.Range(-gm.getWindowHeight(), gm.getWindowHeight()), 0);
-        randomizeDNA();
+        setDna();
     }
 
-    private void randomizeDNA()
+    private void setDna()
     {
-        dna = new List<float>();
-//        dna.Add(1);
-//        dna.Add(1);
-        dna.Add(Random.Range(-5, 5));
-        dna.Add(Random.Range(-5, 5));
+        if (dna.Count==0)
+        {
+            dna.Add(Random.Range(-5, 5));
+            dna.Add(Random.Range(-5, 5));
+        }
     }
+
 
     private void behaviours(List<GameObject> good, List<GameObject> bad)
     {
@@ -118,10 +120,10 @@ public class Boid : MonoBehaviour
             }
         }
 
-        if (record < 0.3f)
+        if (record < 0.5f)
         {
             nom(list[closest]);
-            return Vector3.zero;
+            return seekTarget(randomVector);
         }
 
         if (record < viewRadius)
@@ -235,7 +237,15 @@ public class Boid : MonoBehaviour
 
     private void updateValues()
     {
-        health -= Time.deltaTime * gm.healthModifier;
+        if (vehicleSpawner.getVehicleCount() > 100)
+        {
+            health -= Time.deltaTime * gm.healthModifier * 5;
+        }
+        else
+        {
+            health -= Time.deltaTime * gm.healthModifier;
+        }
+
 //        velocity = rb.velocity;
 //        target = findNearestFood();
         recoloringBoid();
@@ -254,10 +264,10 @@ public class Boid : MonoBehaviour
         int numSegments = 128;
 
         LineRenderer lineRenderer = gameObject.GetComponent<LineRenderer>();
-        Color c1 = new Color(0.5f, 0.5f, 0.5f, 1);
+        Color c1 = Color.green;
 //        lineRenderer.material = new Material(Shader.Find("Particles/Additive"));
         lineRenderer.SetColors(c1, c1);
-        lineRenderer.SetWidth(0.5f, 0.5f);
+        lineRenderer.SetWidth(0.1f, 0.1f);
         lineRenderer.SetVertexCount(numSegments + 1);
         lineRenderer.useWorldSpace = false;
 
@@ -282,10 +292,10 @@ public class Boid : MonoBehaviour
     private void modifyHealth(bool atePoison)
     {
         health += atePoison ? -20 : 50;
-        if (health > maxHealth * 1.5f)
-        {
-            health = maxHealth;
-        }
+//        if (health > maxHealth * 1.5f)
+//        {
+//            health = maxHealth;
+//        }
     }
 
     private void cloneMe()
@@ -304,5 +314,9 @@ public class Boid : MonoBehaviour
         childStats.maxForce = maxForce + HelperFunctions.randomBinominal() * 0.5f * maxForce;
         childStats.gen = gen + 1;
         childStats.gameObject.name = gameObject.name = "Werner der " + childStats.gen + ".";
+        for (int i = 0; i < dna.Count; i++)
+        {
+            childStats.dna[i] = dna[i] + HelperFunctions.randomBinominal() * 0.5f * dna[i];
+        }
     }
 }

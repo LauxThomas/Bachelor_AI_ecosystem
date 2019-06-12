@@ -74,4 +74,9 @@ public class vehicleSpawner : MonoBehaviour
         newVehicle.transform.parent = parent.transform;
         return newVehicle;
     }
+
+    public int getVehicleCount()
+    {
+        return vehicles.Count;
+    }
 }

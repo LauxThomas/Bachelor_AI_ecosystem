@@ -97,6 +97,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemsNearby: 0
   gen: 0
+  dna: []
   health: 50
   maxHealth: 0
   viewRadius: 3
@@ -116,7 +117,7 @@ Rigidbody:
   m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 104
+  m_Constraints: 8
   m_CollisionDetection: 0
 --- !u!120 &-1446891541738736437
 LineRenderer:
@@ -135,7 +136,7 @@ LineRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 0}
+  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
