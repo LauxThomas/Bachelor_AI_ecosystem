@@ -140,6 +140,12 @@ public class Boid : MonoBehaviour
         velocity = rb.velocity;
         target = findNearestFood();
         recoloringBoid();
+        
+        //kill if necessary
+        if (health <= 0)
+        {
+            Destroy(gameObject);
+        }
     }
 
     private void recoloringBoid()
@@ -183,10 +189,6 @@ public class Boid : MonoBehaviour
     private void modifyHealth(bool atePoison)
     {
         health += atePoison ? -50 : 50;
-        if (health <= 0)
-        {
-            Destroy(gameObject);
-        }
     }
 
     private void cloneMe()
