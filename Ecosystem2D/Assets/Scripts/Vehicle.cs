@@ -58,7 +58,7 @@ public class Vehicle : MonoBehaviour
         velocity += acceleration * Time.deltaTime;
         velocity = Vector3.ClampMagnitude(velocity, gm.vehicleSpeed);
         position = position + velocity * Time.deltaTime;
-        conf.wrapAround(ref position,-gm.windowWidth,gm.windowWidth,-gm.windowHeight,gm.windowHeight);
+        conf.wrapAround(ref position, -gm.windowWidth, gm.windowWidth, -gm.windowHeight, gm.windowHeight);
         transform.position = position;
     }
 
@@ -69,7 +69,8 @@ public class Vehicle : MonoBehaviour
         wanderTarget += new Vector3(conf.randomBinominal() * jitter, conf.randomBinominal() * jitter, 0);
         wanderTarget = wanderTarget.normalized;
         wanderTarget *= conf.wanderRadius;
-        Vector3 targetInLocalSpace = wanderTarget + new Vector3(0, conf.wanderDistance, 0);
+        Vector3 targetInLocalSpace =
+            wanderTarget + new Vector3(conf.randomBinominal() * jitter, conf.randomBinominal() * jitter, 0);
         Vector3 targetInWorldSpace = transform.TransformPoint(targetInLocalSpace);
         targetInWorldSpace -= position;
         return targetInWorldSpace.normalized;
@@ -97,6 +98,7 @@ public class Vehicle : MonoBehaviour
     private void debugStuff()
     {
         Debug.DrawLine(position, target, Color.red);
+        Debug.DrawLine(position, wanderTarget, Color.blue);
     }
 
     private void decreaseHealth()
@@ -128,6 +130,11 @@ public class Vehicle : MonoBehaviour
                 dist = Vector3.Distance(foodList[i].position, position);
                 index = i;
             }
+        }
+
+        if (index == -1)
+        {
+            return;
         }
 
         nearestFood = foodList[index];

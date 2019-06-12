@@ -34,8 +34,6 @@ public class VehicleConfig : MonoBehaviour
         {
             vector.y = ymax;
         }
-
-        vector.z = vector.z;
     }
 
 
