@@ -18,7 +18,7 @@ public class GameManager : MonoBehaviour
     [Range(10, 100)] public static int staticVehicleHealth = 50;
     [Range(0.5f, 5.0f)] public static float staticViewRadius = 1f;
     [Range(0.5f, 5.0f)] public static float staticVehicleMaxSpeed = 2.5f;
-    [Range(0.5f, 5.0f)]public static float staticVehicleMaxForce = 5;
+    [Range(0.5f, 5.0f)]public static float staticVehicleMaxForce = 2;
 
     public float getWindowWidth()
     {

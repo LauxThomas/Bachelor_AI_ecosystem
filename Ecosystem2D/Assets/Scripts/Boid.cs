@@ -2,9 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Numerics;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using Random = UnityEngine.Random;
+using Vector3 = UnityEngine.Vector3;
 
 public class Boid : MonoBehaviour
 {
@@ -22,7 +24,7 @@ public class Boid : MonoBehaviour
     private GameObject nearestFoodObject;
     private GameManager gm;
     private float cloningRate;
-    private ArrayList dna;
+    [SerializeField] private List<float> dna;
     [SerializeField] private float health = GameManager.staticVehicleHealth;
     [SerializeField] private float maxHealth;
     [SerializeField] private float viewRadius = GameManager.staticViewRadius;
@@ -53,7 +55,30 @@ public class Boid : MonoBehaviour
 
         randomVector = new Vector3(Random.Range(-gm.getWindowWidth(), gm.getWindowWidth()),
             Random.Range(-gm.getWindowHeight(), gm.getWindowHeight()), 0);
-//        StartCoroutine(createRandomVector3());
+        randomizeDNA();
+    }
+
+    private void randomizeDNA()
+    {
+        dna = new List<float>();
+//        dna.Add(1);
+//        dna.Add(1);
+        dna.Add(Random.Range(-5, 5));
+        dna.Add(Random.Range(-5, 5));
+    }
+
+    private void behaviours(List<GameObject> good, List<GameObject> bad)
+    {
+        Vector3 steerG = eat(good);
+        Vector3 steerB = eat(bad);
+
+        steerG *= dna[0];
+        steerB *= dna[1];
+
+        applyForce(steerG);
+        Debug.DrawLine(transform.position, steerG, Color.green);
+        applyForce(steerB);
+        Debug.DrawLine(transform.position, steerB, Color.red);
     }
 
     private void Update()
@@ -61,8 +86,9 @@ public class Boid : MonoBehaviour
         updateValues();
 
 //        checkForFoodInRange();
-        eat(foodSpawner.getEdibles());
-        eat(foodSpawner.getPoisons());
+//        eat(foodSpawner.getEdibles());
+//        eat(foodSpawner.getPoisons());
+        behaviours(foodSpawner.getEdibles(), foodSpawner.getPoisons());
     }
 
     private void checkForFoodInRange()
@@ -78,15 +104,13 @@ public class Boid : MonoBehaviour
         }
     }
 
-    private void eat(List<GameObject> list)
+    private Vector3 eat(List<GameObject> list)
     {
-        itemsNearby = 0;
         float record = float.PositiveInfinity;
         int closest = -1;
         for (int i = 0; i < list.Count; i++)
         {
             float d = Vector3.Distance(transform.position, list[i].transform.position);
-            list[i].GetComponent<SpriteRenderer>().color = Color.white;
             if (d < record)
             {
                 record = d;
@@ -94,30 +118,27 @@ public class Boid : MonoBehaviour
             }
         }
 
-        list[closest].GetComponent<SpriteRenderer>().color = Color.black;
-
-
         if (record < 0.3f)
         {
             nom(list[closest]);
+            return Vector3.zero;
         }
 
-        else if (record < viewRadius)
+        if (record < viewRadius)
         {
             desired = list[closest].transform.position - transform.position;
 //            desired = list[closest].transform.position;
             foundTarget = true;
-            seekTarget(desired);
-        }
-        else
-        {
-            foundTarget = false;
+            return seekTarget(desired);
         }
 
-        if (!foundTarget)
-        {
-            wanderAround();
-        }
+//        return Vector3.zero;
+        return seekTarget(randomVector);
+//
+//        if (!foundTarget)
+//        {
+////            wanderAround();
+//        }
     }
 
     private void nom(GameObject eatenObject)
@@ -133,7 +154,7 @@ public class Boid : MonoBehaviour
         seekTarget(randomVector);
     }
 
-    private void seekTarget(Vector3 desired)
+    private Vector3 seekTarget(Vector3 desired)
     {
         desired = desired.normalized;
         float dist = Vector3.Distance(transform.position, target);
@@ -151,13 +172,24 @@ public class Boid : MonoBehaviour
         //Addforce:
         steer = desired - velocity;
         steer = Vector3.ClampMagnitude(steer, maxForce);
-        rb.AddForce(steer);
         flipIfNecessary();
+        return steer;
+        applyForce(steer);
 
         //Debug:
 //        Debug.DrawLine(transform.position, steer, Color.red);
 //        Debug.DrawLine(transform.position, desired, Color.blue);
 //        Debug.DrawLine(transform.position, velocity, Color.green);
+    }
+
+    private void applyForce(Vector3 forceToAdd)
+    {
+        Debug.DrawLine(transform.position, forceToAdd, Color.magenta, 0.05f);
+        rb.AddForce(forceToAdd);
+        if (rb.velocity.magnitude > maxSpeed)
+        {
+            rb.velocity = rb.velocity.normalized * maxSpeed;
+        }
     }
 
     private void flipIfNecessary()
@@ -204,7 +236,7 @@ public class Boid : MonoBehaviour
     private void updateValues()
     {
         health -= Time.deltaTime * gm.healthModifier;
-        velocity = rb.velocity;
+//        velocity = rb.velocity;
 //        target = findNearestFood();
         recoloringBoid();
         drawSeekRadii();
@@ -244,39 +276,7 @@ public class Boid : MonoBehaviour
 
     private void recoloringBoid()
     {
-//        var col = Color.Lerp(Color.red, Color.green, health / gm.vehicleHealth);
         sr.color = Color.Lerp(Color.red, Color.green, health / maxHealth);
-    }
-
-    private Vector3 findNearestFood()
-    {
-        int index = -1;
-        float dist = float.PositiveInfinity;
-        List<GameObject> edibles = foodSpawner.getEdibles();
-        for (int i = 0; i < edibles.Count; i++)
-        {
-            float distToFood = Vector3.Distance(transform.position, edibles[i].transform.position);
-            if (distToFood < dist)
-            {
-                dist = distToFood;
-                index = i;
-            }
-        }
-
-        if (index != -1)
-        {
-            nearestFoodObject = edibles[index];
-            if (dist < 0.5f)
-            {
-                modifyHealth(foodSpawner.isPoison(nearestFoodObject));
-                foodSpawner.removeEdible(nearestFoodObject);
-                Destroy(nearestFoodObject.gameObject);
-            }
-
-            return nearestFoodObject.transform.position;
-        }
-
-        return randomVector;
     }
 
     private void modifyHealth(bool atePoison)
