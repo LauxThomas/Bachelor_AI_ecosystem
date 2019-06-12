@@ -8,6 +8,7 @@ using Random = UnityEngine.Random;
 
 public class Boid : MonoBehaviour
 {
+    public int gen = 0;
     private Vector3 velocity = Vector3.zero;
     private Vector3 acceleration = Vector3.zero;
     private Vector3 desired = Vector3.zero;
@@ -23,9 +24,9 @@ public class Boid : MonoBehaviour
     public float health = GameManager.staticVehicleHealth;
     public float viewRadius = GameManager.staticViewRadius;
     public float maxSpeed = GameManager.staticVehicleMaxSpeed; //5
+    public float maxForce = GameManager.staticVehicleMaxForce;
 
 
-    private float maxforce = 10; //10
     private float arrivingRadius = 3;
     private SpriteRenderer sr;
     private Vector3 position;
@@ -36,6 +37,7 @@ public class Boid : MonoBehaviour
 
     private void Start()
     {
+        gameObject.name = "Werner " + gen + ".";
         sr = GetComponent<SpriteRenderer>();
         gm = FindObjectOfType<GameManager>();
         foodSpawner = FindObjectOfType<foodSpawner>();
@@ -96,7 +98,7 @@ public class Boid : MonoBehaviour
 
         //Addforce:
         steer = desired - velocity;
-        steer = Vector3.ClampMagnitude(steer, maxforce);
+        steer = Vector3.ClampMagnitude(steer, maxForce);
         rb.AddForce(steer);
         flipIfNecessary();
 
@@ -191,7 +193,7 @@ public class Boid : MonoBehaviour
 
     private void modifyHealth(bool atePoison)
     {
-        health += atePoison ? -50 : 50;
+        health += atePoison ? -20 : 50;
     }
 
     private void cloneMe()
@@ -207,6 +209,8 @@ public class Boid : MonoBehaviour
         childStats.maxHealth = childStats.health;
         childStats.viewRadius = viewRadius + HelperFunctions.randomBinominal() * 0.5f * viewRadius;
         childStats.maxSpeed = maxSpeed + HelperFunctions.randomBinominal() * 0.5f * maxSpeed;
-        //TODO: maxForce?
+        childStats.maxForce = maxForce + HelperFunctions.randomBinominal() * 0.5f * maxForce;
+        childStats.gen = gen+1;
+        childStats.gameObject.name = gameObject.name = "Werner " + childStats.gen + ".";
     }
 }
