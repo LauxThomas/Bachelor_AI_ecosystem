@@ -35,8 +35,8 @@ public class Spawner : MonoBehaviour
 
     public void addNewFood()
     {
-        Vector3 spawnPosition = new Vector3(Random.Range(-gm.windowWidth, gm.windowWidth),
-            Random.Range(-gm.windowHeight, gm.windowHeight), 0);
+        Vector3 spawnPosition = new Vector3(Random.Range(-gm.getWindowWidth(), gm.getWindowWidth()),
+            Random.Range(-gm.getWindowHeight(), gm.getWindowHeight()), 0);
         Transform newFood = Instantiate(foodPrefab, spawnPosition, Quaternion.identity);
         allFoods.Add(newFood);
         if (allFoods.Count >= 500)
@@ -51,8 +51,8 @@ public class Spawner : MonoBehaviour
 
     void SpawnOrganism()
     {
-        Vector3 spawnPosition = new Vector3(Random.Range(-gm.windowWidth, gm.windowWidth),
-            Random.Range(-gm.windowHeight, gm.windowHeight), 0);
+        Vector3 spawnPosition = new Vector3(Random.Range(-gm.getWindowWidth(), gm.getWindowWidth()),
+            Random.Range(-gm.getWindowHeight(), gm.getWindowHeight()), 0);
         Transform newVehicle = Instantiate(vehiclePrefabs[Random.Range(0, vehiclePrefabs.Length-1)], spawnPosition, Quaternion.identity);
         allvehicles.Add(newVehicle);
     }

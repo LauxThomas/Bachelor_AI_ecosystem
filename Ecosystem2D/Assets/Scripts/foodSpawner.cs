@@ -32,8 +32,8 @@ public class foodSpawner : MonoBehaviour
     private void spawnFood()
     {
         int index = Random.Range(0, 2);
-        Vector3 spawnPoint = new Vector3(Random.Range(-gm.windowWidth, gm.windowWidth),
-            Random.Range(-gm.windowHeight, gm.windowHeight), 0);
+        Vector3 spawnPoint = new Vector3(Random.Range(-gm.getWindowWidth(), gm.getWindowWidth()),
+            Random.Range(-gm.getWindowHeight(), gm.getWindowHeight()), 0);
         GameObject newFood = Instantiate(prefabs[index], spawnPoint, Quaternion.identity);
         edibles.Add(newFood);
     }

@@ -42,8 +42,8 @@ public class Boid : MonoBehaviour
         maxSpeed = gm.vehicleMaxSpeed;
         InvokeRepeating("cloneMe", cloningRate, cloningRate);
         
-        randomVector = new Vector3(Random.Range(-gm.windowWidth, gm.windowWidth),
-            Random.Range(-gm.windowHeight, gm.windowHeight), 0);
+        randomVector = new Vector3(Random.Range(-gm.getWindowWidth(), gm.getWindowWidth()),
+            Random.Range(-gm.getWindowHeight(), gm.getWindowHeight()), 0);
         StartCoroutine(createRandomVector3());
     }
 
@@ -108,29 +108,29 @@ public class Boid : MonoBehaviour
         Vector3 pos = transform.position;
         float x = pos.x;
         float y = pos.y;
-        if (x > gm.windowWidth)
+        if (x > gm.getWindowWidth())
         {
-            transform.position = new Vector3(-gm.windowWidth, y, 0);
+            transform.position = new Vector3(-gm.getWindowWidth(), y, 0);
         }
-        else if (x < -gm.windowWidth)
+        else if (x < -gm.getWindowWidth())
         {
-            transform.position = new Vector3(gm.windowWidth, y, 0);
+            transform.position = new Vector3(gm.getWindowWidth(), y, 0);
         }
-        else if (y > gm.windowHeight)
+        else if (y > gm.getWindowHeight())
         {
-            transform.position = new Vector3(x, -gm.windowHeight, 0);
+            transform.position = new Vector3(x, -gm.getWindowHeight(), 0);
         }
-        else if (y < -gm.windowHeight)
+        else if (y < -gm.getWindowHeight())
         {
-            transform.position = new Vector3(x, gm.windowHeight, 0);
+            transform.position = new Vector3(x, gm.getWindowHeight(), 0);
         }
     }
 
     private IEnumerator createRandomVector3()
     {
         yield return new WaitForSecondsRealtime(2);
-        randomVector = new Vector3(Random.Range(-gm.windowWidth, gm.windowWidth),
-            Random.Range(-gm.windowHeight, gm.windowHeight), 0);
+        randomVector = new Vector3(Random.Range(-gm.getWindowWidth(), gm.getWindowWidth()),
+            Random.Range(-gm.getWindowHeight(), gm.getWindowHeight()), 0);
     }
 
 
@@ -196,29 +196,4 @@ public class Boid : MonoBehaviour
         vehicleSpawner.cloneThis(gameObject);
     }
 
-    private void wanderAround()
-    {
-        Debug.Log("I'm wandering");
-        acceleration = Wander();
-        acceleration = Vector3.ClampMagnitude(acceleration, conf.maxAcceleration);
-        velocity += acceleration * Time.deltaTime;
-        velocity = Vector3.ClampMagnitude(velocity, maxSpeed);
-        position = position + velocity * Time.deltaTime;
-        conf.wrapAround(ref position, -gm.windowWidth, gm.windowWidth, -gm.windowHeight, gm.windowHeight);
-        transform.position = position;
-    }
-
-    protected Vector3 Wander()
-    {
-        position = transform.position;
-        float jitter = conf.wanderJitter * Time.deltaTime;
-        wanderTarget = new Vector3(conf.randomBinominal() * jitter, conf.randomBinominal() * jitter, 0);
-        wanderTarget = wanderTarget.normalized;
-        wanderTarget *= conf.wanderRadius;
-        Vector3 targetInLocalSpace =
-            wanderTarget + new Vector3(conf.randomBinominal() * jitter, conf.randomBinominal() * jitter, 0);
-        Vector3 targetInWorldSpace = transform.TransformPoint(targetInLocalSpace);
-        targetInWorldSpace -= position;
-        return targetInWorldSpace.normalized;
-    }
 }

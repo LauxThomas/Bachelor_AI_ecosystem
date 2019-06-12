@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public float windowWidth = 9.0f;
-    public float windowHeight = 5.0f;
+    private float windowWidth = 16.0f;
+    private float windowHeight = 9.0f;
 
     [Range(0.5f, 5.0f)] public float vehicleMaxSpeed = 2.5f;
     [Range(0.5f, 5.0f)] public float viewRadius = 2.5f;
@@ -13,4 +13,14 @@ public class GameManager : MonoBehaviour
 
     [Range(1, 25)] public int initialFoodCount = 10;
     [Range(1, 25)] public int healthModifier = 10;
+
+    public float getWindowWidth()
+    {
+        return windowWidth;
+    }
+    
+    public float getWindowHeight()
+    {
+        return windowHeight;
+    }
 }

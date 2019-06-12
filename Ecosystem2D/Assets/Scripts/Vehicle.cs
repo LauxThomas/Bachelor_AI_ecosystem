@@ -28,8 +28,8 @@ public class Vehicle : MonoBehaviour
         conf = FindObjectOfType<VehicleConfig>();
         health = gm.vehicleHealth;
         viewRadius = gm.viewRadius;
-        velocity = new Vector3(Random.Range(-gm.windowWidth, gm.windowWidth),
-            Random.Range(-gm.windowHeight, gm.windowHeight), 0);
+        velocity = new Vector3(Random.Range(-gm.getWindowWidth(), gm.getWindowWidth()),
+            Random.Range(-gm.getWindowHeight(), gm.getWindowHeight()), 0);
 
         position = transform.position;
         findTarget();
@@ -58,7 +58,7 @@ public class Vehicle : MonoBehaviour
         velocity += acceleration * Time.deltaTime;
         velocity = Vector3.ClampMagnitude(velocity, gm.vehicleMaxSpeed);
         position = position + velocity * Time.deltaTime;
-        conf.wrapAround(ref position, -gm.windowWidth, gm.windowWidth, -gm.windowHeight, gm.windowHeight);
+        conf.wrapAround(ref position, -gm.getWindowWidth(), gm.getWindowWidth(), -gm.getWindowHeight(), gm.getWindowHeight());
         transform.position = position;
     }
 
@@ -78,8 +78,8 @@ public class Vehicle : MonoBehaviour
 
     private void randomizeTarget()
     {
-        target = new Vector3(Random.Range(-gm.windowWidth, gm.windowWidth),
-            Random.Range(-gm.windowHeight, gm.windowHeight), 0);
+        target = new Vector3(Random.Range(-gm.getWindowWidth(), gm.getWindowWidth()),
+            Random.Range(-gm.getWindowHeight(), gm.getWindowHeight()), 0);
     }
 
     private bool looking4Food(float radius)

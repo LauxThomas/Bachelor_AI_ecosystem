@@ -26,8 +26,8 @@ public class vehicleSpawner : MonoBehaviour
 
     void spawnOrganism()
     {
-        Vector3 spawnPosition = new Vector3(Random.Range(-gm.windowWidth, gm.windowWidth),
-            Random.Range(-gm.windowHeight, gm.windowHeight), 0);
+        Vector3 spawnPosition = new Vector3(Random.Range(-gm.getWindowWidth(), gm.getWindowWidth()),
+            Random.Range(-gm.getWindowHeight(), gm.getWindowHeight()), 0);
         GameObject newVehicle =
             Instantiate(prefabs[Random.Range(0, prefabs.Length - 1)], spawnPosition, Quaternion.identity);
         vehicles.Add(newVehicle);
