@@ -21,10 +21,11 @@ public class Boid : MonoBehaviour
     private GameManager gm;
     private float cloningRate;
     private ArrayList dna;
-    public float health = GameManager.staticVehicleHealth;
-    public float viewRadius = GameManager.staticViewRadius;
-    public float maxSpeed = GameManager.staticVehicleMaxSpeed; //5
-    public float maxForce = GameManager.staticVehicleMaxForce;
+    [SerializeField] private float health = GameManager.staticVehicleHealth;
+    [SerializeField] private float maxHealth;
+    [SerializeField] private float viewRadius = GameManager.staticViewRadius;
+    [SerializeField] private float maxSpeed = GameManager.staticVehicleMaxSpeed; //5
+    [SerializeField] private float maxForce = GameManager.staticVehicleMaxForce;
 
 
     private float arrivingRadius = 3;
@@ -32,12 +33,11 @@ public class Boid : MonoBehaviour
     private Vector3 position;
     private Vector3 wanderTarget;
     private Vector3 randomVector;
-    private float maxHealth;
 
 
     private void Start()
     {
-        gameObject.name = "Werner " + gen + ".";
+        gameObject.name = "Werner der " + gen + ".";
         sr = GetComponent<SpriteRenderer>();
         gm = FindObjectOfType<GameManager>();
         foodSpawner = FindObjectOfType<foodSpawner>();
@@ -56,32 +56,38 @@ public class Boid : MonoBehaviour
     {
         updateValues();
 
-        checkForFood();
+        checkForFoodInRange();
+//        eat(foodSpawner.getEdibles());
+//        eat(foodSpawner.getPoisons());
     }
 
-    private void checkForFood()
+    private void checkForFoodInRange()
     {
         float dist = Vector3.Distance(target, transform.position);
         if (dist < viewRadius)
         {
-            seekTarget(false);
+            eat(foodSpawner.getEdibles());
         }
         else
         {
-            seekTarget(true);
+            wanderAround();
+            
         }
     }
 
-    private void seekTarget(bool shouldWander)
+    private void eat(List<GameObject> list)
     {
-        if (!shouldWander)
-        {
-            desired = target - transform.position;
-        }
-        else
-        {
-            desired = randomVector;
-        }
+        desired = target - transform.position;
+        seekTarget(desired);
+    }
+
+    private void wanderAround()
+    {
+        seekTarget(randomVector);
+    }
+
+    private void seekTarget(Vector3 desired)
+    {
 
         desired = desired.normalized;
         float dist = Vector3.Distance(transform.position, target);
@@ -194,6 +200,10 @@ public class Boid : MonoBehaviour
     private void modifyHealth(bool atePoison)
     {
         health += atePoison ? -20 : 50;
+        if (health > maxHealth*1.5f)
+        {
+            health = maxHealth;
+        }
     }
 
     private void cloneMe()
@@ -210,7 +220,7 @@ public class Boid : MonoBehaviour
         childStats.viewRadius = viewRadius + HelperFunctions.randomBinominal() * 0.5f * viewRadius;
         childStats.maxSpeed = maxSpeed + HelperFunctions.randomBinominal() * 0.5f * maxSpeed;
         childStats.maxForce = maxForce + HelperFunctions.randomBinominal() * 0.5f * maxForce;
-        childStats.gen = gen+1;
-        childStats.gameObject.name = gameObject.name = "Werner " + childStats.gen + ".";
+        childStats.gen = gen + 1;
+        childStats.gameObject.name = gameObject.name = "Werner der " + childStats.gen + ".";
     }
 }

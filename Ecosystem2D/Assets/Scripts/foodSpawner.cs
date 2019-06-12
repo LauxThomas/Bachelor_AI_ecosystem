@@ -8,15 +8,19 @@ public class foodSpawner : MonoBehaviour
 {
     public GameObject[] prefabs;
     private List<GameObject> edibles;
+    private List<GameObject> poisons;
     [Range(0.5f, 5.0f)] public float spawnRate = 2.5f;
     [Range(5, 25)] public int initialRate = 10;
     private GameManager gm;
-    private GameObject parent;
+    private GameObject edibleParent;
+    private GameObject poisonsParent;
 
     private void Start()
     {
-        parent = GameObject.Find("Edibles");
+        edibleParent = GameObject.Find("Edibles");
+        poisonsParent = GameObject.Find("Poisons");
         edibles = new List<GameObject>();
+        poisons = new List<GameObject>();
         gm = FindObjectOfType<GameManager>();
 
         for (int i = 0; i < initialRate; i++)
@@ -40,20 +44,45 @@ public class foodSpawner : MonoBehaviour
         //weighted 70%:
         index = Random.value < 0.7f ? 0 : 1;
 
-        Vector3 spawnPoint = new Vector3(Random.Range(-gm.getWindowWidth(), gm.getWindowWidth()),
-            Random.Range(-gm.getWindowHeight(), gm.getWindowHeight()), 0);
-        GameObject newFood = Instantiate(prefabs[index], spawnPoint, Quaternion.identity);
-        edibles.Add(newFood);
-        if (parent == null)
+        if (index == 0)
         {
-            parent = new GameObject("Edibles");
+            Vector3 spawnPoint = new Vector3(Random.Range(-gm.getWindowWidth(), gm.getWindowWidth()),
+                Random.Range(-gm.getWindowHeight(), gm.getWindowHeight()), 0);
+            GameObject newFood = Instantiate(prefabs[index], spawnPoint, Quaternion.identity);
+            edibles.Add(newFood);
+            if (edibleParent == null)
+            {
+                edibleParent = new GameObject("Edibles");
+            }
+            newFood.transform.parent = edibleParent.transform;
         }
-        newFood.transform.parent = parent.transform;
+        else
+        {
+            Vector3 spawnPoint = new Vector3(Random.Range(-gm.getWindowWidth(), gm.getWindowWidth()),
+                Random.Range(-gm.getWindowHeight(), gm.getWindowHeight()), 0);
+            GameObject newFood = Instantiate(prefabs[index], spawnPoint, Quaternion.identity);
+            poisons.Add(newFood);
+            if (poisonsParent == null)
+            {
+                poisonsParent = new GameObject("Poisons");
+            }
+            newFood.transform.parent = poisonsParent.transform;
+        }
+        
+        
     }
 
     public List<GameObject> getEdibles()
     {
         return edibles;
+    }
+    public List<GameObject> getPoisons()
+    {
+        return poisons;
+    }
+    public void removePoison(GameObject poison)
+    {
+        poisons.Remove(poison);
     }
 
     public void removeEdible(GameObject food)
@@ -65,4 +94,5 @@ public class foodSpawner : MonoBehaviour
     {
         return !go.name.ToLower().Contains("food");
     }
+
 }

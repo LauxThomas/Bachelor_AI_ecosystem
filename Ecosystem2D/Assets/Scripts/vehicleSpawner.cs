@@ -30,6 +30,7 @@ public class vehicleSpawner : MonoBehaviour
 
     private void Update()
     {
+        reloadIfNecessary();
         if (spawnAdditionalVehicles && switched)
         {
             switched = false;
@@ -39,6 +40,14 @@ public class vehicleSpawner : MonoBehaviour
         {
             switched = true;
             CancelInvoke();
+        }
+    }
+
+    private void reloadIfNecessary()
+    {
+        if (parent.transform.childCount == 0)
+        {
+            Application.LoadLevel(Application.loadedLevelName);
         }
     }
 

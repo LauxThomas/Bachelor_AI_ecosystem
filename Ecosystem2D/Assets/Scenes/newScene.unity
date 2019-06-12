@@ -254,7 +254,7 @@ MonoBehaviour:
   vehicleHealth: 50
   initialFoodCount: 25
   healthModifier: 10
-  cloningRate: 10
+  cloningRate: 15
 --- !u!114 &1389297812
 MonoBehaviour:
   m_ObjectHideFlags: 0
