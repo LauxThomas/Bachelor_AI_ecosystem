@@ -13,7 +13,7 @@ public class vehicleSpawner : MonoBehaviour
     public GameObject[] prefabs;
     private List<GameObject> vehicles;
     [Range(0.5f, 25.0f)] public float spawnRate = 2.5f;
-    [Range(5, 25)] public int initialRate = 10;
+    [Range(1, 25)] public int initialRate = 1;
     private GameManager gm;
     private GameObject parent;
 

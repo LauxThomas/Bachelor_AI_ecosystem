@@ -27,7 +27,7 @@ public class Vehicle : MonoBehaviour
         spawner = FindObjectOfType<Spawner>();
         conf = FindObjectOfType<VehicleConfig>();
         health = gm.vehicleHealth;
-        viewRadius = gm.viewRadius;
+//        viewRadius = gm.viewRadius;
         velocity = new Vector3(Random.Range(-gm.getWindowWidth(), gm.getWindowWidth()),
             Random.Range(-gm.getWindowHeight(), gm.getWindowHeight()), 0);
 

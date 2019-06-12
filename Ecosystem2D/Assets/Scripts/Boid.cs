@@ -8,6 +8,8 @@ using Random = UnityEngine.Random;
 
 public class Boid : MonoBehaviour
 {
+    public int itemsNearby = 0;
+
     public int gen = 0;
     private Vector3 velocity = Vector3.zero;
     private Vector3 acceleration = Vector3.zero;
@@ -33,6 +35,7 @@ public class Boid : MonoBehaviour
     private Vector3 position;
     private Vector3 wanderTarget;
     private Vector3 randomVector;
+    private bool foundTarget;
 
 
     private void Start()
@@ -46,19 +49,20 @@ public class Boid : MonoBehaviour
         maxHealth = health;
         cloningRate = gm.cloningRate;
         InvokeRepeating("cloneMe", cloningRate, cloningRate);
+        InvokeRepeating("createRandomVector3", 1, 1);
 
         randomVector = new Vector3(Random.Range(-gm.getWindowWidth(), gm.getWindowWidth()),
             Random.Range(-gm.getWindowHeight(), gm.getWindowHeight()), 0);
-        StartCoroutine(createRandomVector3());
+//        StartCoroutine(createRandomVector3());
     }
 
     private void Update()
     {
         updateValues();
 
-        checkForFoodInRange();
-//        eat(foodSpawner.getEdibles());
-//        eat(foodSpawner.getPoisons());
+//        checkForFoodInRange();
+        eat(foodSpawner.getEdibles());
+        eat(foodSpawner.getPoisons());
     }
 
     private void checkForFoodInRange()
@@ -71,24 +75,66 @@ public class Boid : MonoBehaviour
         else
         {
             wanderAround();
-            
         }
     }
 
     private void eat(List<GameObject> list)
     {
-        desired = target - transform.position;
-        seekTarget(desired);
+        itemsNearby = 0;
+        float record = float.PositiveInfinity;
+        int closest = -1;
+        for (int i = 0; i < list.Count; i++)
+        {
+            float d = Vector3.Distance(transform.position, list[i].transform.position);
+            list[i].GetComponent<SpriteRenderer>().color = Color.white;
+            if (d < record)
+            {
+                record = d;
+                closest = i;
+            }
+        }
+
+        list[closest].GetComponent<SpriteRenderer>().color = Color.black;
+
+
+        if (record < 0.3f)
+        {
+            nom(list[closest]);
+        }
+
+        else if (record < viewRadius)
+        {
+            desired = list[closest].transform.position - transform.position;
+//            desired = list[closest].transform.position;
+            foundTarget = true;
+            seekTarget(desired);
+        }
+        else
+        {
+            foundTarget = false;
+        }
+
+        if (!foundTarget)
+        {
+            wanderAround();
+        }
+    }
+
+    private void nom(GameObject eatenObject)
+    {
+        modifyHealth(foodSpawner.isPoison(eatenObject));
+        foodSpawner.removeObject(eatenObject);
+        Destroy(eatenObject.gameObject);
     }
 
     private void wanderAround()
     {
+        sr.color = Color.black;
         seekTarget(randomVector);
     }
 
     private void seekTarget(Vector3 desired)
     {
-
         desired = desired.normalized;
         float dist = Vector3.Distance(transform.position, target);
         //Arriving behaviour
@@ -122,24 +168,34 @@ public class Boid : MonoBehaviour
         if (x > gm.getWindowWidth())
         {
             transform.position = new Vector3(-gm.getWindowWidth(), y, 0);
+            makeNewRandomVector();
         }
         else if (x < -gm.getWindowWidth())
         {
             transform.position = new Vector3(gm.getWindowWidth(), y, 0);
+            makeNewRandomVector();
         }
         else if (y > gm.getWindowHeight())
         {
             transform.position = new Vector3(x, -gm.getWindowHeight(), 0);
+            makeNewRandomVector();
         }
         else if (y < -gm.getWindowHeight())
         {
             transform.position = new Vector3(x, gm.getWindowHeight(), 0);
+            makeNewRandomVector();
         }
     }
 
     private IEnumerator createRandomVector3()
     {
-        yield return new WaitForSecondsRealtime(2);
+        yield return new WaitForSecondsRealtime(1);
+        randomVector = new Vector3(Random.Range(-gm.getWindowWidth(), gm.getWindowWidth()),
+            Random.Range(-gm.getWindowHeight(), gm.getWindowHeight()), 0);
+    }
+
+    void makeNewRandomVector()
+    {
         randomVector = new Vector3(Random.Range(-gm.getWindowWidth(), gm.getWindowWidth()),
             Random.Range(-gm.getWindowHeight(), gm.getWindowHeight()), 0);
     }
@@ -149,8 +205,9 @@ public class Boid : MonoBehaviour
     {
         health -= Time.deltaTime * gm.healthModifier;
         velocity = rb.velocity;
-        target = findNearestFood();
+//        target = findNearestFood();
         recoloringBoid();
+        drawSeekRadii();
 
         //kill if necessary
         if (health <= 0)
@@ -159,11 +216,36 @@ public class Boid : MonoBehaviour
         }
     }
 
+    private void drawSeekRadii()
+    {
+        float radius = viewRadius / 2;
+        int numSegments = 128;
+
+        LineRenderer lineRenderer = gameObject.GetComponent<LineRenderer>();
+        Color c1 = new Color(0.5f, 0.5f, 0.5f, 1);
+//        lineRenderer.material = new Material(Shader.Find("Particles/Additive"));
+        lineRenderer.SetColors(c1, c1);
+        lineRenderer.SetWidth(0.5f, 0.5f);
+        lineRenderer.SetVertexCount(numSegments + 1);
+        lineRenderer.useWorldSpace = false;
+
+        float deltaTheta = (float) (2.0 * Mathf.PI) / numSegments;
+        float theta = 0f;
+
+        for (int i = 0; i < numSegments + 1; i++)
+        {
+            float x = radius * Mathf.Cos(theta);
+            float z = radius * Mathf.Sin(theta);
+            Vector3 pos = new Vector3(x, z, 0);
+            lineRenderer.SetPosition(i, pos);
+            theta += deltaTheta;
+        }
+    }
+
     private void recoloringBoid()
     {
 //        var col = Color.Lerp(Color.red, Color.green, health / gm.vehicleHealth);
         sr.color = Color.Lerp(Color.red, Color.green, health / maxHealth);
-        ;
     }
 
     private Vector3 findNearestFood()
@@ -194,13 +276,13 @@ public class Boid : MonoBehaviour
             return nearestFoodObject.transform.position;
         }
 
-        return Vector3.zero;
+        return randomVector;
     }
 
     private void modifyHealth(bool atePoison)
     {
         health += atePoison ? -20 : 50;
-        if (health > maxHealth*1.5f)
+        if (health > maxHealth * 1.5f)
         {
             health = maxHealth;
         }

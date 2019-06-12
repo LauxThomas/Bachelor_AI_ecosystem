@@ -90,9 +90,21 @@ public class foodSpawner : MonoBehaviour
         edibles.Remove(food);
     }
 
-    public bool isPoison(GameObject go)
+    public void removeObject(GameObject food)
     {
-        return !go.name.ToLower().Contains("food");
+        if (edibles.Contains(food))
+        {
+            edibles.Remove(food);
+        }
+        else
+        {
+            poisons.Remove(food);
+        }
+    }
+
+    public bool isPoison(GameObject food)
+    {
+        return poisons.Contains(food);
     }
 
 }
