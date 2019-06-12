@@ -31,7 +31,13 @@ public class foodSpawner : MonoBehaviour
 
     private void spawnFood()
     {
-        int index = Random.Range(0, 2);
+        int index;
+        //completely Random:
+//         index = Random.Range(0, 2);
+
+        //weighted 70%:
+        index = Random.value < 0.7f ? 0 : 1;
+
         Vector3 spawnPoint = new Vector3(Random.Range(-gm.getWindowWidth(), gm.getWindowWidth()),
             Random.Range(-gm.getWindowHeight(), gm.getWindowHeight()), 0);
         GameObject newFood = Instantiate(prefabs[index], spawnPoint, Quaternion.identity);

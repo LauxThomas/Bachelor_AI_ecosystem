@@ -6,9 +6,13 @@ using Random = UnityEngine.Random;
 
 public class vehicleSpawner : MonoBehaviour
 {
+    public bool spawnAdditionalVehicles = false;
+    private bool switched = false;
+
+
     public GameObject[] prefabs;
     private List<GameObject> vehicles;
-    [Range(0.5f, 5.0f)] public float spawnRate = 2.5f;
+    [Range(0.5f, 25.0f)] public float spawnRate = 2.5f;
     [Range(5, 25)] public int initialRate = 10;
     private GameManager gm;
 
@@ -20,8 +24,20 @@ public class vehicleSpawner : MonoBehaviour
         {
             spawnOrganism();
         }
+    }
 
-        InvokeRepeating("spawnOrganism", 1.0f, spawnRate);
+    private void Update()
+    {
+        if (spawnAdditionalVehicles && switched)
+        {
+            switched = false;
+            InvokeRepeating("spawnOrganism", spawnRate, spawnRate);
+        }
+        else if (!spawnAdditionalVehicles && !switched)
+        {
+            switched = true;
+            CancelInvoke();
+        }
     }
 
     void spawnOrganism()
