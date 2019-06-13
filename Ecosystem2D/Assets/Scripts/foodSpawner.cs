@@ -35,7 +35,7 @@ public class foodSpawner : MonoBehaviour
     {
     }
 
-    private void spawnFood()
+    public void spawnFood()
     {
         int index;
         //completely Random:
@@ -54,6 +54,7 @@ public class foodSpawner : MonoBehaviour
             {
                 edibleParent = new GameObject("Edibles");
             }
+
             newFood.transform.parent = edibleParent.transform;
         }
         else
@@ -66,20 +67,21 @@ public class foodSpawner : MonoBehaviour
             {
                 poisonsParent = new GameObject("Poisons");
             }
+
             newFood.transform.parent = poisonsParent.transform;
         }
-        
-        
     }
 
     public List<GameObject> getEdibles()
     {
         return edibles;
     }
+
     public List<GameObject> getPoisons()
     {
         return poisons;
     }
+
     public void removePoison(GameObject poison)
     {
         poisons.Remove(poison);
@@ -107,4 +109,34 @@ public class foodSpawner : MonoBehaviour
         return poisons.Contains(food);
     }
 
+    public void spawnFoodAt(Vector3 spawnpos)
+    {
+        int index;
+        index = Random.value < 0.7f ? 0 : 1;
+
+        if (index == 0)
+        {
+            GameObject newFood = Instantiate(prefabs[index], spawnpos, Quaternion.identity);
+            edibles.Add(newFood);
+            if (edibleParent == null)
+            {
+                edibleParent = new GameObject("Edibles");
+            }
+
+            Debug.Log(spawnpos);
+            newFood.transform.parent = edibleParent.transform;
+        }
+        else
+        {
+            GameObject newFood = Instantiate(prefabs[index], spawnpos, Quaternion.identity);
+            poisons.Add(newFood);
+            if (poisonsParent == null)
+            {
+                poisonsParent = new GameObject("Poisons");
+            }
+
+            Debug.Log(spawnpos);
+            newFood.transform.parent = poisonsParent.transform;
+        }
+    }
 }

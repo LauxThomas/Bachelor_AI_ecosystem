@@ -9,6 +9,9 @@ public class GameManager : MonoBehaviour
     private float windowWidth = 16.0f;
     private float windowHeight = 9.0f;
 
+    public bool drawHalos = false;
+    public float mutationRate = 0.01f;
+
     [Range(0.5f, 5.0f)] public float vehicleMaxSpeed = 2.5f;
 //    [Range(0.5f, 5.0f)] public float viewRadius = 2.5f;
     [Range(10, 100)] public int vehicleHealth = 50;
@@ -17,7 +20,7 @@ public class GameManager : MonoBehaviour
     [Range(0, 25)] public int healthDegen = 0;
     [Range(1, 25)] public int cloningRate = 10;
     
-    [Range(10, 100)] public static int staticVehicleHealth = 50;
+    [Range(10, 100)] public static int staticVehicleHealth = 100;
     [Range(0.5f, 5.0f)] public static float staticViewRadius = 1f;
     [Range(0.5f, 5.0f)] public static float staticVehicleMaxSpeed = 2.5f;
     [Range(0.5f, 5.0f)]public static float staticVehicleMaxForce = 2;

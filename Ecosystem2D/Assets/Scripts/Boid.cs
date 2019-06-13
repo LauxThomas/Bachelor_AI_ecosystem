@@ -13,6 +13,7 @@ public class Boid : MonoBehaviour
 {
     public int itemsNearby = 0;
 
+    private float mutationRate;
     public int gen = 0;
     private Vector3 velocity = Vector3.zero;
     private Vector3 acceleration = Vector3.zero;
@@ -52,7 +53,8 @@ public class Boid : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         maxHealth = health;
         cloningRate = gm.cloningRate;
-        InvokeRepeating("cloneMe", cloningRate, cloningRate);
+        mutationRate = gm.mutationRate;
+//        InvokeRepeating("cloneMe", cloningRate, cloningRate);
         InvokeRepeating("createRandomVector3", 1, 1);
 
         randomVector = new Vector3(Random.Range(-gm.getWindowWidth(), gm.getWindowWidth()),
@@ -64,6 +66,8 @@ public class Boid : MonoBehaviour
     {
         updateValues();
         behaviours(foodSpawner.getEdibles(), foodSpawner.getPoisons(), dna[2], dna[3]);
+
+        cloneMe();
     }
 
     private void setDna()
@@ -228,7 +232,7 @@ public class Boid : MonoBehaviour
     private void updateValues()
     {
         int count = vehicleParent.transform.childCount;
-        Debug.Log("Anzahl Vehicles: " + count);
+//        Debug.Log("Anzahl Vehicles: " + count);
         if (count > 100)
         {
             health -= Time.deltaTime * gm.healthDegen * count / 10f;
@@ -241,13 +245,19 @@ public class Boid : MonoBehaviour
 //        velocity = rb.velocity;
 //        target = findNearestFood();
         recoloringBoid();
-        drawSigthRadius(gameObject.transform.GetChild(0), Color.green, dna[2]);
-        drawSigthRadius(gameObject.transform.GetChild(1), Color.red, dna[3]);
+        if (gm.drawHalos)
+        {
+            drawSigthRadius(gameObject.transform.GetChild(0), Color.green, dna[2]);
+            drawSigthRadius(gameObject.transform.GetChild(1), Color.red, dna[3]);
+        }
 
         //kill if necessary
         if (health <= 0)
         {
+            Vector3 spawnpos = transform.position;
             Destroy(gameObject);
+            //Y U NO WORK
+            foodSpawner.spawnFoodAt(spawnpos);
         }
     }
 
@@ -290,16 +300,19 @@ public class Boid : MonoBehaviour
     private void modifyHealth(bool atePoison)
     {
         health += atePoison ? -50 : 20;
-        if (health > maxHealth)
-        {
-            health = maxHealth;
-        }
+//        if (health > maxHealth)
+//        {
+//            health = maxHealth;
+//        }
     }
 
     private void cloneMe()
     {
-        GameObject child = vehicleSpawner.cloneThis(gameObject);
-        mutateMe(child);
+        if (Random.value < 0.0025)
+        {
+            GameObject child = vehicleSpawner.cloneThis(gameObject);
+            mutateMe(child);
+        }
     }
 
     private void mutateMe(GameObject child)
@@ -308,13 +321,45 @@ public class Boid : MonoBehaviour
         childStats.gen = gen + 1;
         childStats.gameObject.name = gameObject.name = "Werner der " + childStats.gen + ".";
 
-        childStats.health = maxHealth + HelperFunctions.randomBinominal(100) * maxHealth;
-        childStats.maxHealth = childStats.health;
-        childStats.maxSpeed = maxSpeed + HelperFunctions.randomBinominal(100) * maxSpeed;
-        childStats.maxForce = maxForce + HelperFunctions.randomBinominal(100) * maxForce;
+        if (Random.value < mutationRate)
+        {
+            childStats.maxHealth = maxHealth + HelperFunctions.randomBinominal(100) * GameManager.staticVehicleHealth;
+            childStats.health = childStats.maxHealth;
+        }
+        else
+        {
+            childStats.maxHealth = maxHealth;
+            childStats.health = maxHealth;
+        }
+
+        if (Random.value < mutationRate)
+        {
+            childStats.maxSpeed = maxSpeed + HelperFunctions.randomBinominal(100) * GameManager.staticVehicleMaxSpeed;
+        }
+        else
+        {
+            childStats.maxSpeed = maxSpeed;
+        }
+
+        if (Random.value < mutationRate)
+        {
+            childStats.maxForce = maxForce + HelperFunctions.randomBinominal(100) * GameManager.staticVehicleMaxForce;
+        }
+        else
+        {
+            childStats.maxForce = maxForce;
+        }
+
         for (int i = 0; i < dna.Count; i++)
         {
-            childStats.dna[i] = dna[i] + HelperFunctions.randomBinominal(100) * dna[i];
+            if (Random.value < mutationRate)
+            {
+                childStats.dna[i] = dna[i] + HelperFunctions.randomBinominal(100) * dna[i];
+            }
+            else
+            {
+                childStats.dna[i] = dna[i];
+            }
         }
     }
 }
