@@ -249,12 +249,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: feb5bf587a16482a97f0ab52df6968c2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  vehicleMaxSpeed: 1.05
-  viewRadius: 25
-  vehicleHealth: 50
+  vehicleMaxSpeed: 0.5
+  vehicleHealth: 100
   initialFoodCount: 25
-  healthModifier: 1
-  cloningRate: 25
+  healthDegen: 4
+  cloningRate: 13
 --- !u!114 &1389297812
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -290,7 +289,7 @@ MonoBehaviour:
   prefabs:
   - {fileID: 1670014795730715509, guid: 506ee0db560c3514494faa69eff1ede3, type: 3}
   spawnRate: 0.5
-  initialRate: 1
+  initialRate: 25
 --- !u!114 &1389297814
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -79,6 +79,14 @@ public class Boid : MonoBehaviour
             //poisonViewRadius
             dna.Add(Random.Range(0, 5));
         }
+
+        for (int i = 0; i < dna.Count; i++)
+        {
+            if (dna[i] == 0)
+            {
+                dna[i] = HelperFunctions.randomBinominal(1);
+            }
+        }
     }
 
 
@@ -223,7 +231,7 @@ public class Boid : MonoBehaviour
         Debug.Log("Anzahl Vehicles: " + count);
         if (count > 100)
         {
-            health -= Time.deltaTime * gm.healthDegen * count/10f;
+            health -= Time.deltaTime * gm.healthDegen * count / 10f;
         }
         else
         {
@@ -233,8 +241,8 @@ public class Boid : MonoBehaviour
 //        velocity = rb.velocity;
 //        target = findNearestFood();
         recoloringBoid();
-//        drawSigthRadius(Color.green, dna[2]);
-//        drawSigthRadius(Color.red, dna[3]);
+        drawSigthRadius(gameObject.transform.GetChild(0), Color.green, dna[2]);
+        drawSigthRadius(gameObject.transform.GetChild(1), Color.red, dna[3]);
 
         //kill if necessary
         if (health <= 0)
@@ -243,29 +251,35 @@ public class Boid : MonoBehaviour
         }
     }
 
-    private void drawSigthRadius(Color col, float radius)
+    private void drawSigthRadius(Transform halo, Color col, float radius)
     {
-        radius /= 2;
-        int numSegments = 30;
+        radius *= 4;
+        col = new Color(col.r, col.g, col.b, 0.1f);
+        halo.GetComponent<SpriteRenderer>().color = col;
+        halo.transform.localScale = new Vector3(radius, radius, radius);
 
-        LineRenderer lineRenderer = gameObject.GetComponent<LineRenderer>();
-        lineRenderer.material = lineRenderer.materials[1];
-        lineRenderer.SetColors(Color.white, Color.white);
-        lineRenderer.SetWidth(0.1f, 0.1f);
-        lineRenderer.SetVertexCount(numSegments + 1);
-        lineRenderer.useWorldSpace = false;
-
-        float deltaTheta = (float) (2.0 * Mathf.PI) / numSegments;
-        float theta = 0f;
-
-        for (int i = 0; i < numSegments + 1; i++)
-        {
-            float x = radius * Mathf.Cos(theta);
-            float z = radius * Mathf.Sin(theta);
-            Vector3 pos = new Vector3(x, z, 0);
-            lineRenderer.SetPosition(i, pos);
-            theta += deltaTheta;
-        }
+//        
+//        radius /= 2;
+//        int numSegments = 30;
+//
+//        LineRenderer lineRenderer = gameObject.GetComponent<LineRenderer>();
+//        lineRenderer.material = lineRenderer.materials[1];
+//        lineRenderer.SetColors(Color.white, Color.white);
+//        lineRenderer.SetWidth(0.1f, 0.1f);
+//        lineRenderer.SetVertexCount(numSegments + 1);
+//        lineRenderer.useWorldSpace = false;
+//
+//        float deltaTheta = (float) (2.0 * Mathf.PI) / numSegments;
+//        float theta = 0f;
+//
+//        for (int i = 0; i < numSegments + 1; i++)
+//        {
+//            float x = radius * Mathf.Cos(theta);
+//            float z = radius * Mathf.Sin(theta);
+//            Vector3 pos = new Vector3(x, z, 0);
+//            lineRenderer.SetPosition(i, pos);
+//            theta += deltaTheta;
+//        }
     }
 
     private void recoloringBoid()
@@ -291,15 +305,16 @@ public class Boid : MonoBehaviour
     private void mutateMe(GameObject child)
     {
         Boid childStats = child.GetComponent<Boid>();
-        childStats.health = maxHealth + HelperFunctions.randomBinominal() * 0.5f * maxHealth;
-        childStats.maxHealth = childStats.health;
-        childStats.maxSpeed = maxSpeed + HelperFunctions.randomBinominal() * 0.5f * maxSpeed;
-        childStats.maxForce = maxForce + HelperFunctions.randomBinominal() * 0.5f * maxForce;
         childStats.gen = gen + 1;
         childStats.gameObject.name = gameObject.name = "Werner der " + childStats.gen + ".";
+
+        childStats.health = maxHealth + HelperFunctions.randomBinominal(100) * maxHealth;
+        childStats.maxHealth = childStats.health;
+        childStats.maxSpeed = maxSpeed + HelperFunctions.randomBinominal(100) * maxSpeed;
+        childStats.maxForce = maxForce + HelperFunctions.randomBinominal(100) * maxForce;
         for (int i = 0; i < dna.Count; i++)
         {
-            childStats.dna[i] = dna[i] + HelperFunctions.randomBinominal() * 0.5f * dna[i];
+            childStats.dna[i] = dna[i] + HelperFunctions.randomBinominal(100) * dna[i];
         }
     }
 }

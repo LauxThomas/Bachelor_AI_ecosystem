@@ -7,9 +7,9 @@ public class HelperFunctions
         return (value - from1) / (to1 - from1) * (to2 - from2) + from2;
     }
     
-    public static float randomBinominal()
+    public static float randomBinominal(int oneOverX)
     {
-        return Random.Range(0f, 1f) - Random.Range(0f, 1f);
+        return (Random.Range(0f, 1f) - Random.Range(0f, 1f))/oneOverX;
     }
 
 }
