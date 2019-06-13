@@ -28,7 +28,6 @@ public class Boid : MonoBehaviour
     [SerializeField] private List<float> dna;
     [SerializeField] private float health = GameManager.staticVehicleHealth;
     [SerializeField] private float maxHealth;
-    [SerializeField] private float viewRadius = GameManager.staticViewRadius;
     [SerializeField] private float maxSpeed = GameManager.staticVehicleMaxSpeed; //5
     [SerializeField] private float maxForce = GameManager.staticVehicleMaxForce;
 
@@ -39,11 +38,13 @@ public class Boid : MonoBehaviour
     private Vector3 wanderTarget;
     private Vector3 randomVector;
     private bool foundTarget;
+    private GameObject vehicleParent;
 
 
     private void Start()
     {
         gameObject.name = "Werner der " + gen + ".";
+        vehicleParent = GameObject.Find("Vehicles");
         sr = GetComponent<SpriteRenderer>();
         gm = FindObjectOfType<GameManager>();
         foodSpawner = FindObjectOfType<foodSpawner>();
@@ -59,54 +60,42 @@ public class Boid : MonoBehaviour
         setDna();
     }
 
+    private void Update()
+    {
+        updateValues();
+        behaviours(foodSpawner.getEdibles(), foodSpawner.getPoisons(), dna[2], dna[3]);
+    }
+
     private void setDna()
     {
-        if (dna.Count==0)
+        if (dna.Count == 0)
         {
+            //foodWeight
             dna.Add(Random.Range(-5, 5));
+            //poisonWeight
             dna.Add(Random.Range(-5, 5));
+            //foodViewRadius
+            dna.Add(Random.Range(0, 5));
+            //poisonViewRadius
+            dna.Add(Random.Range(0, 5));
         }
     }
 
 
-    private void behaviours(List<GameObject> good, List<GameObject> bad)
+    private void behaviours(List<GameObject> good, List<GameObject> bad, float goodRadius, float badRadius)
     {
-        Vector3 steerG = eat(good);
-        Vector3 steerB = eat(bad);
+        Vector3 steerG = eat(good, goodRadius);
+        Vector3 steerB = eat(bad, badRadius);
 
         steerG *= dna[0];
         steerB *= dna[1];
 
         applyForce(steerG);
-        Debug.DrawLine(transform.position, steerG, Color.green);
         applyForce(steerB);
-        Debug.DrawLine(transform.position, steerB, Color.red);
     }
 
-    private void Update()
-    {
-        updateValues();
 
-//        checkForFoodInRange();
-//        eat(foodSpawner.getEdibles());
-//        eat(foodSpawner.getPoisons());
-        behaviours(foodSpawner.getEdibles(), foodSpawner.getPoisons());
-    }
-
-    private void checkForFoodInRange()
-    {
-        float dist = Vector3.Distance(target, transform.position);
-        if (dist < viewRadius)
-        {
-            eat(foodSpawner.getEdibles());
-        }
-        else
-        {
-            wanderAround();
-        }
-    }
-
-    private Vector3 eat(List<GameObject> list)
+    private Vector3 eat(List<GameObject> list, float sightRadius)
     {
         float record = float.PositiveInfinity;
         int closest = -1;
@@ -126,7 +115,7 @@ public class Boid : MonoBehaviour
             return seekTarget(randomVector);
         }
 
-        if (record < viewRadius)
+        if (record < sightRadius)
         {
             desired = list[closest].transform.position - transform.position;
 //            desired = list[closest].transform.position;
@@ -176,17 +165,10 @@ public class Boid : MonoBehaviour
         steer = Vector3.ClampMagnitude(steer, maxForce);
         flipIfNecessary();
         return steer;
-        applyForce(steer);
-
-        //Debug:
-//        Debug.DrawLine(transform.position, steer, Color.red);
-//        Debug.DrawLine(transform.position, desired, Color.blue);
-//        Debug.DrawLine(transform.position, velocity, Color.green);
     }
 
     private void applyForce(Vector3 forceToAdd)
     {
-        Debug.DrawLine(transform.position, forceToAdd, Color.magenta, 0.05f);
         rb.AddForce(forceToAdd);
         if (rb.velocity.magnitude > maxSpeed)
         {
@@ -237,19 +219,22 @@ public class Boid : MonoBehaviour
 
     private void updateValues()
     {
-        if (vehicleSpawner.getVehicleCount() > 100)
+        int count = vehicleParent.transform.childCount;
+        Debug.Log("Anzahl Vehicles: " + count);
+        if (count > 100)
         {
-            health -= Time.deltaTime * gm.healthModifier * 5;
+            health -= Time.deltaTime * gm.healthDegen * count/10f;
         }
         else
         {
-            health -= Time.deltaTime * gm.healthModifier;
+            health -= Time.deltaTime * gm.healthDegen;
         }
 
 //        velocity = rb.velocity;
 //        target = findNearestFood();
         recoloringBoid();
-        drawSeekRadii();
+//        drawSigthRadius(Color.green, dna[2]);
+//        drawSigthRadius(Color.red, dna[3]);
 
         //kill if necessary
         if (health <= 0)
@@ -258,15 +243,14 @@ public class Boid : MonoBehaviour
         }
     }
 
-    private void drawSeekRadii()
+    private void drawSigthRadius(Color col, float radius)
     {
-        float radius = viewRadius / 2;
-        int numSegments = 128;
+        radius /= 2;
+        int numSegments = 30;
 
         LineRenderer lineRenderer = gameObject.GetComponent<LineRenderer>();
-        Color c1 = Color.green;
-//        lineRenderer.material = new Material(Shader.Find("Particles/Additive"));
-        lineRenderer.SetColors(c1, c1);
+        lineRenderer.material = lineRenderer.materials[1];
+        lineRenderer.SetColors(Color.white, Color.white);
         lineRenderer.SetWidth(0.1f, 0.1f);
         lineRenderer.SetVertexCount(numSegments + 1);
         lineRenderer.useWorldSpace = false;
@@ -291,11 +275,11 @@ public class Boid : MonoBehaviour
 
     private void modifyHealth(bool atePoison)
     {
-        health += atePoison ? -20 : 50;
-//        if (health > maxHealth * 1.5f)
-//        {
-//            health = maxHealth;
-//        }
+        health += atePoison ? -50 : 20;
+        if (health > maxHealth)
+        {
+            health = maxHealth;
+        }
     }
 
     private void cloneMe()
@@ -309,7 +293,6 @@ public class Boid : MonoBehaviour
         Boid childStats = child.GetComponent<Boid>();
         childStats.health = maxHealth + HelperFunctions.randomBinominal() * 0.5f * maxHealth;
         childStats.maxHealth = childStats.health;
-        childStats.viewRadius = viewRadius + HelperFunctions.randomBinominal() * 0.5f * viewRadius;
         childStats.maxSpeed = maxSpeed + HelperFunctions.randomBinominal() * 0.5f * maxSpeed;
         childStats.maxForce = maxForce + HelperFunctions.randomBinominal() * 0.5f * maxForce;
         childStats.gen = gen + 1;

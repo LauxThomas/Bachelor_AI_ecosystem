@@ -14,7 +14,7 @@ public class GameManager : MonoBehaviour
     [Range(10, 100)] public int vehicleHealth = 50;
 
     [Range(1, 25)] public int initialFoodCount = 10;
-    [Range(0, 25)] public int healthModifier = 0;
+    [Range(0, 25)] public int healthDegen = 0;
     [Range(1, 25)] public int cloningRate = 10;
     
     [Range(10, 100)] public static int staticVehicleHealth = 50;
