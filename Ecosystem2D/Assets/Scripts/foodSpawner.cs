@@ -123,7 +123,6 @@ public class foodSpawner : MonoBehaviour
                 edibleParent = new GameObject("Edibles");
             }
 
-            Debug.Log(spawnpos);
             newFood.transform.parent = edibleParent.transform;
         }
         else
@@ -135,7 +134,6 @@ public class foodSpawner : MonoBehaviour
                 poisonsParent = new GameObject("Poisons");
             }
 
-            Debug.Log(spawnpos);
             newFood.transform.parent = poisonsParent.transform;
         }
     }

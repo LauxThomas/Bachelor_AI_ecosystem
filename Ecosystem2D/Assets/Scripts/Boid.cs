@@ -14,6 +14,7 @@ public class Boid : MonoBehaviour
     public int itemsNearby = 0;
 
     private float mutationRate;
+    private float sleepTime = 0;
     public int gen = 0;
     private Vector3 velocity = Vector3.zero;
     private Vector3 acceleration = Vector3.zero;
@@ -258,6 +259,20 @@ public class Boid : MonoBehaviour
             Destroy(gameObject);
             //Y U NO WORK
             foodSpawner.spawnFoodAt(spawnpos);
+        }
+
+        if (rb.IsSleeping())
+        {
+            sleepTime += Time.deltaTime;
+            if (sleepTime > 5)
+            {
+                Debug.Log("work work death");
+                Destroy(gameObject);
+            }
+        }
+        else
+        {
+            sleepTime = 0;
         }
     }
 
