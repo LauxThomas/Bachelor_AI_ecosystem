@@ -14,7 +14,7 @@ public class Boid : MonoBehaviour
     public int itemsNearby = 0;
 
     private float mutationRate;
-    private float sleepTime = 0;
+    public float sleepTime = 0;
     public int gen = 0;
     private Vector3 velocity = Vector3.zero;
     private Vector3 acceleration = Vector3.zero;
