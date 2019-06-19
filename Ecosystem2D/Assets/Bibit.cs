@@ -77,13 +77,13 @@ public class Bibit : MonoBehaviour
 
 //    private float ROTATIONCOST = 0.1f;
 //    private float MOVECOST = 0.1f;
-    public float debugValue;
+    public double debugValue;
     private float distToNearestPoison;
     private GameObject nearestPoison;
     private Vector3 vecToNearestFood;
     private Vector3 vecToNearestPoison;
     private Vector3 forceToAdd;
-    private float rotateForce;
+    private double rotateForce;
 
 
     private void Start()
@@ -183,9 +183,9 @@ public class Bibit : MonoBehaviour
         float g = mother.color.g;
         float b = mother.color.b;
 
-        r += Random.value * 0.1f - 0.05f;
-        g += Random.value * 0.1f - 0.05f;
-        b += Random.value * 0.1f - 0.05f;
+        r += Random.value * 0.01f - 0.005f;
+        g += Random.value * 0.01f - 0.005f;
+        b += Random.value * 0.01f - 0.005f;
         r = Mathf.Clamp(r, 0, 1);
         g = Mathf.Clamp(g, 0, 1);
         b = Mathf.Clamp(b, 0, 1);
@@ -218,14 +218,14 @@ public class Bibit : MonoBehaviour
 
     private void actEat(float costMult, GameObject o)
     {
-        float eatWish = outEat.getValue();
+        double eatWish = outEat.getValue();
         if (eatWish > 0)
         {
             nom(eatWish, nearestFood);
         }
     }
 
-    private void nom(float eatWish, GameObject o)
+    private void nom(double eatWish, GameObject o)
     {
         if (o != null)
         {
@@ -243,7 +243,7 @@ public class Bibit : MonoBehaviour
 
     private void actBirth()
     {
-        float birthWish = outBirth.getValue();
+        double birthWish = outBirth.getValue();
         if (birthWish > 0)
         {
             if (energy > STARTENERGY + MINIMUMSURVIVALENERGY * 1.1f)
@@ -256,7 +256,7 @@ public class Bibit : MonoBehaviour
 
     private void actMove(float costMult)
     {
-        forceToAdd = outForward.getValue() * outForward.getValue() * speed * transform.up.normalized;
+        forceToAdd = (float)(outForward.getValue() * outForward.getValue()) * speed * transform.up.normalized;
         if (float.IsNaN(forceToAdd.x) || float.IsNaN(forceToAdd.y))
         {
             Debug.Log("forceToAdd was NaN");
@@ -276,16 +276,16 @@ public class Bibit : MonoBehaviour
     {
         rotateForce = outRotate.getValue();
         rotateForce = HelperFunctions.remap(rotateForce, 0.5f, 1.0f, -0.5f, 0.5f);
-//        rotateForce -= 0.5f;
-        if (float.IsNaN(rotateForce))
+        if (double.IsNaN(rotateForce))
         {
+            Debug.Log("rotateForce was NaN");
             rotateForce = Random.Range(-0.5f, 0.5f);
         }
 
         debugValue = rotateForce;
 
 
-        transform.Rotate(0, 0, rotateForce * force, Space.Self);
+        transform.Rotate(0, 0, (float)rotateForce * force, Space.Self);
         if (rotateForce < 0)
         {
             rotateForce = -rotateForce;

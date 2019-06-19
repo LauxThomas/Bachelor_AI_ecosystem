@@ -2,14 +2,14 @@ namespace DefaultNamespace
 {
     public class InputNeuron : Neuron
     {
-        private float value = 0;
+        private double value = 0;
 
-        public void setValue(float x)
+        public void setValue(double x)
         {
             this.value = x;
         }
 
-        public override float getValue()
+        public override double getValue()
         {
             return this.value;
         }

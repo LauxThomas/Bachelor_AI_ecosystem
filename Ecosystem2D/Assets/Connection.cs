@@ -2,16 +2,16 @@ namespace DefaultNamespace
 {
     public class Connection
     {
-        public float weight = 0;
+        public double weight = 0;
         private Neuron entrieNeuron;
 
-        public Connection(Neuron neuron, float weight)
+        public Connection(Neuron neuron, double weight)
         {
             this.weight = weight;
             this.entrieNeuron = neuron;
         }
 
-        public float getValue()
+        public double getValue()
         {
             return weight * entrieNeuron.getValue();
         }

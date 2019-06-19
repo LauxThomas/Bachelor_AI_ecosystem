@@ -5,10 +5,10 @@ namespace DefaultNamespace
 {
     public class WorkingNeuron : Neuron
     {
-        private float? value = null;
+        private double? value = null;
         public List<Connection> connections = new List<Connection>();
 
-        public void addNeuronConnection(Neuron n, float weight)
+        public void addNeuronConnection(Neuron n, double weight)
         {
             addNeuronConnection(new Connection(n, weight));
         }
@@ -25,7 +25,7 @@ namespace DefaultNamespace
 
         private void calculate()
         {
-            float value = 0;
+            double value = 0;
             foreach (Connection c in connections)
             {
                 value += c.getValue();
@@ -35,14 +35,14 @@ namespace DefaultNamespace
             this.value = value;
         }
 
-        public override float getValue()
+        public override double getValue()
         {
             if (value == null)
             {
                 calculate();
             }
 
-            return (float) value;
+            return  (double)value;
         }
 
         public override Neuron nameCopy()
