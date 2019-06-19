@@ -51,7 +51,7 @@ public class vehicleSpawner : MonoBehaviour
         }
     }
 
-    void spawnOrganism()
+    public void spawnOrganism()
     {
         Vector3 spawnPosition = new Vector3(Random.Range(-gm.getWindowWidth(), gm.getWindowWidth()),
             Random.Range(-gm.getWindowHeight(), gm.getWindowHeight()), 0);

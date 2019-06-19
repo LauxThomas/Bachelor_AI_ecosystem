@@ -238,6 +238,10 @@ public class Boid : MonoBehaviour
         {
             health -= Time.deltaTime * gm.healthDegen * count / 10f;
         }
+        else if (count < 3)
+        {
+            vehicleSpawner.spawnOrganism();
+        }
         else
         {
             health -= Time.deltaTime * gm.healthDegen;
