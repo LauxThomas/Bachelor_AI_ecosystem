@@ -196,7 +196,7 @@ public class Bibit : MonoBehaviour
 
     private void Update()
     {
-        ageModifier += Time.deltaTime / 15;
+        ageModifier += Time.deltaTime / 10;
         readSensors();
         updateBrain();
         executeAction();

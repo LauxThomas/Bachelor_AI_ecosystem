@@ -58,41 +58,57 @@ public class BibitProducer : MonoBehaviour
             }
         }
 
-        if (count > 30)
-        {
-            foreach (GameObject go in allBibits)
-            {
-                Bibit b = go.GetComponent<Bibit>();
-                if (!b.hasModifiedAgeModifier)
-                {
-                    b.ageModifier *= 3;
-                    b.hasModifiedAgeModifier = true;
-                }
-            }
-        }
-        else
-        {
-            foreach (GameObject go in allBibits)
-            {
-                Bibit b = go.GetComponent<Bibit>();
-                if (b.hasModifiedAgeModifier)
-                {
-                    b.ageModifier /= 3;
-                    b.hasModifiedAgeModifier = false;
-                }
-            }
-        }
+//        if (count > 30)
+//        {
+//            foreach (GameObject go in allBibits)
+//            {
+//                Bibit b = go.GetComponent<Bibit>();
+//                if (!b.hasModifiedAgeModifier)
+//                {
+//                    b.ageModifier *= 3;
+//                    b.hasModifiedAgeModifier = true;
+//                }
+//            }
+//        }
+//        else
+//        {
+//            foreach (GameObject go in allBibits)
+//            {
+//                Bibit b = go.GetComponent<Bibit>();
+//                if (b.hasModifiedAgeModifier)
+//                {
+//                    b.ageModifier /= 3;
+//                    b.hasModifiedAgeModifier = false;
+//                }
+//            }
+//        }
 
-        while (allBibits.Count < Camera.main.orthographicSize*2)
+        while (allBibits.Count < Camera.main.orthographicSize * 2)
         {
             spawnBibit();
             additionalBibitsProduced++;
+        }
+
+        if (allBibits.Count >= 65)
+        {
+            startWithEvolvedBibids();
         }
 
         while (allBibits.Count > 70)
         {
             removeBibit(allBibits[Random.Range(0, allBibits.Count)]);
         }
+    }
+
+    private void startWithEvolvedBibids()
+    {
+        for (int i = 0; i < 65 - Camera.main.orthographicSize * 2; i++)
+        {
+            GameObject removeObject = allBibits[Random.Range(0, allBibits.Count)];
+            allBibits.Remove(removeObject);
+            Destroy(removeObject);
+        }
+        Debug.Log("restarted!");
     }
 
     private void spawnBibit()
