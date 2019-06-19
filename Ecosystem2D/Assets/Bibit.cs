@@ -152,7 +152,7 @@ public class Bibit : MonoBehaviour
         brain = new NeuralNetwork(); //DEBUGGING
         this.brain = mother.brain.cloneFullMesh();
         this.energy = 150;
-        this.generation = mother.getGeneration()+1;
+        this.generation = mother.getGeneration() + 1;
 
         inBias = brain.getInputNeuronFromName(NAME_IN_BIAS);
         inDistToNearestFood = brain.getInputNeuronFromName(NAME_IN_DISTTONEARESTFOOD);
@@ -183,9 +183,9 @@ public class Bibit : MonoBehaviour
         float g = mother.color.g;
         float b = mother.color.b;
 
-        r += Random.value * 0.01f - 0.005f;
-        g += Random.value * 0.01f - 0.005f;
-        b += Random.value * 0.01f - 0.005f;
+        r += Random.value * (1 / 255) - (1 / 255 * 2);
+        g += Random.value * (1 / 255) - (1 / 255 * 2);
+        b += Random.value * (1 / 255) - (1 / 255 * 2);
         r = Mathf.Clamp(r, 0, 1);
         g = Mathf.Clamp(g, 0, 1);
         b = Mathf.Clamp(b, 0, 1);
@@ -196,7 +196,7 @@ public class Bibit : MonoBehaviour
 
     private void Update()
     {
-        ageModifier += Time.deltaTime / 20;
+        ageModifier += Time.deltaTime / 15;
         readSensors();
         updateBrain();
         executeAction();
@@ -256,7 +256,7 @@ public class Bibit : MonoBehaviour
 
     private void actMove(float costMult)
     {
-        forceToAdd = (float)(outForward.getValue() * outForward.getValue()) * speed * transform.up.normalized;
+        forceToAdd = (float) (outForward.getValue() * outForward.getValue()) * speed * transform.up.normalized;
         if (float.IsNaN(forceToAdd.x) || float.IsNaN(forceToAdd.y))
         {
             Debug.Log("forceToAdd was NaN");
@@ -285,7 +285,7 @@ public class Bibit : MonoBehaviour
         debugValue = rotateForce;
 
 
-        transform.Rotate(0, 0, (float)rotateForce * force, Space.Self);
+        transform.Rotate(0, 0, (float) rotateForce * force, Space.Self);
         if (rotateForce < 0)
         {
             rotateForce = -rotateForce;
@@ -332,7 +332,8 @@ public class Bibit : MonoBehaviour
         //if still alive:
         else
         {
-            color.a = (float) ((energy - MINIMUMSURVIVALENERGY) /(STARTENERGY - MINIMUMSURVIVALENERGY)); //set coloralpha to healthpercentage
+            color.a = (float) ((energy - MINIMUMSURVIVALENERGY) /
+                               (STARTENERGY - MINIMUMSURVIVALENERGY)); //set coloralpha to healthpercentage
             GetComponent<SpriteRenderer>().color = color;
             List<GameObject> allFoods = foodProducer.getAllFoods();
             distToNearestFood = float.PositiveInfinity;

@@ -37,12 +37,13 @@ public class BibitProducer : MonoBehaviour
     {
         maxCurrentGeneration = 0;
         count = allBibits.Count;
-        if (allBibits.Count>100)
+        if (allBibits.Count > 100)
         {
             Debug.LogError("EXIT APPLICATION, TOO MANY BIBITS");
             UnityEditor.EditorApplication.isPlaying = false;
             Application.Quit(1);
         }
+
         foreach (GameObject go in allBibits)
         {
             int gen = go.GetComponent<Bibit>().getGeneration();
@@ -50,6 +51,7 @@ public class BibitProducer : MonoBehaviour
             {
                 maxGeneration = gen;
             }
+
             if (gen > maxCurrentGeneration)
             {
                 maxCurrentGeneration = gen;
@@ -81,12 +83,12 @@ public class BibitProducer : MonoBehaviour
             }
         }
 
-
-        while (allBibits.Count < 5)
+        while (allBibits.Count < Camera.main.orthographicSize*2)
         {
             spawnBibit();
             additionalBibitsProduced++;
         }
+
         while (allBibits.Count > 70)
         {
             removeBibit(allBibits[Random.Range(0, allBibits.Count)]);
@@ -95,10 +97,13 @@ public class BibitProducer : MonoBehaviour
 
     private void spawnBibit()
     {
-        Vector3 spawnPos = new Vector3(Random.Range(lu.x, ru.x), Random.Range(lu.y, lo.y));
-        GameObject newBibit = Instantiate(bibitPrefab, spawnPos, Quaternion.identity);
-        newBibit.GetComponent<Bibit>().pseudoConstructor1();
-        addBibit(newBibit);
+        if (allBibits.Count < 70)
+        {
+            Vector3 spawnPos = new Vector3(Random.Range(lu.x, ru.x), Random.Range(lu.y, lo.y));
+            GameObject newBibit = Instantiate(bibitPrefab, spawnPos, Quaternion.identity);
+            newBibit.GetComponent<Bibit>().pseudoConstructor1();
+            addBibit(newBibit);
+        }
     }
 
     public void addBibit(GameObject bibit)
@@ -119,9 +124,12 @@ public class BibitProducer : MonoBehaviour
 
     public void spawnChild(GameObject o)
     {
-        Vector3 spawnPos = new Vector3(Random.Range(lu.x, ru.x), Random.Range(lu.y, lo.y));
-        GameObject newBibit = Instantiate(bibitPrefab, spawnPos, Quaternion.identity);
-        newBibit.GetComponent<Bibit>().pseudoConstructor2(o.GetComponent<Bibit>());
-        addBibit(newBibit);
+        if (allBibits.Count < 70)
+        {
+            Vector3 spawnPos = new Vector3(Random.Range(lu.x, ru.x), Random.Range(lu.y, lo.y));
+            GameObject newBibit = Instantiate(bibitPrefab, spawnPos, Quaternion.identity);
+            newBibit.GetComponent<Bibit>().pseudoConstructor2(o.GetComponent<Bibit>());
+            addBibit(newBibit);
+        }
     }
 }
