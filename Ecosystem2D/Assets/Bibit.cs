@@ -10,9 +10,11 @@ using Random = UnityEngine.Random;
 
 public class Bibit : MonoBehaviour
 {
-    public float energy = 150;
+    public double energy = 150;
     private float age = 0;
     public float ageModifier;
+    private int generation = 0;
+    public Boolean hasModifiedAgeModifier;
 
     private NeuralNetwork brain;
 
@@ -61,8 +63,8 @@ public class Bibit : MonoBehaviour
 
     private Rigidbody2D rb;
     private float rotation;
-    private float speed = 10;
-    private float force = 10;
+    private float speed = 5;
+    private float force = 5;
     private FoodProducer foodProducer;
     private BibitProducer bibitProducer;
     private Vector3 lu;
@@ -70,14 +72,18 @@ public class Bibit : MonoBehaviour
     private Vector3 ru;
     private Vector3 ro;
     private float distToNearestFood;
+
     private GameObject nearestFood;
-    private float ROTATIONCOST = 0.1f;
-    private float MOVECOST = 0.1f;
+
+//    private float ROTATIONCOST = 0.1f;
+//    private float MOVECOST = 0.1f;
     public float debugValue;
     private float distToNearestPoison;
     private GameObject nearestPoison;
     private Vector3 vecToNearestFood;
     private Vector3 vecToNearestPoison;
+    private Vector3 forceToAdd;
+    private float rotateForce;
 
 
     private void Start()
@@ -89,6 +95,7 @@ public class Bibit : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         foodProducer = FindObjectOfType<FoodProducer>();
         bibitProducer = FindObjectOfType<BibitProducer>();
+        gameObject.name = generation + ". Gen";
     }
 
     public void pseudoConstructor1()
@@ -145,6 +152,7 @@ public class Bibit : MonoBehaviour
         brain = new NeuralNetwork(); //DEBUGGING
         this.brain = mother.brain.cloneFullMesh();
         this.energy = 150;
+        this.generation = mother.getGeneration()+1;
 
         inBias = brain.getInputNeuronFromName(NAME_IN_BIAS);
         inDistToNearestFood = brain.getInputNeuronFromName(NAME_IN_DISTTONEARESTFOOD);
@@ -188,7 +196,7 @@ public class Bibit : MonoBehaviour
 
     private void Update()
     {
-        ageModifier += Time.deltaTime / 2;
+        ageModifier += Time.deltaTime / 20;
         readSensors();
         updateBrain();
         executeAction();
@@ -203,7 +211,6 @@ public class Bibit : MonoBehaviour
             actRotate(costMult);
             actMove(costMult);
             actBirth();
-//        actFeelerRotate();
             actEat(costMult, nearestFood);
             age += Time.deltaTime;
         }
@@ -249,9 +256,10 @@ public class Bibit : MonoBehaviour
 
     private void actMove(float costMult)
     {
-        Vector3 forceToAdd = outForward.getValue() * outForward.getValue() * speed * transform.up.normalized;
+        forceToAdd = outForward.getValue() * outForward.getValue() * speed * transform.up.normalized;
         if (float.IsNaN(forceToAdd.x) || float.IsNaN(forceToAdd.y))
         {
+            Debug.Log("forceToAdd was NaN");
             forceToAdd = new Vector3(Random.value * speed, Random.value * speed);
         }
 
@@ -261,13 +269,14 @@ public class Bibit : MonoBehaviour
             rb.velocity = rb.velocity.normalized * 10;
         }
 
-        energy -= Mathf.Abs(outForward.getValue() * outForward.getValue() * MOVECOST * ageModifier);
+        energy -= forceToAdd.magnitude / speed / 10f * ageModifier;
     }
 
     private void actRotate(float costMult)
     {
-        float rotateForce = outRotate.getValue();
-        rotateForce -= 0.5f;
+        rotateForce = outRotate.getValue();
+        rotateForce = HelperFunctions.remap(rotateForce, 0.5f, 1.0f, -0.5f, 0.5f);
+//        rotateForce -= 0.5f;
         if (float.IsNaN(rotateForce))
         {
             rotateForce = Random.Range(-0.5f, 0.5f);
@@ -275,8 +284,14 @@ public class Bibit : MonoBehaviour
 
         debugValue = rotateForce;
 
+
         transform.Rotate(0, 0, rotateForce * force, Space.Self);
-        energy -= Mathf.Abs(rotateForce * ROTATIONCOST * ageModifier);
+        if (rotateForce < 0)
+        {
+            rotateForce = -rotateForce;
+        }
+
+        energy -= rotateForce * ageModifier;
     }
 
     private void updateBrain()
@@ -285,19 +300,29 @@ public class Bibit : MonoBehaviour
         inBias.setValue(1);
 
         inDistToNearestFood.setValue(distToNearestFood);
-        inDistToNearestPoison.setValue(distToNearestPoison); //todo
-        inNearestFoodVectorX.setValue(vecToNearestFood.x * distToNearestFood); //todo
-        inNearestFoodVectorY.setValue(vecToNearestFood.y * distToNearestFood); //todo
-        inNearestPoisonVectorX.setValue(vecToNearestPoison.x * distToNearestPoison); //todo:
-        inNearestPoisonVectorY.setValue(vecToNearestPoison.y * distToNearestPoison); //todo
-        inEnergy.setValue((energy - MINIMUMSURVIVALENERGY) / (STARTENERGY - MINIMUMSURVIVALENERGY));
+        inDistToNearestPoison.setValue(distToNearestPoison);
+        inNearestFoodVectorX.setValue(vecToNearestFood.x * distToNearestFood);
+        inNearestFoodVectorY.setValue(vecToNearestFood.y * distToNearestFood);
+        inNearestPoisonVectorX.setValue(vecToNearestPoison.x * distToNearestPoison);
+        inNearestPoisonVectorY.setValue(vecToNearestPoison.y * distToNearestPoison);
+        inEnergy.setValue(((float) energy - MINIMUMSURVIVALENERGY) / (STARTENERGY - MINIMUMSURVIVALENERGY));
         inAge.setValue(age);
-        inForwardVectorX.setValue(transform.forward.x); //todo
-        inForwardVectorY.setValue(transform.forward.y); //todo
+        inForwardVectorX.setValue(transform.forward.x);
+        inForwardVectorY.setValue(transform.forward.y);
     }
 
     private void readSensors()
     {
+        if (double.IsNaN(energy))
+        {
+            Debug.LogError("energy = NaN \n" +
+                           "rotateForce:" + rotateForce + "\n" +
+                           "forceToAddX: " + forceToAdd.x + " ---- \n" +
+                           "forceToAddY: " + forceToAdd.y + " ---- \n" +
+                           "forceToAddZ: " + forceToAdd.z + " ---- \n" +
+                           "");
+        }
+
         //Kill if necessary:
         if (energy < 100)
         {
@@ -307,7 +332,7 @@ public class Bibit : MonoBehaviour
         //if still alive:
         else
         {
-//            color.a = (energy - MINIMUMSURVIVALENERGY) /(STARTENERGY - MINIMUMSURVIVALENERGY); //set coloralpha to healthpercentage
+            color.a = (float) ((energy - MINIMUMSURVIVALENERGY) /(STARTENERGY - MINIMUMSURVIVALENERGY)); //set coloralpha to healthpercentage
             GetComponent<SpriteRenderer>().color = color;
             List<GameObject> allFoods = foodProducer.getAllFoods();
             distToNearestFood = float.PositiveInfinity;
@@ -431,5 +456,10 @@ public class Bibit : MonoBehaviour
         foodProducer.removeFood(collisionGameObject);
         Destroy(collisionGameObject);
         energy += wasFood ? 40 : -50;
+    }
+
+    public int getGeneration()
+    {
+        return generation;
     }
 }
