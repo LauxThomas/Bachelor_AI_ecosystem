@@ -9,7 +9,7 @@ public class FoodProducer : MonoBehaviour
 {
     public GameObject prefab1;
     public GameObject prefab2;
-    
+
     private float width;
     private float height;
     private Vector3 lu;
@@ -17,7 +17,7 @@ public class FoodProducer : MonoBehaviour
     private Vector3 ru;
     private Vector3 ro;
     private GameObject parent;
-    private List<GameObject> allFoods;
+    public List<GameObject> allFoods;
     GameObject spawnFab;
 
 
@@ -32,39 +32,41 @@ public class FoodProducer : MonoBehaviour
         height = Vector3.Distance(lu, lo);
 
         allFoods = new List<GameObject>();
-        createFoods(50);
+        for (int i = 0; i < 50; i++)
+        {
+            createFoods();
+        }
+
+        InvokeRepeating("createFoods", 0, 0.2f);
     }
 
-    public void createFoods(int amount)
+    public void createFoods()
     {
-        for (int i = 0; i < amount; i++)
+        spawnFab = Random.value < 0.9 ? prefab1 : prefab2;
+        Vector3 spawnPos = new Vector3(Random.Range(lu.x, ru.x), Random.Range(lu.y, lo.y), 0);
+        GameObject newFood = Instantiate(spawnFab, spawnPos, Quaternion.identity);
+        if (parent == null)
         {
-
-            spawnFab = Random.value < 0.95 ? prefab1 : prefab2;
-            Vector3 spawnPos = new Vector3(Random.Range(lu.x, ru.x), Random.Range(lu.y, lo.y), 0);
-            GameObject newFood = Instantiate(spawnFab, spawnPos, Quaternion.identity);
-            if (parent == null)
-            {
-                parent = new GameObject("foods");
-            }
-            newFood.transform.parent = parent.transform;
-            allFoods.Add(newFood);
+            parent = new GameObject("foods");
         }
+
+        newFood.transform.parent = parent.transform;
+        allFoods.Add(newFood);
     }
 
     public List<GameObject> getAllFoods()
     {
         return allFoods;
     }
-    
+
 
     // Update is called once per frame
     void Update()
     {
-        while (allFoods.Count<50)
-        {
-            createFoods(1);
-        }
+//        while (allFoods.Count<30)
+//        {
+//            createFoods(1);
+//        }
     }
 
     public void removeFood(GameObject eatenFood)

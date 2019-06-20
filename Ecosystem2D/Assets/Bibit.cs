@@ -23,7 +23,9 @@ public class Bibit : MonoBehaviour
 
     private const String NAME_IN_BIAS = "bias";
     private const String NAME_IN_DISTTONEARESTFOOD = "Distance to nearest Food";
-    private const String NAME_IN_DISTTONEARESTPOISON = "istance to nearest Poison";
+    private const String NAME_IN_DISTTONEARESTPOISON = "Distance to nearest Poison";
+    private const String NAME_IN_ANGLETONEARESTFOOD = "Angle to nearest Food";
+    private const String NAME_IN_ANGLETONEARESTPOISON = "Angle to nearest Poison";
     private const String NAME_IN_NEARESTFOODVECTORX = "Occlusion Feeler";
     private const String NAME_IN_ENERGY = "Energy";
     private const String NAME_IN_AGE = "Age";
@@ -44,6 +46,8 @@ public class Bibit : MonoBehaviour
     private InputNeuron inDistToNearestFood = new InputNeuron();
     private InputNeuron inDistToNearestPoison = new InputNeuron();
     private InputNeuron inNearestFoodVectorX = new InputNeuron();
+    private InputNeuron inAngleToNearestFood = new InputNeuron();
+    private InputNeuron inAngleToNearestPoison = new InputNeuron();
     private InputNeuron inEnergy = new InputNeuron();
     private InputNeuron inAge = new InputNeuron();
     private InputNeuron inForwardVectorX = new InputNeuron();
@@ -84,6 +88,8 @@ public class Bibit : MonoBehaviour
     private Vector3 vecToNearestPoison;
     private Vector3 forceToAdd;
     private double rotateForce;
+    private float angleToNearestFood;
+    private float angleToNearestPoison;
 
 
     private void Start()
@@ -104,6 +110,8 @@ public class Bibit : MonoBehaviour
         inDistToNearestFood.setName(NAME_IN_DISTTONEARESTFOOD);
         inDistToNearestPoison.setName(NAME_IN_DISTTONEARESTPOISON);
         inNearestFoodVectorX.setName(NAME_IN_NEARESTFOODVECTORX);
+        inAngleToNearestFood.setName(NAME_IN_ANGLETONEARESTFOOD);
+        inAngleToNearestPoison.setName(NAME_IN_ANGLETONEARESTPOISON);
         inEnergy.setName(NAME_IN_ENERGY);
         inAge.setName(NAME_IN_AGE);
         inForwardVectorX.setName(NAME_IN_FORWARDVECTORX);
@@ -123,6 +131,8 @@ public class Bibit : MonoBehaviour
         brain.addInputNeuron(inDistToNearestFood);
         brain.addInputNeuron(inDistToNearestPoison);
         brain.addInputNeuron(inNearestFoodVectorX);
+        brain.addInputNeuron(inAngleToNearestFood);
+        brain.addInputNeuron(inAngleToNearestPoison);
         brain.addInputNeuron(inEnergy);
         brain.addInputNeuron(inAge);
         brain.addInputNeuron(inForwardVectorX);
@@ -159,6 +169,8 @@ public class Bibit : MonoBehaviour
         inDistToNearestPoison = brain.getInputNeuronFromName(NAME_IN_DISTTONEARESTPOISON);
         inNearestFoodVectorX = brain.getInputNeuronFromName(NAME_IN_NEARESTFOODVECTORX);
         inNearestFoodVectorY = brain.getInputNeuronFromName(NAME_IN_NEARESTFOODVECTORY);
+        inAngleToNearestFood = brain.getInputNeuronFromName(NAME_IN_ANGLETONEARESTFOOD);
+        inAngleToNearestPoison = brain.getInputNeuronFromName(NAME_IN_ANGLETONEARESTPOISON);
         inEnergy = brain.getInputNeuronFromName(NAME_IN_ENERGY);
         inAge = brain.getInputNeuronFromName(NAME_IN_AGE);
         inForwardVectorX = brain.getInputNeuronFromName(NAME_IN_FORWARDVECTORX);
@@ -183,9 +195,9 @@ public class Bibit : MonoBehaviour
         float g = mother.color.g;
         float b = mother.color.b;
 
-        r += Random.value * (1 / 255) - (1 / 255 * 2);
-        g += Random.value * (1 / 255) - (1 / 255 * 2);
-        b += Random.value * (1 / 255) - (1 / 255 * 2);
+        r += Random.value * 0.01f - 0.005f;
+        g += Random.value * 0.01f - 0.005f;
+        b += Random.value * 0.01f - 0.005f;
         r = Mathf.Clamp(r, 0, 1);
         g = Mathf.Clamp(g, 0, 1);
         b = Mathf.Clamp(b, 0, 1);
@@ -233,10 +245,10 @@ public class Bibit : MonoBehaviour
             if (dist < 0.5f)
             {
                 bool wasFood = nearestFood.CompareTag("food");
-                energy += wasFood ? 10 : -20;
+                energy += wasFood ? 10 : -30;
                 foodProducer.removeFood(nearestFood);
                 Destroy(nearestFood);
-                foodProducer.createFoods(1);
+//                foodProducer.createFoods();
             }
         }
     }
@@ -282,8 +294,6 @@ public class Bibit : MonoBehaviour
             rotateForce = Random.Range(-0.5f, 0.5f);
         }
 
-        debugValue = rotateForce;
-
 
         transform.Rotate(0, 0, (float) rotateForce * force, Space.Self);
         if (rotateForce < 0)
@@ -305,6 +315,8 @@ public class Bibit : MonoBehaviour
         inNearestFoodVectorY.setValue(vecToNearestFood.y * distToNearestFood);
         inNearestPoisonVectorX.setValue(vecToNearestPoison.x * distToNearestPoison);
         inNearestPoisonVectorY.setValue(vecToNearestPoison.y * distToNearestPoison);
+        inAngleToNearestFood.setValue(angleToNearestFood);
+        inAngleToNearestPoison.setValue(angleToNearestPoison);
         inEnergy.setValue(((float) energy - MINIMUMSURVIVALENERGY) / (STARTENERGY - MINIMUMSURVIVALENERGY));
         inAge.setValue(age);
         inForwardVectorX.setValue(transform.forward.x);
@@ -380,6 +392,10 @@ public class Bibit : MonoBehaviour
         {
             vecToNearestPoison = nearestPoison.transform.position - transform.position;
         }
+
+        //calculate angle to nearest Food / poison
+        angleToNearestFood = Vector3.SignedAngle(transform.up, vecToNearestFood, transform.forward);
+        angleToNearestPoison = Vector3.SignedAngle(transform.up, vecToNearestPoison, transform.forward);
 
 //        Debug.DrawLine(transform.position, transform.position + vecToNearestFood, Color.green);
 //        Debug.DrawLine(transform.position, transform.position + vecToNearestPoison, Color.red);
