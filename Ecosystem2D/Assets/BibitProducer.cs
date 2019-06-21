@@ -84,7 +84,7 @@ public class BibitProducer : MonoBehaviour
 //        }
 
         while (allBibits.Count < Camera.main.orthographicSize * 2)
-//        while (allBibits.Count < 1)
+//        while (allBibits.Count < 50)
         {
             spawnBibit();
             additionalBibitsProduced++;
