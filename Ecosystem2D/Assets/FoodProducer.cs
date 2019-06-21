@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
+using Debug = UnityEngine.Debug;
 using Random = UnityEngine.Random;
 
 public class FoodProducer : MonoBehaviour
@@ -17,7 +21,9 @@ public class FoodProducer : MonoBehaviour
     private Vector3 ru;
     private Vector3 ro;
     private GameObject parent;
-    public List<GameObject> allFoods;
+    private List<GameObject> allFoods;
+    public List<GameObject> allWater;
+    public List<GameObject> fertileSpots;
     GameObject spawnFab;
 
 
@@ -32,41 +38,60 @@ public class FoodProducer : MonoBehaviour
         height = Vector3.Distance(lu, lo);
 
         allFoods = new List<GameObject>();
-        for (int i = 0; i < 50; i++)
-        {
-            createFoods();
-        }
-
-        InvokeRepeating("createFoods", 0, 0.2f);
+        allWater = new List<GameObject>();
+        fertileSpots = new List<GameObject>();
+        fillWholeWorld();
+//        fillWorldWithPoison();
     }
 
-    public void createFoods()
+    private void fillWholeWorld()
     {
-        spawnFab = Random.value < 0.9 ? prefab1 : prefab2;
-        Vector3 spawnPos = new Vector3(Random.Range(lu.x, ru.x), Random.Range(lu.y, lo.y), 0);
-        GameObject newFood = Instantiate(spawnFab, spawnPos, Quaternion.identity);
-        if (parent == null)
+        for (int x = (int) (-width / 2); x <= (int) width / 2; x++)
         {
-            parent = new GameObject("foods");
+            for (int y = (int) (-height / 2)+1; y <= (int) height / 2-1; y++)
+            {
+                GameObject spawnFab = Random.value < 0.95 ? prefab1 : prefab2;
+                GameObject newObj = Instantiate(spawnFab, new Vector3(x,y), Quaternion.identity);
+                newObj.GetComponent<FoodStats>().foodAmountAvailable = 0;
+                fertileSpots.Add(newObj);
+            }
         }
-
-        newFood.transform.parent = parent.transform;
-        allFoods.Add(newFood);
     }
+
+
+
+    private void fillWorldWithPoison()
+    {
+        Vector3 poolCenter = new Vector3((int) Random.Range(-width / 2, width / 2),
+            (int) Random.Range(-height / 2, height / 2));
+
+//        Vector3 poolCenter = new Vector3(0, 0);
+        GameObject center = Instantiate(prefab2, poolCenter, Quaternion.identity);
+        allWater.Add(center);
+        fertileSpots.Add(center);
+        poolCenter.x += 1;
+        GameObject right = Instantiate(prefab2, poolCenter, Quaternion.identity);
+        allWater.Add(right);
+        fertileSpots.Add(right);
+        poolCenter.x -= 2;
+        GameObject left = Instantiate(prefab2, poolCenter, Quaternion.identity);
+        allWater.Add(left);
+        fertileSpots.Add(left);
+        poolCenter.x += 1;
+        poolCenter.y += 1;
+        GameObject top = Instantiate(prefab2, poolCenter, Quaternion.identity);
+        allWater.Add(top);
+        fertileSpots.Add(top);
+        poolCenter.y -= 2;
+        GameObject bottom = Instantiate(prefab2, poolCenter, Quaternion.identity);
+        allWater.Add(bottom);
+        fertileSpots.Add(bottom);
+    }
+
 
     public List<GameObject> getAllFoods()
     {
         return allFoods;
-    }
-
-
-    // Update is called once per frame
-    void Update()
-    {
-//        while (allFoods.Count<30)
-//        {
-//            createFoods(1);
-//        }
     }
 
     public void removeFood(GameObject eatenFood)
