@@ -22,8 +22,6 @@ public class FoodProducer : MonoBehaviour
     private Vector3 ro;
     private GameObject parent;
     private List<GameObject> allFoods;
-    public List<GameObject> allWater;
-    public List<GameObject> fertileSpots;
     GameObject spawnFab;
 
 
@@ -38,26 +36,54 @@ public class FoodProducer : MonoBehaviour
         height = Vector3.Distance(lu, lo);
 
         allFoods = new List<GameObject>();
-        allWater = new List<GameObject>();
-        fertileSpots = new List<GameObject>();
         fillWholeWorld();
-//        fillWorldWithPoison();
+        addFoodsToParent();
+//        float scaler = Camera.main.orthographicSize / 10;
+//        prefab1.transform.localScale = new Vector3(scaler,scaler,scaler);
+//        prefab2.transform.localScale = new Vector3(scaler,scaler,scaler);
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Keypad0))
+        {
+            foreach (GameObject go in allFoods)
+            {
+                if (go.CompareTag("food") && go.GetComponent<FoodStats>().fertileIsNear)
+                {
+                    go.GetComponent<FoodStats>().foodAmountAvailable = 70;
+                }
+            }
+        }
+    }
+
+
+    private void addFoodsToParent()
+    {
+        if (parent == null)
+        {
+            parent = new GameObject("Foods");
+        }
+
+        foreach (GameObject go in allFoods)
+        {
+            go.transform.SetParent(parent.transform);
+        }
     }
 
     private void fillWholeWorld()
     {
         for (int x = (int) (-width / 2); x <= (int) width / 2; x++)
         {
-            for (int y = (int) (-height / 2)+1; y <= (int) height / 2-1; y++)
+            for (int y = (int) (-height / 2) + 1; y <= (int) height / 2 - 1; y++)
             {
                 GameObject spawnFab = Random.value < 0.95 ? prefab1 : prefab2;
-                GameObject newObj = Instantiate(spawnFab, new Vector3(x,y), Quaternion.identity);
+                GameObject newObj = Instantiate(spawnFab, new Vector3(x, y), Quaternion.identity);
                 newObj.GetComponent<FoodStats>().foodAmountAvailable = 0;
-                fertileSpots.Add(newObj);
+                allFoods.Add(newObj);
             }
         }
     }
-
 
 
     private void fillWorldWithPoison()
@@ -67,25 +93,20 @@ public class FoodProducer : MonoBehaviour
 
 //        Vector3 poolCenter = new Vector3(0, 0);
         GameObject center = Instantiate(prefab2, poolCenter, Quaternion.identity);
-        allWater.Add(center);
-        fertileSpots.Add(center);
+        allFoods.Add(center);
         poolCenter.x += 1;
         GameObject right = Instantiate(prefab2, poolCenter, Quaternion.identity);
-        allWater.Add(right);
-        fertileSpots.Add(right);
+        allFoods.Add(right);
         poolCenter.x -= 2;
         GameObject left = Instantiate(prefab2, poolCenter, Quaternion.identity);
-        allWater.Add(left);
-        fertileSpots.Add(left);
+        allFoods.Add(left);
         poolCenter.x += 1;
         poolCenter.y += 1;
         GameObject top = Instantiate(prefab2, poolCenter, Quaternion.identity);
-        allWater.Add(top);
-        fertileSpots.Add(top);
+        allFoods.Add(top);
         poolCenter.y -= 2;
         GameObject bottom = Instantiate(prefab2, poolCenter, Quaternion.identity);
-        allWater.Add(bottom);
-        fertileSpots.Add(bottom);
+        allFoods.Add(bottom);
     }
 
 
@@ -94,8 +115,25 @@ public class FoodProducer : MonoBehaviour
         return allFoods;
     }
 
-    public void removeFood(GameObject eatenFood)
+//    public void removeFood(GameObject eatenFood)
+//    {
+//        allFoods.Remove(eatenFood);
+//    }
+
+    public double eatFood(GameObject eatenFood, double eatWish)
     {
-        allFoods.Remove(eatenFood);
+        if (eatenFood.CompareTag("poison"))
+        {
+//            Debug.LogError("POISON @ " + eatenFood.transform.position);
+            return -5 * Math.Abs(eatWish * Time.deltaTime);
+        }
+
+        if (eatenFood.GetComponent<FoodStats>().foodAmountAvailable > 0)
+        {
+            eatenFood.GetComponent<FoodStats>().foodAmountAvailable -= (float) eatWish * Time.deltaTime;
+            return eatWish * Time.deltaTime;
+        }
+
+        return 0;
     }
 }

@@ -12,16 +12,20 @@ public class FoodStats : MonoBehaviour
     public bool drawRayU = false;
     public bool drawRayL = false;
     public bool drawRayR = false;
+    private bool alreadyFed;
 
     // Start is called before the first frame update
     void Start()
     {
         color = GetComponent<SpriteRenderer>().color;
+        isFertile = amIFertile();
+        fertileIsNear = isFertileNear();
     }
 
     // Update is called once per frame
     void Update()
     {
+        checkForInputs();
         debugDrawing();
         if (CompareTag("poison") && foodAmountAvailable != 100f)
         {
@@ -30,11 +34,29 @@ public class FoodStats : MonoBehaviour
         else
         {
             updateFoodAmount();
+            if (CompareTag("poison"))
+            {
+                color = Color.blue;
+            }
+            else if (isFertile && !CompareTag("poison"))
+            {
+                color = Color.green;
+            }
+            else
+            {
+                color = Color.white;
+            }
+
             color.a = foodAmountAvailable / 100;
             GetComponent<SpriteRenderer>().color = color;
 
             foodAmountAvailable = Mathf.Clamp(foodAmountAvailable, 0, 100);
         }
+    }
+
+    private void checkForInputs()
+    {
+        
     }
 
     private void debugDrawing()
@@ -71,7 +93,7 @@ public class FoodStats : MonoBehaviour
 
         if (isFertile || fertileIsNear)
         {
-            foodAmountAvailable += Time.deltaTime * 3;
+            foodAmountAvailable += Time.deltaTime*3;
         }
     }
 
@@ -133,4 +155,5 @@ public class FoodStats : MonoBehaviour
 
         return false;
     }
+
 }

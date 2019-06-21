@@ -90,6 +90,7 @@ public class Bibit : MonoBehaviour
     private double rotateForce;
     private float angleToNearestFood;
     private float angleToNearestPoison;
+    public List<Collider2D> cols;
 
 
     private void Start()
@@ -99,8 +100,8 @@ public class Bibit : MonoBehaviour
         ru = Camera.main.ViewportToWorldPoint(new Vector3(1, 0, 0));
         ro = Camera.main.ViewportToWorldPoint(new Vector3(1, 1, 0));
         rb = GetComponent<Rigidbody2D>();
-        float scaler = Camera.main.orthographicSize/3;
-        transform.localScale = new Vector3(scaler,scaler,scaler);
+        float scaler = Camera.main.orthographicSize / 3;
+        transform.localScale = new Vector3(scaler, scaler, scaler);
         foodProducer = FindObjectOfType<FoodProducer>();
         bibitProducer = FindObjectOfType<BibitProducer>();
         gameObject.name = generation + ". Gen";
@@ -235,22 +236,26 @@ public class Bibit : MonoBehaviour
         double eatWish = outEat.getValue();
         if (eatWish > 0)
         {
-            nom(eatWish, nearestFood);
+            nom(eatWish*30);
         }
     }
 
-    private void nom(double eatWish, GameObject o)
+    private void nom(double eatWish)
     {
-        if (o != null)
+//        RaycastHit2D hit = Physics2D.Raycast(new Vector3(transform.position.x, transform.position.y, 10),
+//            new Vector3(transform.position.x, transform.position.y, -10), 100f,
+//            LayerMask.GetMask("poison", "food"));
+//        Debug.DrawLine(new Vector3(transform.position.x, transform.position.y, 10),
+//            new Vector3(transform.position.x, transform.position.y, -10), Color.blue);
+
+        foreach (GameObject go in foodProducer.getAllFoods())
         {
-            float dist = Vector3.Distance(o.transform.position, transform.position);
-            if (dist < 0.5f)
+            if (GetComponent<Renderer>().bounds.Intersects(go.GetComponent<Renderer>().bounds))
             {
-                bool wasFood = nearestFood.CompareTag("food");
-                energy += wasFood ? 10 : -30;
-                foodProducer.removeFood(nearestFood);
-                Destroy(nearestFood);
-//                foodProducer.createFoods();
+                if ((go.CompareTag("poison") || go.CompareTag("food")))
+                {
+                    energy += foodProducer.eatFood(go, eatWish);
+                }
             }
         }
     }
@@ -327,16 +332,14 @@ public class Bibit : MonoBehaviour
 
     private void readSensors()
     {
-        if (double.IsNaN(energy))
-        {
-            Debug.LogError("energy = NaN \n" +
-                           "rotateForce:" + rotateForce + "\n" +
-                           "forceToAddX: " + forceToAdd.x + " ---- \n" +
-                           "forceToAddY: " + forceToAdd.y + " ---- \n" +
-                           "forceToAddZ: " + forceToAdd.z + " ---- \n" +
-                           "");
-        }
-
+        
+        //TODO: new Inputs:
+        //    isCurrentSpotFood 0,1
+        //    sightRadius: nearestFood Angle + Dist + Amount
+        //    sightRadius: Food with max Amount in sight Angle + Dist + Amount
+        //    sightRadius: nearestPoison Angle + Dist
+        //    output --> input Memory
+        
         //Kill if necessary:
         if (energy < 100)
         {
@@ -349,48 +352,43 @@ public class Bibit : MonoBehaviour
             color.a = (float) ((energy - MINIMUMSURVIVALENERGY) /
                                (STARTENERGY - MINIMUMSURVIVALENERGY)); //set coloralpha to healthpercentage
             GetComponent<SpriteRenderer>().color = color;
+            
             List<GameObject> allFoods = foodProducer.getAllFoods();
             distToNearestFood = float.PositiveInfinity;
             distToNearestPoison = float.PositiveInfinity;
             for (int i = 0; i < allFoods.Count; i++)
             {
                 float dist = Vector3.Distance(transform.position, allFoods[i].transform.position);
-
-                if (dist < distToNearestFood)
+                if (allFoods[i].GetComponent<FoodStats>().isFertile)
                 {
-                    if (allFoods[i].CompareTag("food"))
+                    if (dist < distToNearestFood)
                     {
-                        distToNearestFood = dist;
-                        nearestFood = allFoods[i];
+                        if (allFoods[i].CompareTag("food"))
+                        {
+                            distToNearestFood = dist;
+                            nearestFood = allFoods[i];
+                        }
                     }
-                }
 
-                if (dist < distToNearestPoison)
-                {
-                    if (allFoods[i].CompareTag("poison"))
+                    if (dist < distToNearestPoison)
                     {
-                        distToNearestPoison = dist;
-                        nearestPoison = allFoods[i];
+                        if (allFoods[i].CompareTag("poison"))
+                        {
+                            distToNearestPoison = dist;
+                            nearestPoison = allFoods[i];
+                        }
                     }
                 }
             }
         }
 
 
-        if (distToNearestFood < 0.5f)
-        {
-            eat(nearestFood, true);
-        }
-        else if (distToNearestFood < float.PositiveInfinity && nearestFood != null)
+        if (distToNearestFood < float.PositiveInfinity && nearestFood != null)
         {
             vecToNearestFood = nearestFood.transform.position - transform.position;
         }
 
-        if (distToNearestPoison < 0.5f)
-        {
-            eat(nearestPoison, false);
-        }
-        else if (distToNearestPoison < float.PositiveInfinity && nearestPoison != null)
+        if (distToNearestPoison < float.PositiveInfinity && nearestPoison != null)
         {
             vecToNearestPoison = nearestPoison.transform.position - transform.position;
         }
@@ -470,12 +468,13 @@ public class Bibit : MonoBehaviour
     }
 
 
-    private void eat(GameObject collisionGameObject, Boolean wasFood)
-    {
-        foodProducer.removeFood(collisionGameObject);
-        Destroy(collisionGameObject);
-        energy += wasFood ? 40 : -50;
-    }
+//    private void eat(GameObject collisionGameObject, Boolean wasFood)
+//    {
+//        
+//        foodProducer.removeFood(collisionGameObject);
+//        Destroy(collisionGameObject);
+//        energy += wasFood ? 40 : -50;
+//    }
 
     public int getGeneration()
     {
