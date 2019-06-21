@@ -99,6 +99,8 @@ public class Bibit : MonoBehaviour
         ru = Camera.main.ViewportToWorldPoint(new Vector3(1, 0, 0));
         ro = Camera.main.ViewportToWorldPoint(new Vector3(1, 1, 0));
         rb = GetComponent<Rigidbody2D>();
+        float scaler = Camera.main.orthographicSize/3;
+        transform.localScale = new Vector3(scaler,scaler,scaler);
         foodProducer = FindObjectOfType<FoodProducer>();
         bibitProducer = FindObjectOfType<BibitProducer>();
         gameObject.name = generation + ". Gen";
