@@ -1,6 +1,8 @@
+using UnityEngine.Tilemaps;
+
 namespace DefaultNamespace
 {
-    public class MyTile : UnityEngine.Tilemaps.Tile
+    public class MyTile : Tile
     {
         
     }

@@ -1,6 +1,4 @@
 using System;
-using System.Linq.Expressions;
-using System.Runtime.InteropServices;
 using UnityEngine;
 
 namespace DefaultNamespace
@@ -31,8 +29,10 @@ namespace DefaultNamespace
 
             double et = Math.Pow(Math.E, x);
             et = et / (1 + et);
+            et = et * 2 - 1;    //probably tanh. nvm
 
 
+            et = Math.Tanh(x);
             if (double.IsNaN(et))
             {
                 Debug.LogError("et = NAN!! \n" +

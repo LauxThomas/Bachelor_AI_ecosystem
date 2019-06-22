@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Collections;
 using UnityEngine.Tilemaps;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -37,7 +36,7 @@ public class RoadTile : Tile
             m.SetTRS(Vector3.zero, GetRotation((byte) mask), Vector3.one);
             tileData.transform = m;
             tileData.flags = TileFlags.LockTransform;
-            tileData.colliderType = UnityEngine.Tilemaps.Tile.ColliderType.None;
+            tileData.colliderType = ColliderType.None;
         }
         else
         {
@@ -101,7 +100,7 @@ public class RoadTile : Tile
         string path = EditorUtility.SaveFilePanelInProject("Save Road Tile", "New Road Tile", "Asset", "Save Road Tile", "Assets");
         if (path == "")
             return;
-    AssetDatabase.CreateAsset(ScriptableObject.CreateInstance<RoadTile>(), path);
+    AssetDatabase.CreateAsset(CreateInstance<RoadTile>(), path);
     }
 #endif
 }

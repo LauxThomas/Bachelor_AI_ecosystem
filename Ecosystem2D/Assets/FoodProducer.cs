@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
-using Debug = UnityEngine.Debug;
 using Random = UnityEngine.Random;
 
 public class FoodProducer : MonoBehaviour
@@ -55,6 +49,21 @@ public class FoodProducer : MonoBehaviour
                 }
             }
         }
+
+        if (Input.GetKeyDown(KeyCode.Keypad1))
+        {
+            Time.timeScale = 1;
+        }
+        
+        if (Input.GetKeyDown(KeyCode.Keypad2))
+        {
+            Time.timeScale += 1;
+        }
+        
+        if (Input.GetKeyDown(KeyCode.Keypad3))
+        {
+            Time.timeScale = 25;
+        }
     }
 
 
@@ -73,9 +82,9 @@ public class FoodProducer : MonoBehaviour
 
     private void fillWholeWorld()
     {
-        for (int x = (int) (-width / 2); x <= (int) width / 2; x++)
+        for (int x = (int) (-width / 2)-1; x <= (int) width / 2+1; x++)
         {
-            for (int y = (int) (-height / 2) + 1; y <= (int) height / 2 - 1; y++)
+            for (int y = (int) (-height / 2) ; y <= (int) height / 2 ; y++)
             {
                 GameObject spawnFab = Random.value < 0.95 ? prefab1 : prefab2;
                 GameObject newObj = Instantiate(spawnFab, new Vector3(x, y), Quaternion.identity);

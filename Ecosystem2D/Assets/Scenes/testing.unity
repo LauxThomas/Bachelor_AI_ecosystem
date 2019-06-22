@@ -173,7 +173,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 10
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -235,8 +235,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   prefab1: {fileID: 8949193621168767084, guid: 14a72b934475ffa4e8f25c722cd457d9, type: 3}
   prefab2: {fileID: 8055058610830193194, guid: cbfeaa4d3fbb77d4aba217a84d84bbd1, type: 3}
-  allWater: []
-  fertileSpots: []
 --- !u!4 &474683408
 Transform:
   m_ObjectHideFlags: 0

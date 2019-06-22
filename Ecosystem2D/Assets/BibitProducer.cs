@@ -1,6 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEditorInternal;
+﻿using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class BibitProducer : MonoBehaviour
@@ -37,10 +36,10 @@ public class BibitProducer : MonoBehaviour
     {
         maxCurrentGeneration = 0;
         count = allBibits.Count;
-        if (allBibits.Count > 100)
+        if (allBibits.Count > Camera.main.orthographicSize*50)
         {
             Debug.LogError("EXIT APPLICATION, TOO MANY BIBITS");
-            UnityEditor.EditorApplication.isPlaying = false;
+            EditorApplication.isPlaying = false;
             Application.Quit(1);
         }
 
@@ -90,15 +89,15 @@ public class BibitProducer : MonoBehaviour
             additionalBibitsProduced++;
         }
 
-        if (allBibits.Count >= 65)
-        {
-            startWithEvolvedBibids();
-        }
+//        if (allBibits.Count >= 65)
+//        {
+//            startWithEvolvedBibids();
+//        }
 
-        while (allBibits.Count > 70)
-        {
-            removeBibit(allBibits[Random.Range(0, allBibits.Count)]);
-        }
+//        while (allBibits.Count > 70)
+//        {
+//            removeBibit(allBibits[Random.Range(0, allBibits.Count)]);
+//        }
     }
 
     private void startWithEvolvedBibids()
@@ -114,7 +113,7 @@ public class BibitProducer : MonoBehaviour
 
     private void spawnBibit()
     {
-        if (allBibits.Count < 70)
+        if (allBibits.Count < Camera.main.orthographicSize*50)
         {
             Vector3 spawnPos = new Vector3(Random.Range(lu.x, ru.x), Random.Range(lu.y, lo.y));
             GameObject newBibit = Instantiate(bibitPrefab, spawnPos, Quaternion.identity);
@@ -141,12 +140,17 @@ public class BibitProducer : MonoBehaviour
 
     public void spawnChild(GameObject o)
     {
-        if (allBibits.Count < 70)
-        {
+//        if (allBibits.Count < 70)
+//        {
             Vector3 spawnPos = new Vector3(Random.Range(lu.x, ru.x), Random.Range(lu.y, lo.y));
             GameObject newBibit = Instantiate(bibitPrefab, spawnPos, Quaternion.identity);
             newBibit.GetComponent<Bibit>().pseudoConstructor2(o.GetComponent<Bibit>());
             addBibit(newBibit);
-        }
+//        }
+    }
+
+    public List<GameObject> getAllBibits()
+    {
+        return allBibits;
     }
 }

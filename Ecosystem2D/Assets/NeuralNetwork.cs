@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.XR;
 using Random = UnityEngine.Random;
 
 namespace DefaultNamespace
@@ -45,7 +43,7 @@ namespace DefaultNamespace
             {
                 foreach (InputNeuron input in inputNeurons)
                 {
-                    hn.addNeuronConnection(input, Random.Range(-1, 1));
+                    hn.addNeuronConnection(input, Random.Range(-1f, 1f));
                 }
             }
 
@@ -53,7 +51,7 @@ namespace DefaultNamespace
             {
                 foreach (WorkingNeuron hn in hiddenNeurons)
                 {
-                    on.addNeuronConnection(hn, Random.Range(-1, 1));
+                    on.addNeuronConnection(hn, Random.Range(-1f, 1f));
                 }
             }
 

@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.Numerics;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
-using Quaternion = UnityEngine.Quaternion;
-using Random = UnityEngine.Random;
-using Vector3 = UnityEngine.Vector3;
 
 public class Boid : MonoBehaviour
 {
