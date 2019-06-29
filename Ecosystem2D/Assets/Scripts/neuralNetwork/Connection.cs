@@ -2,7 +2,7 @@ namespace DefaultNamespace
 {
     public class Connection
     {
-        public double weight = 0;
+        public double weight;
         private Neuron entrieNeuron;
 
         public Connection(Neuron neuron, double weight)

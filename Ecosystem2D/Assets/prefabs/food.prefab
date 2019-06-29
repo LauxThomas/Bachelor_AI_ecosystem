@@ -9,16 +9,16 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 465290135524366504}
+  - component: {fileID: 63253778299868161}
   - component: {fileID: 5642873682668932530}
   - component: {fileID: 3526975268856522149}
-  - component: {fileID: 63253778299868161}
-  - component: {fileID: 4856030111828024006}
+  - component: {fileID: -8206785892022786906}
   m_Layer: 8
   m_Name: food
   m_TagString: food
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &465290135524366504
 Transform:
@@ -34,6 +34,22 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &63253778299868161
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8949193621168767084}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 355afc78203e3c84eaca320a58be17ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  foodAmountAvailable: 100
+  hasFood: 0
+  iAmFertile: 0
+  fertileIsNear: 0
 --- !u!212 &5642873682668932530
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -69,8 +85,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -1829301593
+  m_SortingLayer: -1
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300002, guid: d9d48dc28a0b6c144ba5ede442f6d0f2, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -104,26 +120,7 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!114 &63253778299868161
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8949193621168767084}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 355afc78203e3c84eaca320a58be17ee, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  foodAmountAvailable: 100
-  isFertile: 0
-  fertileIsNear: 0
-  drawRayO: 0
-  drawRayU: 0
-  drawRayL: 0
-  drawRayR: 0
---- !u!61 &4856030111828024006
+--- !u!61 &-8206785892022786906
 BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -147,5 +144,5 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 1.01, y: 1.01}
   m_EdgeRadius: 0

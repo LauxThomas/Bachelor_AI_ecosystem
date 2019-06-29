@@ -79,7 +79,6 @@ public class Bibit : MonoBehaviour
     private Vector3 lo;
     private Vector3 ru;
     private float distToNearestFood;
-    private float timescaler;
 
     private GameObject nearestFood;
 
@@ -90,7 +89,7 @@ public class Bibit : MonoBehaviour
     private Vector3 vecToNearestPoison;
     private Vector3 forceToAdd;
     private double rotateForce;
-    private float angleToNearestFood;
+    private float? angleToNearestFood;
     private float? angleToNearestPoison;
     private double foodAmountAtCurrentBlock;
     private double foodAmountInSightRadius;
@@ -103,6 +102,9 @@ public class Bibit : MonoBehaviour
     private GameObject nearestBibit;
     private float geneticDifferenceToAttackedBibit;
     private Rigidbody2D rb;
+    private SpriteRenderer sr;
+    private int layerMask;
+    private float rotationCost, moveCost, birthCost, eatCost, attackCost;
 
 
     private void Start()
@@ -112,10 +114,18 @@ public class Bibit : MonoBehaviour
         ru = FoodProducer.ru;
 //        float scaler = BibitProducer.CameraSize / 3;
 //        transform.localScale = new Vector3(scaler, scaler, scaler);
-        foodProducer = FindObjectOfType<FoodProducer>();
-        bibitProducer = FindObjectOfType<BibitProducer>();
+//        foodProducer = FindObjectOfType<FoodProducer>();
+//        bibitProducer = FindObjectOfType<BibitProducer>();
         rb = GetComponent<Rigidbody2D>();
-        gameObject.name = displayName + ", " + generation + ". seines Namens";
+        sr = GetComponent<SpriteRenderer>();
+        gameObject.name = displayName + ", der " + generation;
+        layerMask = LayerMask.GetMask("food", "poison");
+
+        rotationCost = 1.2f;
+        moveCost = 1.1f;
+        birthCost = 0.8f;
+        eatCost = 1.0f;
+        attackCost = 0.8f;
     }
 
     public void pseudoConstructor1()
@@ -182,9 +192,9 @@ public class Bibit : MonoBehaviour
     public void pseudoConstructor2(Bibit mother)
     {
         transform.position = mother.transform.position;
-        brain = new NeuralNetwork(); //DEBUGGING
         brain = mother.brain.cloneFullMesh();
         energy = 150;
+        displayName = mother.displayName;
         generation = mother.getGeneration() + 1;
 
 
@@ -213,9 +223,9 @@ public class Bibit : MonoBehaviour
         outAttack = brain.getOutputNeuronFromName(NAME_OUT_ATTACK);
 
 //            CalculateFeelerPos();
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 50; i++)
         {
-            brain.RandomMutation(0.5f);
+            brain.RandomMutation(0.6f);
         }
 
         float r = mother.color.r;
@@ -234,25 +244,27 @@ public class Bibit : MonoBehaviour
 
     private void Update()
     {
-        timescaler = Time.deltaTime * 15;
+        rb.AddForce(Vector3.up * Time.deltaTime);
         energy -= Time.deltaTime * ageModifier;
+
         //Kill if necessary:
         if (energy < 100)
         {
-            bibitProducer.removeBibit(gameObject);
+            BibitProducer.removeBibit(gameObject);
             Destroy(gameObject);
         }
+
         else
         {
             flipIfNecessary();
             color.a = (float) ((energy - MINIMUMSURVIVALENERGY) /
                                (STARTENERGY - MINIMUMSURVIVALENERGY)); //set coloralpha to healthpercentage
-            GetComponent<SpriteRenderer>().color = color;
+            sr.color = color;
 
             //exponential growth:
-            ageModifier = Mathf.Clamp(ageModifier, 0.001f, 200);
+            ageModifier = Mathf.Clamp(ageModifier, 0.0001f, 200);
             ageModifier += ageModifier * Time.deltaTime / 10;
-            readSensors();
+            readSensors(); //TODO: performance!!
             updateBrain();
             executeAction();
         }
@@ -260,32 +272,23 @@ public class Bibit : MonoBehaviour
 
     private void executeAction()
     {
-        if (gameObject != null)
+        actRotate(rotationCost);
+        actMove(moveCost);
+        actBirth(birthCost);
+        actEat(eatCost);
+        if (nearestBibit)
         {
-            float rotationCost, moveCost, birthCost, eatCost, attackCost;
-            rotationCost = 1.2f;
-            moveCost = 1.1f;
-            birthCost = 0.8f;
-            eatCost = 1.0f;
-            attackCost = 0.8f;
-            actRotate(rotationCost);
-            actMove(moveCost);
-            actBirth(birthCost);
-            actEat(eatCost);
-            if (nearestBibit != null)
-            {
-                actAttack(nearestBibit, attackCost);
-            }
-
-            age += Time.deltaTime;
+            actAttack(nearestBibit, attackCost);
         }
+
+        age += Time.deltaTime;
     }
 
     private void actAttack(GameObject attackedBibit, float cost)
     {
         geneticDifferenceToAttackedBibit = 0;
         if (angleToNearestBibit != null &&
-            Vector3.Distance(transform.position, attackedBibit.transform.position) < 0.3f &&
+            (transform.position - attackedBibit.transform.position).sqrMagnitude < 0.3f * 0.3f &&
             Math.Abs((float) angleToNearestBibit) < 70)
         {
             geneticDifferenceToAttackedBibit +=
@@ -309,51 +312,41 @@ public class Bibit : MonoBehaviour
     private void actEat(float eatCost)
     {
         double eatWish = outEat.getValue() * 30;
-        if (eatWish > 0)
+        if (eatWish <= 0) return;
+        if (distToNearestFood < distToNearestPoison)
         {
-            nom(eatWish, eatCost);
+            energy += FoodProducer.eatFood(nearestFood, eatWish) * eatCost;
         }
-    }
-
-    private void nom(double eatWish, float eatCost)
-    {
-        foreach (GameObject go in foodProducer.getAllFoods())
+        else
         {
-            if (GetComponent<Renderer>().bounds.Intersects(go.GetComponent<Renderer>().bounds))
-            {
-                if ((go.CompareTag("poison") || go.CompareTag("food")))
-                {
-                    energy += FoodProducer.eatFood(go, eatWish) * eatCost;
-                }
-            }
+            energy += FoodProducer.eatPoison(nearestPoison, eatWish) * eatCost;
         }
     }
 
     private void actBirth(float birthCost)
     {
         double birthWish = outBirth.getValue();
-        debugValue = birthWish;
-//        if (birthWish > 0)
-//        {
-        if (energy > STARTENERGY + MINIMUMSURVIVALENERGY * birthCost * 1.5f)
+//        debugValue = birthWish;
+        if (birthWish > 0)
         {
-            bibitProducer.spawnChild(gameObject);
-            energy -= STARTENERGY * birthCost;
+            if (energy > STARTENERGY + MINIMUMSURVIVALENERGY * birthCost * 1.5f)
+            {
+                BibitProducer.spawnChild(gameObject);
+                energy -= STARTENERGY * birthCost;
+            }
         }
-
-//        }
     }
 
     private void actMove(float moveCost)
     {
-        float remappedForward = (float) HelperFunctions.remap(outForward.getValue(), -1, 1, 0, 1); //not going backwards
+        float speedForce = (float) outForward.getValue();
+//        float remappedForward = (float) HelperFunctions.remap(outForward.getValue(), -1, 1, 0, 1); //not going backwards
 //        float remappedForward = (float)outForward.getValue();
-        forceToAdd = SPEED * remappedForward * remappedForward * timescaler * transform.up.normalized;
-        if (rb.velocity.magnitude > 10)
-        {
-            Debug.Log("clamped");
-            rb.velocity = rb.velocity.normalized * 10;
-        }
+        forceToAdd = SPEED * speedForce * speedForce * 15 * Time.deltaTime * transform.up.normalized;
+//        if (rb.velocity.magnitude > 10)
+//        {
+//            rb.velocity = rb.velocity.normalized * 10;
+//        }
 
 //        rb.AddForce(forceToAdd*Vector3.up.normalized);
         rb.AddForce(forceToAdd);
@@ -363,14 +356,9 @@ public class Bibit : MonoBehaviour
 
     private void actRotate(float rotationCost)
     {
-        rotateForce = outRotate.getValue() * timescaler;
-        if (double.IsNaN(rotateForce))
-        {
-            Debug.Log("rotateForce was NaN");
-            rotateForce = Random.Range(-1f, 1f);
-        }
+        rotateForce = outRotate.getValue() * 15 * Time.deltaTime;
 
-        transform.Rotate(0, 0, (float) rotateForce * FORCE, Space.Self);
+        rb.SetRotation(rb.rotation + (float) rotateForce * FORCE);
         energy -= Mathf.Abs((float) (rotateForce * ageModifier * rotationCost));
     }
 
@@ -401,6 +389,10 @@ public class Bibit : MonoBehaviour
         distToNearestPoison = float.PositiveInfinity;
         angleToNearestPoison = null;
         foodAmountAtCurrentBlock = 0;
+
+        distToNearestFood = float.PositiveInfinity;
+        angleToNearestFood = null;
+
         foodAmountInSightRadius = 0;
         distToMaxFoodBlockAround = float.PositiveInfinity;
         angleToMaxFoodBlockAround = null;
@@ -409,70 +401,92 @@ public class Bibit : MonoBehaviour
 
         Transform trans = transform;
         Vector3 transPos = trans.position;
-        foreach (GameObject go in foodProducer.getAllFoods())
+//        transPos.z = -0.3f;
+
+
+        //do raycast, if hit=food bla, else
+        RaycastHit2D hitUp = Physics2D.Raycast(transPos, transPos + trans.forward, 1f, layerMask);
+//        Debug.DrawLine(transPos, hitUp.point, Color.red);
+        if (hitUp.collider != null)
         {
-            Vector3 goPos = go.transform.position;
-            if (Vector3.Distance(transPos, goPos) < 3)
+            if (hitUp.collider.CompareTag("food"))
             {
-                if (Vector3.Distance(transPos, goPos) < distToNearestPoison)
+                nearestFood = hitUp.collider.gameObject;
+                distToNearestFood = (transPos - nearestFood.transform.position).sqrMagnitude;
+            }
+        }
+        else
+        {
+            //TODO: debugging
+            foreach (GameObject go in FoodProducer.getAllFoods())
+            {
+                Vector3 goPos = go.transform.position;
+                float sqrdDistance = (transPos - goPos).sqrMagnitude;
+                if (sqrdDistance < distToNearestFood)
                 {
-                    // distToNearestPoison
-                    distToNearestPoison = Vector3.Distance(trans.position, goPos);
-                    // angleToNearestPoison
-                    angleToNearestPoison = Vector3.SignedAngle(trans.up, goPos - transPos,
-                        trans.forward);
-                }
-
-                // foodAmountATCurrentBlock
-                if (GetComponent<Renderer>().bounds.Intersects(go.GetComponent<Renderer>().bounds))
-                {
-                    if (go.CompareTag("poison"))
-                    {
-                        foodAmountAtCurrentBlock = -100;
-                        energy += FoodProducer.eatFood(go, 100);
-                    }
-                    else
-                    {
-                        foodAmountAtCurrentBlock = go.GetComponent<FoodStats>().foodAmountAvailable;
-                    }
-                }
-
-                // amountOfMaxFoodBlockAround
-                // distToMaxFoodBlockAround
-                // angleToMaxFoodBlockAround
-                if (go.GetComponent<FoodStats>().foodAmountAvailable > amountOfMaxFoodBlockAround &&
-                    go.CompareTag("food"))
-                {
-                    amountOfMaxFoodBlockAround = go.GetComponent<FoodStats>().foodAmountAvailable;
-                    distToMaxFoodBlockAround = Vector3.Distance(transPos, goPos);
-                    angleToMaxFoodBlockAround = Vector3.SignedAngle(trans.up,
-                        goPos - transPos, trans.forward);
+                    distToNearestFood = sqrdDistance;
+                    nearestFood = go;
                 }
             }
         }
+
+        if (nearestFood)
+        {
+            angleToNearestFood = Vector3.SignedAngle(trans.up, nearestFood.transform.position - transPos,
+                trans.forward);
+        }
+
+        foreach (GameObject go in FoodProducer.getAllPoisons())
+        {
+            Vector3 goPos = go.transform.position;
+            float sqrdDistance = (transPos - goPos).sqrMagnitude;
+            if (sqrdDistance < distToNearestPoison)
+            {
+                distToNearestPoison = sqrdDistance;
+                nearestPoison = go;
+            }
+        }
+
+        if (nearestPoison)
+        {
+            angleToNearestPoison = Vector3.SignedAngle(trans.up, nearestPoison.transform.position - transPos,
+                trans.forward);
+        }
+
+        if (distToNearestFood < distToNearestPoison)
+        {
+            foodAmountAtCurrentBlock = nearestFood.GetComponent<FoodStats>().foodAmountAvailable;
+        }
+
 
         numberOfBibitsNear = 0;
         distToNearestBibit = float.PositiveInfinity;
         angleToNearestBibit = 0;
         angleToNearestBibit = null;
 
-        foreach (GameObject go in bibitProducer.getAllBibits())
+        foreach (GameObject go in BibitProducer.getAllBibits())
         {
-            if (go != gameObject)
+            Vector3 goPos = go.transform.position;
+            float dist = (transPos - goPos).sqrMagnitude;
+            if (dist < 9)
             {
-                Vector3 goPos = go.transform.position;
-                if (Vector3.Distance(transPos, goPos) < 3)
+                if (go != gameObject)
                 {
                     numberOfBibitsNear++;
-                    if (Vector3.Distance(transPos, goPos) < distToNearestBibit)
+                    if (dist < distToNearestBibit * distToNearestBibit)
                     {
-                        distToNearestBibit = Vector3.Distance(transPos, goPos);
-                        angleToNearestBibit = Vector3.SignedAngle(trans.up,
-                            goPos - transPos, trans.forward);
+                        distToNearestBibit = dist;
+
                         nearestBibit = go;
                     }
                 }
             }
+        }
+
+        if (nearestBibit != null)
+        {
+            angleToNearestBibit = Vector3.SignedAngle(trans.up,
+                nearestBibit.transform.position - transPos, trans.forward);
         }
 
 //        Debug.DrawLine(transform.position, transform.position + vecToNearestFood, Color.green);

@@ -157,7 +157,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 226489605}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.3419662, y: -0.13971691, z: -7.8364596}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -278,7 +278,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   prefab1: {fileID: 8949193621168767084, guid: 14a72b934475ffa4e8f25c722cd457d9, type: 3}
   prefab2: {fileID: 8055058610830193194, guid: cbfeaa4d3fbb77d4aba217a84d84bbd1, type: 3}
-  allFoods: []
 --- !u!4 &474683408
 Transform:
   m_ObjectHideFlags: 0
@@ -287,7 +286,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 474683406}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -6.7046123, y: -50.242893, z: -2.187213}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -305,9 +304,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da95a436065a04741bac4e58955ca289, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bibitPrefab: {fileID: 8952680034314405633, guid: 20c30fba88214b64ebb4a5269d8a8fd3,
-    type: 3}
   followerNames: []
-  maxGeneration: 0
-  maxCurrentGeneration: 0
-  allBibits: []

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class FoodStats : MonoBehaviour
 {
@@ -6,11 +7,14 @@ public class FoodStats : MonoBehaviour
     private Color color;
     private bool alreadyFed;
     public bool hasFood;
+    public bool iAmFertile;
+    public bool fertileIsNear;
 
     // Start is called before the first frame update
     private void Start()
     {
         color = GetComponent<SpriteRenderer>().color;
+        InvokeRepeating("checkBools", 0, 3);
     }
 
     // Update is called once per frame
@@ -28,7 +32,7 @@ public class FoodStats : MonoBehaviour
             {
                 color = Color.blue;
             }
-            else if (amIFertile() && !CompareTag("poison"))
+            else if (iAmFertile && !CompareTag("poison"))
             {
                 color = Color.green;
             }
@@ -42,29 +46,36 @@ public class FoodStats : MonoBehaviour
         }
     }
 
+    void checkBools()
+    {
+        iAmFertile = amIFertile();
+        fertileIsNear = isFertileNear();
+    }
 
     private void updateFoodAmount()
     {
         foodAmountAvailable = Mathf.Clamp(foodAmountAvailable, 0, 100);
-        if (amIFertile() || isFertileNear())
+        if (iAmFertile || fertileIsNear)
         {
-            foodAmountAvailable += Time.deltaTime * 3;
+            foodAmountAvailable += Time.deltaTime * 2;
         }
     }
 
     public bool isFertileNear()
     {
+
         Transform trans = transform;
         Vector3 pos = trans.position;
         Vector3 up = trans.up;
         Vector3 right = trans.right;
 
+        
 
         RaycastHit2D hitUp = Physics2D.Raycast(pos,
             up, 1f,
             LayerMask.GetMask("poison", "food"));
 
-        if (hitUp.transform != null && hitUp.transform.GetComponent<FoodStats>().amIFertile())
+        if (hitUp.transform != null && hitUp.transform.GetComponent<FoodStats>().iAmFertile)
         {
             return true;
         }
@@ -72,7 +83,7 @@ public class FoodStats : MonoBehaviour
         RaycastHit2D hitDown = Physics2D.Raycast(pos,
             -up, 1f,
             LayerMask.GetMask("poison", "food"));
-        if (hitDown.transform != null && hitDown.transform.GetComponent<FoodStats>().amIFertile())
+        if (hitDown.transform != null && hitDown.transform.GetComponent<FoodStats>().iAmFertile)
         {
             return true;
         }
@@ -81,7 +92,7 @@ public class FoodStats : MonoBehaviour
             -right, 1f,
             LayerMask.GetMask("poison", "food"));
 
-        if (hitLeft.transform != null && hitLeft.transform.gameObject.GetComponent<FoodStats>().amIFertile())
+        if (hitLeft.transform != null && hitLeft.transform.gameObject.GetComponent<FoodStats>().iAmFertile)
         {
             return true;
         }
@@ -91,13 +102,12 @@ public class FoodStats : MonoBehaviour
             LayerMask.GetMask("poison", "food"));
 
 
-        if (hitRight.transform != null && hitRight.transform.GetComponent<FoodStats>().amIFertile())
+        if (hitRight.transform != null && hitRight.transform.GetComponent<FoodStats>().iAmFertile)
         {
             return true;
         }
 
         return false;
-        return true;
     }
 
 
@@ -105,4 +115,5 @@ public class FoodStats : MonoBehaviour
     {
         return foodAmountAvailable > 50;
     }
+
 }

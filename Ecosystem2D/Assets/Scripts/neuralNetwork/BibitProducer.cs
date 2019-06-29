@@ -9,40 +9,45 @@ using Random = UnityEngine.Random;
 [SuppressMessage("ReSharper", "IdentifierTypo")]
 public class BibitProducer : MonoBehaviour
 {
-    public GameObject bibitPrefab;
+    public static GameObject bibitPrefab;
 
     public List<String> followerNames;
 //    public List<Sprite> sprites;
 
-    private Vector3 lu;
-    private Vector3 lo;
-    private Vector3 ru;
+    private static Vector3 lu;
+    private static Vector3 lo;
+    private static Vector3 ru;
+    public static int maxGeneration;
+    public static int maxCurrentGeneration;
+    public static int respawns;
+    private static String maxGenAnc;
+    private static String maxCurrGenAnc;
 
-    [SerializeField] private int maxGeneration;
-    [SerializeField] private int maxCurrentGeneration;
-
-    [SerializeField] private List<GameObject> allBibits;
-    private GameObject parent;
+    [SerializeField] private static List<GameObject> allBibits;
+    private static GameObject parent;
     public static float CameraSize;
 
     // Start is called before the first frame update
     private void Start()
     {
+        bibitPrefab = (GameObject) Resources.Load("Bibit");
+        InvokeRepeating("readGenerations",3,2);
         CameraSize = Camera.main.orthographicSize;
         lu = FoodProducer.lu;
         lo = FoodProducer.lo;
         ru = FoodProducer.ru;
         allBibits = new List<GameObject>();
+        parent = new GameObject("Bibits");
+        parent.AddComponent<childCounter>();
         initLists();
         initBibits();
     }
 
     private void initBibits()
     {
-        for (int i = 0; i < followerNames.Count * 4; i++)
+        for (int i = 0; i < followerNames.Count * 1; i++)
         {
             spawnBibit(followerNames[i % followerNames.Count]);
-            
         }
     }
 
@@ -51,14 +56,9 @@ public class BibitProducer : MonoBehaviour
         followerNames.Add("Stoney0815");
         followerNames.Add("Altay1010");
         followerNames.Add("smoomorli94");
-//        sprites.Add(Resources.Load<Sprite>("Sprites/mummySprite"));
-//        sprites.Add(Resources.Load<Sprite>("Sprites/frankensteinSprite"));
-//        sprites.Add(Resources.Load<Sprite>("Sprites/reaperSprite"));
-//        sprites.Add(Resources.Load<Sprite>("Sprites/scarecrowSprite"));
-//        sprites.Add(Resources.Load<Sprite>("Sprites/vampyrSprite"));
-//        sprites.Add(Resources.Load<Sprite>("Sprites/vampyrSprite"));
-//        sprites.Add(Resources.Load<Sprite>("Sprites/witchSprite"));
-//        sprites.Add(Resources.Load<Sprite>("Sprites/zomieSprite"));
+        followerNames.Add("losemymindyesterday");
+        followerNames.Add("SporkCodes");
+        followerNames.Add("TinkyOwO");
     }
 
     // Update is called once per frame
@@ -66,28 +66,38 @@ public class BibitProducer : MonoBehaviour
     {
         if (allBibits.Count <= 0)
         {
+            respawns++;
             initBibits();
         }
 
-        maxCurrentGeneration = 0;
-        if (allBibits.Count > CameraSize * 50)
+        if (allBibits.Count > 500)
         {
-            Debug.LogError("EXIT APPLICATION, TOO MANY BIBITS");
+//            Debug.LogError("EXIT APPLICATION, TOO MANY BIBITS");
 //            EditorApplication.isPlaying = false;
-            Application.Quit(1);
+//            Application.Quit(1);
         }
 
+        
+    }
+
+    private void readGenerations()
+    {
+        maxCurrentGeneration = 0;
         foreach (GameObject go in allBibits)
         {
             int gen = go.GetComponent<Bibit>().getGeneration();
             if (gen > maxGeneration)
             {
                 maxGeneration = gen;
+                maxGenAnc = go.name;
+                maxGenAnc = maxGenAnc.Substring(0, maxGenAnc.IndexOf(",", StringComparison.Ordinal));
             }
 
             if (gen > maxCurrentGeneration)
             {
                 maxCurrentGeneration = gen;
+                maxCurrGenAnc = go.name;
+                maxCurrGenAnc = maxCurrGenAnc.Substring(0, maxCurrGenAnc.IndexOf(",", StringComparison.Ordinal));
             }
         }
     }
@@ -99,46 +109,42 @@ public class BibitProducer : MonoBehaviour
         newBibit.GetComponent<Bibit>().pseudoConstructor1();
         addBibit(newBibit);
         newBibit.GetComponent<Bibit>().displayName = displayName;
-//        newBibit.GetComponent<SpriteRenderer>().sprite = sprite;
     }
 
-
-//    private void spawnBibit()
-//    {
-//        Vector3 spawnPos = new Vector3(Random.Range(lu.x, ru.x), Random.Range(lu.y, lo.y));
-//        GameObject newBibit = Instantiate(bibitPrefab, spawnPos, Quaternion.identity);
-//        newBibit.GetComponent<Bibit>().pseudoConstructor1();
-//        addBibit(newBibit);
-//    }
-
-    private void addBibit(GameObject bibit)
+    private static void addBibit(GameObject bibit)
     {
         allBibits.Add(bibit);
-        if (parent == null)
-        {
-            parent = new GameObject("Bibits");
-        }
-
         bibit.transform.parent = parent.transform;
     }
 
-    public void removeBibit(GameObject bibit)
+    public static void removeBibit(GameObject bibit)
     {
         allBibits.Remove(bibit);
     }
 
-    public void spawnChild(GameObject o)
+    public static void spawnChild(GameObject o)
     {
-        Vector3 spawnPos = new Vector3(Random.Range(lu.x, ru.x), Random.Range(lu.y, lo.y));
-        GameObject newBibit = Instantiate(bibitPrefab, spawnPos, Quaternion.identity);
-        newBibit.GetComponent<Bibit>().pseudoConstructor2(o.GetComponent<Bibit>());
-        addBibit(newBibit);
-        newBibit.GetComponent<Bibit>().displayName = o.GetComponent<Bibit>().displayName;
-//        newBibit.GetComponent<SpriteRenderer>().sprite = sprites[Random.Range(0,sprites.Count)];
+        if (allBibits.Count < 500)
+        {
+            Vector3 spawnPos = new Vector3(Random.Range(lu.x, ru.x), Random.Range(lu.y, lo.y));
+            GameObject newBibit = Instantiate(bibitPrefab, spawnPos, Quaternion.identity);
+            newBibit.GetComponent<Bibit>().pseudoConstructor2(o.GetComponent<Bibit>());
+            addBibit(newBibit);
+//            newBibit.GetComponent<Bibit>().displayName = o.GetComponent<Bibit>().displayName;
+        }
     }
 
-    public IEnumerable<GameObject> getAllBibits()
+    public static IEnumerable<GameObject> getAllBibits()
     {
         return allBibits;
+    }
+
+    public static string getStats()
+    {
+        return "\n" +
+               "Respawns: " + respawns + " \n" +
+               "maxGeneration: " + maxGeneration + " @ " + maxGenAnc + " \n" +
+               "maxCurrentGeneration: " + maxCurrentGeneration + " @ " + maxCurrGenAnc + " \n" +
+               "numberOfBibits: " + allBibits.Count;
     }
 }

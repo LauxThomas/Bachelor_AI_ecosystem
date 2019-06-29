@@ -14,9 +14,14 @@ public class FoodProducer : MonoBehaviour
     public static Vector3 lo;
     public static Vector3 ru;
     private GameObject parent;
+
     [SerializeField]
-    private List<GameObject> allFoods;
-    GameObject spawnFab;
+//    private static List<GameObject> allFoodsAndPoisons;
+    private static List<GameObject> allFoods;
+
+    private static List<GameObject> allPoisons;
+
+//    GameObject spawnFab;
     private Camera mainCam;
 
 
@@ -31,6 +36,7 @@ public class FoodProducer : MonoBehaviour
         height = Vector3.Distance(lu, lo);
 
         allFoods = new List<GameObject>();
+        allPoisons = new List<GameObject>();
         fillWholeWorld();
         addFoodsToParent();
     }
@@ -46,6 +52,8 @@ public class FoodProducer : MonoBehaviour
                     go.GetComponent<FoodStats>().foodAmountAvailable = 70;
                 }
             }
+
+//        }
         }
 
         if (Input.GetKeyDown(KeyCode.Keypad1))
@@ -76,18 +84,23 @@ public class FoodProducer : MonoBehaviour
         {
             go.transform.SetParent(parent.transform);
         }
+
+        foreach (GameObject go in allPoisons)
+        {
+            go.transform.SetParent(parent.transform);
+        }
     }
 
     private void fillWholeWorld()
     {
         int waterpools = 0;
-        for (int x = (int) (-width / 2) - 1; x <= (int) width / 2 + 1; x++)
+        for (int y = (int) (height / 2) + 1; y >= (int) -height / 2 - 1; y--)
         {
-            for (int y = (int) (-height / 2); y <= (int) height / 2; y++)
+            for (int x = (int) (-width / 2) - 1; x <= (int) width / 2 + 1; x++)
             {
                 GameObject spawnPrefab;
                 float randomValue = Random.value;
-                if (waterpools < mainCam.orthographicSize)
+                if (waterpools < mainCam.orthographicSize / 2)
                 {
                     if (randomValue < 0.99f)
                     {
@@ -106,53 +119,80 @@ public class FoodProducer : MonoBehaviour
 
                 GameObject newObj = Instantiate(spawnPrefab, new Vector3(x, y), Quaternion.identity);
                 newObj.GetComponent<FoodStats>().foodAmountAvailable = 0;
-                allFoods.Add(newObj);
+                if (spawnPrefab == prefab1)
+                {
+                    allFoods.Add(newObj);
+                }
+                else
+                {
+                    allPoisons.Add(newObj);
+                }
             }
         }
 
-        if (waterpools < mainCam.orthographicSize)
+        if (waterpools < mainCam.orthographicSize / 2)
         {
             foreach (GameObject foods in allFoods)
             {
                 Destroy(foods);
-                
             }
+
             allFoods.Clear();
-            
+
+            foreach (GameObject poisons in allPoisons)
+            {
+                Destroy(poisons);
+            }
+
+            allPoisons.Clear();
+
             fillWholeWorld();
         }
     }
 
 
+    public static IEnumerable<GameObject> getAllFoodsAndPoisons()
+    {
+        return allFoods;
+    }
+    public static double eatPoison(GameObject nearestPoison, double eatWish)
+    {
+        return -3 * Math.Abs(eatWish * Time.deltaTime);
+    }
 
+    public static double eatFood(GameObject eatenFood, double eatWish)
+    {
+        FoodStats eatenFoodStats = eatenFood.GetComponent<FoodStats>();
 
-    public IEnumerable<GameObject> getAllFoods()
+        if (eatenFoodStats.foodAmountAvailable > eatWish)
+        {
+            eatenFoodStats.foodAmountAvailable -= (float) eatWish * Time.deltaTime;
+            return eatWish * Time.deltaTime;
+        }
+
+        eatenFoodStats.foodAmountAvailable = 0;
+        return eatenFoodStats.foodAmountAvailable * Time.deltaTime;
+    }
+
+    public static int getIndexFrom(GameObject go)
+    {
+        return allFoods.IndexOf(go);
+    }
+
+    public static IEnumerable<GameObject> getAllFoods()
     {
         return allFoods;
     }
 
-
-    public static double eatFood(GameObject eatenFood, double eatWish)
+    public static IEnumerable<GameObject> getAllPoisons()
     {
-        if (eatenFood.CompareTag("poison"))
-        {
-//            Debug.LogError("POISON @ " + eatenFood.transform.position);
-            return -3 * Math.Abs(eatWish * Time.deltaTime);
-        }
-
-        if (eatenFood.GetComponent<FoodStats>().foodAmountAvailable>eatWish)
-        {
-            
-            eatenFood.GetComponent<FoodStats>().foodAmountAvailable -= (float) eatWish * Time.deltaTime;
-            return eatWish * Time.deltaTime;
-        }
-        else
-        {
-            float temp = eatenFood.GetComponent<FoodStats>().foodAmountAvailable;
-            eatenFood.GetComponent<FoodStats>().foodAmountAvailable = 0;
-            return temp*Time.deltaTime;
-        }
-
-        return 0;
+        return allPoisons;
     }
+
+    public static GameObject getRandomFood()
+    {
+        return allFoods[Random.Range(0, allFoods.Count)];
+    }
+
+    
 }

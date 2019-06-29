@@ -9,7 +9,7 @@ namespace DefaultNamespace
         public abstract double getValue();
         public abstract Neuron nameCopy();
 
-        public static double Sigmoid(double x)
+        public static double activationFunction(double x)
         {
             //with x>10, sigmoid will always be almost 1, analog with -10
             //when x gets too large, e.g. around 10000, still double will be NaN or infinity
@@ -27,19 +27,19 @@ namespace DefaultNamespace
                 x = 0;
             }
 
-            double et = Math.Pow(Math.E, x);
-            et = et / (1 + et);
-            et = et * 2 - 1;    //probably tanh. nvm
+//            double et = Math.Pow(Math.E, x);
+//            et = et / (1 + et);
+//            et = et * 2 - 1;    //probably tanh. nvm
+//
+//
+//            et = Math.Tanh(x);
+//            if (double.IsNaN(et))
+//            {
+//                Debug.LogError("et = NAN!! \n" +
+//                               "x is: " + x);
+//            }
 
-
-            et = Math.Tanh(x);
-            if (double.IsNaN(et))
-            {
-                Debug.LogError("et = NAN!! \n" +
-                               "x is: " + x);
-            }
-
-            return et;
+            return Math.Tanh(x); 
         }
 
         public String getName()

@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 8952680034314405632}
   - component: {fileID: 8952680034314405644}
   - component: {fileID: -5422324355683653508}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Bibit
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -49,6 +49,8 @@ MonoBehaviour:
   energy: 150
   age: 0
   ageModifier: 0
+  generation: 0
+  displayName: 
   debugValue: 0
 --- !u!212 &8952680034314405632
 SpriteRenderer:

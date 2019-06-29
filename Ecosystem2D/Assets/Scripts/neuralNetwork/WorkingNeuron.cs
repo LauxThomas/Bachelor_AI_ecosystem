@@ -32,7 +32,7 @@ namespace DefaultNamespace
                 value += c.getValue();
             }
 
-            value = Sigmoid(value);
+            value = activationFunction(value);
 //            value = Sigmoid(value/connections.Count);    //average
 
             this.value = value;
