@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class FPSDisplay : MonoBehaviour
 {
+    
     float deltaTime = 0.0f;
  
     void Update()
@@ -11,6 +12,7 @@ public class FPSDisplay : MonoBehaviour
  
     void OnGUI()
     {
+        
         int w = Screen.width, h = Screen.height;
  
         GUIStyle style = new GUIStyle();

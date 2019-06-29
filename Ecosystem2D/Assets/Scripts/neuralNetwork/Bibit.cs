@@ -112,10 +112,6 @@ public class Bibit : MonoBehaviour
         lu = FoodProducer.lu;
         lo = FoodProducer.lo;
         ru = FoodProducer.ru;
-//        float scaler = BibitProducer.CameraSize / 3;
-//        transform.localScale = new Vector3(scaler, scaler, scaler);
-//        foodProducer = FindObjectOfType<FoodProducer>();
-//        bibitProducer = FindObjectOfType<BibitProducer>();
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
         gameObject.name = displayName + ", der " + generation;
@@ -262,9 +258,18 @@ public class Bibit : MonoBehaviour
             sr.color = color;
 
             //exponential growth:
-            ageModifier = Mathf.Clamp(ageModifier, 0.0001f, 200);
-            ageModifier += ageModifier * Time.deltaTime / 10;
-            readSensors(); //TODO: performance!!
+            ageModifier = Mathf.Clamp(ageModifier, 0.001f, 200);
+            int numOfBibits = BibitProducer.getNumberOfBibits();
+            if (numOfBibits > 10)
+            {
+                ageModifier += ageModifier * Time.deltaTime * 0.1f * numOfBibits / 10f; //bibitcountmod
+            }
+            else
+            {
+                ageModifier += ageModifier * Time.deltaTime * 0.1f; //bibitcountmod
+            }
+
+            readSensors();
             updateBrain();
             executeAction();
         }
@@ -312,14 +317,14 @@ public class Bibit : MonoBehaviour
     private void actEat(float eatCost)
     {
         double eatWish = outEat.getValue() * 30;
-        if (eatWish <= 0) return;
         if (distToNearestFood < distToNearestPoison)
         {
+            if (eatWish <= 0) return;
             energy += FoodProducer.eatFood(nearestFood, eatWish) * eatCost;
         }
         else
         {
-            energy += FoodProducer.eatPoison(nearestPoison, eatWish) * eatCost;
+            energy += FoodProducer.eatPoison() * eatCost;
         }
     }
 

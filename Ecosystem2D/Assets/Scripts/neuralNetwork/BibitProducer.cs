@@ -31,7 +31,7 @@ public class BibitProducer : MonoBehaviour
     private void Start()
     {
         bibitPrefab = (GameObject) Resources.Load("Bibit");
-        InvokeRepeating("readGenerations",3,2);
+        InvokeRepeating("readGenerations", 3, 2);
         CameraSize = Camera.main.orthographicSize;
         lu = FoodProducer.lu;
         lo = FoodProducer.lo;
@@ -45,7 +45,7 @@ public class BibitProducer : MonoBehaviour
 
     private void initBibits()
     {
-        for (int i = 0; i < followerNames.Count * 1; i++)
+        for (int i = 0; i < followerNames.Count * 2; i++)
         {
             spawnBibit(followerNames[i % followerNames.Count]);
         }
@@ -64,9 +64,9 @@ public class BibitProducer : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
-        if (allBibits.Count <= 0)
+        if (allBibits.Count < 2 * followerNames.Count)
         {
-            respawns++;
+            respawns += followerNames.Count;
             initBibits();
         }
 
@@ -76,8 +76,6 @@ public class BibitProducer : MonoBehaviour
 //            EditorApplication.isPlaying = false;
 //            Application.Quit(1);
         }
-
-        
     }
 
     private void readGenerations()
@@ -142,9 +140,15 @@ public class BibitProducer : MonoBehaviour
     public static string getStats()
     {
         return "\n" +
+               "running: " + (int) Time.timeSinceLevelLoad + " @ " + Time.timeScale + " \n" +
                "Respawns: " + respawns + " \n" +
                "maxGeneration: " + maxGeneration + " @ " + maxGenAnc + " \n" +
                "maxCurrentGeneration: " + maxCurrentGeneration + " @ " + maxCurrGenAnc + " \n" +
                "numberOfBibits: " + allBibits.Count;
+    }
+
+    public static int getNumberOfBibits()
+    {
+        return allBibits.Count;
     }
 }

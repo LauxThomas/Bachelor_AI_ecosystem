@@ -14,6 +14,7 @@ public class FoodProducer : MonoBehaviour
     public static Vector3 lo;
     public static Vector3 ru;
     private GameObject parent;
+    [SerializeField] [Range(0, 1f)] private float offset = 0;
 
     [SerializeField]
 //    private static List<GameObject> allFoodsAndPoisons;
@@ -70,6 +71,10 @@ public class FoodProducer : MonoBehaviour
         {
             Time.timeScale = 10;
         }
+        if (Input.GetKeyDown(KeyCode.Keypad4))
+        {
+            Time.timeScale = 25;
+        }
     }
 
 
@@ -93,29 +98,42 @@ public class FoodProducer : MonoBehaviour
 
     private void fillWholeWorld()
     {
+        float randX = (Random.value * 2 - 1)*Random.value*100;
+        float randY = (Random.value * 2 - 1)*Random.value*100;
+//        Debug.Log(Mathf.PerlinNoise(-0.1f, -0.1f));
+//        Debug.Log(Mathf.PerlinNoise(-0.1f, 0));
+//        Debug.Log(Mathf.PerlinNoise(-0.1f, 0.1f));
+//        Debug.Log(Mathf.PerlinNoise(0, -0.1f));
+//        Debug.Log(Mathf.PerlinNoise(0, 0));
+//        Debug.Log(Mathf.PerlinNoise(0, 0.1f));
+//        Debug.Log(Mathf.PerlinNoise(0.1f, -0.1f));
+//        Debug.Log(Mathf.PerlinNoise(0.1f, 0));
+//        Debug.Log(Mathf.PerlinNoise(0.1f, 0.1f));
         int waterpools = 0;
         for (int y = (int) (height / 2) + 1; y >= (int) -height / 2 - 1; y--)
         {
             for (int x = (int) (-width / 2) - 1; x <= (int) width / 2 + 1; x++)
             {
+                Debug.Log("x / y" + x + " / " + y + ": " + Mathf.PerlinNoise(x  / 10f+randX, y / 10f+randY));
                 GameObject spawnPrefab;
-                float randomValue = Random.value;
-                if (waterpools < mainCam.orthographicSize / 2)
-                {
-                    if (randomValue < 0.99f)
-                    {
-                        spawnPrefab = prefab1;
-                    }
-                    else
-                    {
-                        spawnPrefab = prefab2;
-                        waterpools++;
-                    }
-                }
-                else
-                {
-                    spawnPrefab = prefab1;
-                }
+//                float randomValue = Random.value;
+//                if (waterpools < mainCam.orthographicSize / 2)
+//                {
+//                    if (randomValue < 0.99f)
+//                    {
+//                        spawnPrefab = prefab1;
+//                    }
+//                    else
+//                    {
+//                        spawnPrefab = prefab2;
+//                        waterpools++;
+//                    }
+//                }
+//                else
+//                {
+//                    spawnPrefab = prefab1;
+//                }
+                spawnPrefab = Mathf.PerlinNoise(x  / 10f+randX, y / 10f+randY) < 0.55f ? prefab1 : prefab2;
 
                 GameObject newObj = Instantiate(spawnPrefab, new Vector3(x, y), Quaternion.identity);
                 newObj.GetComponent<FoodStats>().foodAmountAvailable = 0;
@@ -130,24 +148,24 @@ public class FoodProducer : MonoBehaviour
             }
         }
 
-        if (waterpools < mainCam.orthographicSize / 2)
-        {
-            foreach (GameObject foods in allFoods)
-            {
-                Destroy(foods);
-            }
-
-            allFoods.Clear();
-
-            foreach (GameObject poisons in allPoisons)
-            {
-                Destroy(poisons);
-            }
-
-            allPoisons.Clear();
-
-            fillWholeWorld();
-        }
+//        if (waterpools < mainCam.orthographicSize / 2)
+//        {
+//            foreach (GameObject foods in allFoods)
+//            {
+//                Destroy(foods);
+//            }
+//
+//            allFoods.Clear();
+//
+//            foreach (GameObject poisons in allPoisons)
+//            {
+//                Destroy(poisons);
+//            }
+//
+//            allPoisons.Clear();
+//
+//            fillWholeWorld();
+//        }
     }
 
 
@@ -155,9 +173,10 @@ public class FoodProducer : MonoBehaviour
     {
         return allFoods;
     }
-    public static double eatPoison(GameObject nearestPoison, double eatWish)
+
+    public static double eatPoison()
     {
-        return -3 * Math.Abs(eatWish * Time.deltaTime);
+        return -100 * Time.deltaTime;
     }
 
     public static double eatFood(GameObject eatenFood, double eatWish)
@@ -193,6 +212,4 @@ public class FoodProducer : MonoBehaviour
     {
         return allFoods[Random.Range(0, allFoods.Count)];
     }
-
-    
 }
