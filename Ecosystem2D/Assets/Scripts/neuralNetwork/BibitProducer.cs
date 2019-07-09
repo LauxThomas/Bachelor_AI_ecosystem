@@ -40,15 +40,21 @@ public class BibitProducer : MonoBehaviour
         parent = new GameObject("Bibits");
         parent.AddComponent<childCounter>();
         initLists();
+        respawns = -2*followerNames.Count;
+        for (int i = 0; i < 200; i++)
+        {
         initBibits();
+        }
     }
 
     private void initBibits()
     {
-        for (int i = 0; i < followerNames.Count * 2; i++)
-        {
-            spawnBibit(followerNames[i % followerNames.Count]);
-        }
+//        for (int i = 0; i < followerNames.Count * 2; i++)
+//        {
+//            spawnBibit(followerNames[i % followerNames.Count]);
+//        }
+        spawnBibit(followerNames[Random.Range(0, followerNames.Count)]);
+        respawns ++;
     }
 
     private void initLists()
@@ -64,9 +70,10 @@ public class BibitProducer : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
-        if (allBibits.Count < 2 * followerNames.Count)
+        if (allBibits.Count < 10 * followerNames.Count)
+//        if (allBibits.Count < 1)
         {
-            respawns += followerNames.Count;
+            
             initBibits();
         }
 
@@ -141,7 +148,7 @@ public class BibitProducer : MonoBehaviour
     {
         return "\n" +
                "running: " + (int) Time.timeSinceLevelLoad + " @ " + Time.timeScale + " \n" +
-               "Respawns: " + respawns + " \n" +
+               "Deaths: " + respawns + " \n" +
                "maxGeneration: " + maxGeneration + " @ " + maxGenAnc + " \n" +
                "maxCurrentGeneration: " + maxCurrentGeneration + " @ " + maxCurrGenAnc + " \n" +
                "numberOfBibits: " + allBibits.Count;

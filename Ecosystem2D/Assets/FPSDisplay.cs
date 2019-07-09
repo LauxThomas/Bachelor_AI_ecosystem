@@ -8,6 +8,34 @@ public class FPSDisplay : MonoBehaviour
     void Update()
     {
         deltaTime += (Time.unscaledDeltaTime - deltaTime) * 0.1f;
+        
+        if (Input.GetKeyDown(KeyCode.Keypad1))
+        {
+            Time.timeScale = 1;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Keypad2))
+        {
+            Time.timeScale += 1;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Keypad3))
+        {
+            Time.timeScale = 10;
+        }
+        if (Input.GetKeyDown(KeyCode.Keypad4))
+        {
+            Time.timeScale = 25;
+        }
+        if (Input.GetKeyDown(KeyCode.Keypad9))
+        {
+            Time.timeScale /= 2;
+        }
+        if (Input.GetKeyDown(KeyCode.Return))
+        {
+            Application.LoadLevel(Application.loadedLevel);
+        }
+        
     }
  
     void OnGUI()

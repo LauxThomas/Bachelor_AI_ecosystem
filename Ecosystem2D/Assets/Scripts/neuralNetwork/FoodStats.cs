@@ -9,6 +9,7 @@ public class FoodStats : MonoBehaviour
     public bool hasFood;
     public bool iAmFertile;
     public bool fertileIsNear;
+    public bool isNearestFoodOfABibit;
 
     // Start is called before the first frame update
     private void Start()
@@ -22,26 +23,17 @@ public class FoodStats : MonoBehaviour
     {
         if (CompareTag("poison"))
         {
-            foodAmountAvailable = 100f;
+            foodAmountAvailable = -100f;
         }
         else
         {
             hasFood = foodAmountAvailable > 0.5f;
             updateFoodAmount();
-            if (CompareTag("poison"))
-            {
-                color = Color.blue;
-            }
-            else if (iAmFertile && !CompareTag("poison"))
-            {
-                color = Color.green;
-            }
-            else
-            {
-                color = Color.white;
-            }
+            color = iAmFertile ? Color.green : Color.white;
+//            color = isNearestFoodOfABibit ? Color.red : Color.white;
 
-            color.a = foodAmountAvailable / 100;
+
+            color.a = Mathf.Abs(foodAmountAvailable) / 100;
             GetComponent<SpriteRenderer>().color = color;
         }
     }
@@ -50,6 +42,7 @@ public class FoodStats : MonoBehaviour
     {
         iAmFertile = amIFertile();
         fertileIsNear = isFertileNear();
+        isNearestFoodOfABibit = false;
     }
 
     private void updateFoodAmount()
@@ -57,19 +50,17 @@ public class FoodStats : MonoBehaviour
         foodAmountAvailable = Mathf.Clamp(foodAmountAvailable, 0, 100);
         if (iAmFertile || fertileIsNear)
         {
-            foodAmountAvailable += Time.deltaTime * 2;
+            foodAmountAvailable += Time.deltaTime * 1;
         }
     }
 
     public bool isFertileNear()
     {
-
         Transform trans = transform;
         Vector3 pos = trans.position;
         Vector3 up = trans.up;
         Vector3 right = trans.right;
 
-        
 
         RaycastHit2D hitUp = Physics2D.Raycast(pos,
             up, 1f,
@@ -111,9 +102,8 @@ public class FoodStats : MonoBehaviour
     }
 
 
-    public bool amIFertile()
+    private bool amIFertile()
     {
-        return foodAmountAvailable > 50;
+        return CompareTag("poison") || foodAmountAvailable > 70;
     }
-
 }

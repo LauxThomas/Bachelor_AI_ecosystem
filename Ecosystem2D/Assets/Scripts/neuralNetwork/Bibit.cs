@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using DefaultNamespace;
 using UnityEngine;
+using UnityEngine.Profiling;
 using Random = UnityEngine.Random;
 
 [SuppressMessage("ReSharper", "IdentifierTypo")]
@@ -10,7 +12,7 @@ public class Bibit : MonoBehaviour
 {
     public double energy = 150;
     [SerializeField] private float age;
-    public float ageModifier = 1;
+    public float ageModifier = 0.001f;
     public int generation;
     public String displayName;
 
@@ -105,6 +107,12 @@ public class Bibit : MonoBehaviour
     private SpriteRenderer sr;
     private int layerMask;
     private float rotationCost, moveCost, birthCost, eatCost, attackCost;
+    private List<double> foodAmountAvailableAllFoods;
+    private List<FoodStats> foodStatsPoison;
+    private List<Vector3> transformsFood;
+    private List<Vector3> transformsPoison;
+    private List<GameObject> gameObjectsFood;
+    private List<GameObject> gameObjectsPoison;
 
 
     private void Start()
@@ -122,7 +130,13 @@ public class Bibit : MonoBehaviour
         birthCost = 0.8f;
         eatCost = 1.0f;
         attackCost = 0.8f;
+
+        Profiler.BeginSample("MySampleGetAllFieldStats");
+        getAllFieldStats();
+        Profiler.EndSample();
+        InvokeRepeating("updateFoodAvailable", 3, Random.Range(1f, 3f));
     }
+
 
     public void pseudoConstructor1()
     {
@@ -219,9 +233,9 @@ public class Bibit : MonoBehaviour
         outAttack = brain.getOutputNeuronFromName(NAME_OUT_ATTACK);
 
 //            CalculateFeelerPos();
-        for (int i = 0; i < 50; i++)
+        for (int i = 0; i < 10; i++)
         {
-            brain.RandomMutation(0.6f);
+            brain.RandomMutation(0.2f);
         }
 
         float r = mother.color.r;
@@ -258,43 +272,58 @@ public class Bibit : MonoBehaviour
             sr.color = color;
 
             //exponential growth:
-            ageModifier = Mathf.Clamp(ageModifier, 0.001f, 200);
-            int numOfBibits = BibitProducer.getNumberOfBibits();
-            if (numOfBibits > 10)
+            //int numOfBibits = BibitProducer.getNumberOfBibits();
+            /*
+            if (numOfBibits > 200)
             {
-                ageModifier += ageModifier * Time.deltaTime * 0.1f * numOfBibits / 10f; //bibitcountmod
+                ageModifier += ageModifier * Time.deltaTime * 0.1f * numOfBibits * 0.1f; //bibitcountmod
             }
             else
             {
-                ageModifier += ageModifier * Time.deltaTime * 0.1f; //bibitcountmod
+                ageModifier += ageModifier * Time.deltaTime * 0.1f;
             }
+            */
+            ageModifier = (float) (-(3 / Math.Pow(Math.E, 0.1 * age - 10) + 1) + 3);
+            ageModifier = Mathf.Clamp(ageModifier, 0.001f, 200);
 
+            Profiler.BeginSample("readSensors");
             readSensors();
+            Profiler.EndSample();
+            Profiler.BeginSample("updateBrain");
             updateBrain();
+            Profiler.EndSample();
+            Profiler.BeginSample("executeAction");
             executeAction();
+            Profiler.EndSample();
         }
     }
 
     private void executeAction()
     {
-        actRotate(rotationCost);
-        actMove(moveCost);
-        actBirth(birthCost);
-        actEat(eatCost);
+        bool isOnPoison = distToNearestPoison < distToNearestFood;
+        actRotate(rotationCost, isOnPoison);
+        actMove(moveCost, isOnPoison);
+        actBirth(birthCost, isOnPoison);
+        actEat(eatCost, isOnPoison);
         if (nearestBibit)
         {
-            actAttack(nearestBibit, attackCost);
+            actAttack(nearestBibit, attackCost, isOnPoison);
         }
 
         age += Time.deltaTime;
     }
 
-    private void actAttack(GameObject attackedBibit, float cost)
+    private void actAttack(GameObject attackedBibit, float attackCosts, bool isOnPoison)
     {
+        if (isOnPoison)
+        {
+            attackCosts *= 2;
+        }
+
         geneticDifferenceToAttackedBibit = 0;
         if (angleToNearestBibit != null &&
-            (transform.position - attackedBibit.transform.position).sqrMagnitude < 0.3f * 0.3f &&
-            Math.Abs((float) angleToNearestBibit) < 70)
+            (Vector3.Distance(transform.position, attackedBibit.transform.position) < 0.3f * 0.3f &&
+             Math.Abs((float) angleToNearestBibit) < 70))
         {
             geneticDifferenceToAttackedBibit +=
                 Math.Abs(color.r - attackedBibit.GetComponent<SpriteRenderer>().color.r);
@@ -308,42 +337,58 @@ public class Bibit : MonoBehaviour
                     double attackWish = outAttack.getValue() * Time.deltaTime * 30;
 
                     attackedBibit.GetComponent<Bibit>().energy -= attackWish;
-                    energy += attackWish * cost;
+                    energy += attackWish / attackCosts;
                 }
             }
         }
     }
 
-    private void actEat(float eatCost)
+    private void actEat(float eatCost, bool isOnPoison)
     {
-        double eatWish = outEat.getValue() * 30;
-        if (distToNearestFood < distToNearestPoison)
+        if (isOnPoison)
         {
-            if (eatWish <= 0) return;
-            energy += FoodProducer.eatFood(nearestFood, eatWish) * eatCost;
+            eatCost *= 2;
         }
-        else
+
+        double eatWish = outEat.getValue() * 30;
+        if (eatWish <= 0) return;
+
+        if (distToNearestFood < distToNearestPoison && distToNearestFood < 1)
         {
-            energy += FoodProducer.eatPoison() * eatCost;
+            energy += FoodProducer.eatFood(nearestFood, eatWish);
+        }
+        else if (distToNearestPoison < 1)
+        {
+            energy += FoodProducer.eatPoison(eatWish);
         }
     }
 
-    private void actBirth(float birthCost)
+    private void actBirth(float birthCost, bool isOnPoison)
     {
         double birthWish = outBirth.getValue();
 //        debugValue = birthWish;
         if (birthWish > 0)
         {
-            if (energy > STARTENERGY + MINIMUMSURVIVALENERGY * birthCost * 1.5f)
+            if (energy > STARTENERGY + MINIMUMSURVIVALENERGY * birthCost * 1.15f)
             {
                 BibitProducer.spawnChild(gameObject);
+                if (isOnPoison)
+                {
+                    birthCost *= 3;
+                }
+
                 energy -= STARTENERGY * birthCost;
             }
         }
     }
 
-    private void actMove(float moveCost)
+    private void actMove(float moveCost, bool isOnPoison)
     {
+        if (isOnPoison)
+        {
+            moveCost *= 3;
+        }
+
         float speedForce = (float) outForward.getValue();
 //        float remappedForward = (float) HelperFunctions.remap(outForward.getValue(), -1, 1, 0, 1); //not going backwards
 //        float remappedForward = (float)outForward.getValue();
@@ -359,8 +404,13 @@ public class Bibit : MonoBehaviour
         energy -= forceToAdd.magnitude / SPEED / 10f * ageModifier * moveCost;
     }
 
-    private void actRotate(float rotationCost)
+    private void actRotate(float rotationCost, bool isOnPoison)
     {
+        if (isOnPoison)
+        {
+            rotationCost *= 3;
+        }
+
         rotateForce = outRotate.getValue() * 15 * Time.deltaTime;
 
         rb.SetRotation(rb.rotation + (float) rotateForce * FORCE);
@@ -391,6 +441,7 @@ public class Bibit : MonoBehaviour
 
     private void readSensors()
     {
+        bool temp = false;
         distToNearestPoison = float.PositiveInfinity;
         angleToNearestPoison = null;
         foodAmountAtCurrentBlock = 0;
@@ -408,32 +459,46 @@ public class Bibit : MonoBehaviour
         Vector3 transPos = trans.position;
 //        transPos.z = -0.3f;
 
-
+        Profiler.BeginSample("Raycast&Hit");
         //do raycast, if hit=food bla, else
         RaycastHit2D hitUp = Physics2D.Raycast(transPos, transPos + trans.forward, 1f, layerMask);
 //        Debug.DrawLine(transPos, hitUp.point, Color.red);
         if (hitUp.collider != null)
         {
-            if (hitUp.collider.CompareTag("food"))
+            temp = true;
+            if (hitUp.collider.CompareTag("food") &&
+                hitUp.collider.gameObject.GetComponent<FoodStats>().foodAmountAvailable > 10)
             {
                 nearestFood = hitUp.collider.gameObject;
-                distToNearestFood = (transPos - nearestFood.transform.position).sqrMagnitude;
+                distToNearestFood = Vector3.Distance(transPos, nearestFood.transform.position);
             }
         }
-        else
+
+        Profiler.EndSample();
+
+//        Profiler.BeginSample("Raycast&NOTHit");
+        if (temp)
         {
-            //TODO: debugging
-            foreach (GameObject go in FoodProducer.getAllFoods())
+            for (int i = 0; i < gameObjectsFood.Count; i++)
             {
-                Vector3 goPos = go.transform.position;
-                float sqrdDistance = (transPos - goPos).sqrMagnitude;
-                if (sqrdDistance < distToNearestFood)
+                Profiler.BeginSample("DistCalculationDist");
+                float dist = Vector3.Distance(transPos, transformsFood[i]);
+                Profiler.EndSample();
+
+                if (dist < distToNearestFood && foodAmountAvailableAllFoods[i] > 10)
                 {
-                    distToNearestFood = sqrdDistance;
-                    nearestFood = go;
+                    Profiler.BeginSample("distAssignment");
+                    distToNearestFood = dist;
+                    Profiler.EndSample();
+
+                    Profiler.BeginSample("nearestFoodAssignment");
+                    nearestFood = gameObjectsFood[i];
+                    Profiler.EndSample();
                 }
             }
         }
+
+//        Profiler.EndSample();
 
         if (nearestFood)
         {
@@ -441,16 +506,19 @@ public class Bibit : MonoBehaviour
                 trans.forward);
         }
 
-        foreach (GameObject go in FoodProducer.getAllPoisons())
+
+        Profiler.BeginSample("PoisonStuff");
+        for (int i = 0; i < gameObjectsPoison.Count; i++)
         {
-            Vector3 goPos = go.transform.position;
-            float sqrdDistance = (transPos - goPos).sqrMagnitude;
-            if (sqrdDistance < distToNearestPoison)
+            float dist = Vector3.Distance(transPos, transformsPoison[i]);
+            if (dist < distToNearestPoison)
             {
-                distToNearestPoison = sqrdDistance;
-                nearestPoison = go;
+                distToNearestPoison = dist;
+                nearestPoison = gameObjectsPoison[i];
             }
         }
+
+        Profiler.EndSample();
 
         if (nearestPoison)
         {
@@ -463,16 +531,17 @@ public class Bibit : MonoBehaviour
             foodAmountAtCurrentBlock = nearestFood.GetComponent<FoodStats>().foodAmountAvailable;
         }
 
-
         numberOfBibitsNear = 0;
         distToNearestBibit = float.PositiveInfinity;
         angleToNearestBibit = 0;
         angleToNearestBibit = null;
 
+
+        Profiler.BeginSample("BibitStuff");
         foreach (GameObject go in BibitProducer.getAllBibits())
         {
             Vector3 goPos = go.transform.position;
-            float dist = (transPos - goPos).sqrMagnitude;
+            float dist = Vector3.Distance(transPos, goPos);
             if (dist < 9)
             {
                 if (go != gameObject)
@@ -488,11 +557,13 @@ public class Bibit : MonoBehaviour
             }
         }
 
+        Profiler.EndSample();
         if (nearestBibit != null)
         {
             angleToNearestBibit = Vector3.SignedAngle(trans.up,
                 nearestBibit.transform.position - transPos, trans.forward);
         }
+
 
 //        Debug.DrawLine(transform.position, transform.position + vecToNearestFood, Color.green);
 //        Debug.DrawLine(transform.position, transform.position + vecToNearestPoison, Color.red);
@@ -530,5 +601,46 @@ public class Bibit : MonoBehaviour
     public int getGeneration()
     {
         return generation;
+    }
+
+    private void updateFoodAvailable()
+    {
+        Profiler.BeginSample("UpdateFoodAmountInvokeRepeating");
+        foreach (GameObject go in FoodProducer.getAllFoods())
+        {
+            transformsFood.Add(go.transform.position);
+        }
+
+        Profiler.EndSample();
+    }
+
+    private void getAllFieldStats()
+    {
+        /*
+        private List<FoodStats> foodStatsFood;    //DONE
+        private List<FoodStats> foodStatsPoison;
+        private List<Vector3> transformsFood;
+        private List<Vector3> transformsPoison;
+          */
+        //todo: getAllFoodStats();
+        foodAmountAvailableAllFoods = new List<double>();
+        transformsFood = new List<Vector3>();
+        gameObjectsFood = new List<GameObject>();
+        foreach (GameObject go in FoodProducer.getAllFoods())
+        {
+            foodAmountAvailableAllFoods.Add(go.GetComponent<FoodStats>().foodAmountAvailable);
+            transformsFood.Add(go.transform.position);
+            gameObjectsFood.Add(go);
+        }
+
+
+        transformsPoison = new List<Vector3>();
+        gameObjectsPoison = new List<GameObject>();
+        //todo: getAllPoisonStats();
+        foreach (GameObject go in FoodProducer.getAllPoisons())
+        {
+            transformsPoison.Add(go.transform.position);
+            gameObjectsPoison.Add(go);
+        }
     }
 }

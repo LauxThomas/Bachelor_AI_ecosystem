@@ -16,7 +16,6 @@ public class FoodProducer : MonoBehaviour
     private GameObject parent;
     [SerializeField] [Range(0, 1f)] private float offset = 0;
 
-    [SerializeField]
 //    private static List<GameObject> allFoodsAndPoisons;
     private static List<GameObject> allFoods;
 
@@ -57,24 +56,7 @@ public class FoodProducer : MonoBehaviour
 //        }
         }
 
-        if (Input.GetKeyDown(KeyCode.Keypad1))
-        {
-            Time.timeScale = 1;
-        }
-
-        if (Input.GetKeyDown(KeyCode.Keypad2))
-        {
-            Time.timeScale += 1;
-        }
-
-        if (Input.GetKeyDown(KeyCode.Keypad3))
-        {
-            Time.timeScale = 10;
-        }
-        if (Input.GetKeyDown(KeyCode.Keypad4))
-        {
-            Time.timeScale = 25;
-        }
+        
     }
 
 
@@ -114,7 +96,6 @@ public class FoodProducer : MonoBehaviour
         {
             for (int x = (int) (-width / 2) - 1; x <= (int) width / 2 + 1; x++)
             {
-                Debug.Log("x / y" + x + " / " + y + ": " + Mathf.PerlinNoise(x  / 10f+randX, y / 10f+randY));
                 GameObject spawnPrefab;
 //                float randomValue = Random.value;
 //                if (waterpools < mainCam.orthographicSize / 2)
@@ -174,9 +155,9 @@ public class FoodProducer : MonoBehaviour
         return allFoods;
     }
 
-    public static double eatPoison()
+    public static double eatPoison(double eatWish)
     {
-        return -100 * Time.deltaTime;
+        return -3*eatWish * Time.deltaTime;
     }
 
     public static double eatFood(GameObject eatenFood, double eatWish)
@@ -190,7 +171,7 @@ public class FoodProducer : MonoBehaviour
         }
 
         eatenFoodStats.foodAmountAvailable = 0;
-        return eatenFoodStats.foodAmountAvailable * Time.deltaTime;
+        return 0;
     }
 
     public static int getIndexFrom(GameObject go)
