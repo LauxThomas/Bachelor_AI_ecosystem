@@ -40,10 +40,11 @@ public class BibitProducer : MonoBehaviour
         parent = new GameObject("Bibits");
         parent.AddComponent<childCounter>();
         initLists();
-        respawns = -2*followerNames.Count;
+        respawns = -2 * followerNames.Count;
         for (int i = 0; i < 200; i++)
+//        for (int i = 0; i < 1; i++)
         {
-        initBibits();
+            initBibits();
         }
     }
 
@@ -54,7 +55,7 @@ public class BibitProducer : MonoBehaviour
 //            spawnBibit(followerNames[i % followerNames.Count]);
 //        }
         spawnBibit(followerNames[Random.Range(0, followerNames.Count)]);
-        respawns ++;
+        respawns++;
     }
 
     private void initLists()
@@ -70,10 +71,8 @@ public class BibitProducer : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
-        if (allBibits.Count < 10 * followerNames.Count)
-//        if (allBibits.Count < 1)
+        if (allBibits.Count < 10)
         {
-            
             initBibits();
         }
 

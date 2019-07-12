@@ -134,7 +134,8 @@ public class Bibit : MonoBehaviour
         Profiler.BeginSample("MySampleGetAllFieldStats");
         getAllFieldStats();
         Profiler.EndSample();
-        InvokeRepeating("updateFoodAvailable", 3, Random.Range(1f, 3f));
+//        updateFoodAvailable();
+//        InvokeRepeating("updateFoodAvailable", 1, Random.Range(0.1f, 1f));
     }
 
 
@@ -441,7 +442,6 @@ public class Bibit : MonoBehaviour
 
     private void readSensors()
     {
-        bool temp = false;
         distToNearestPoison = float.PositiveInfinity;
         angleToNearestPoison = null;
         foodAmountAtCurrentBlock = 0;
@@ -459,17 +459,27 @@ public class Bibit : MonoBehaviour
         Vector3 transPos = trans.position;
 //        transPos.z = -0.3f;
 
+        bool temp = false;
         Profiler.BeginSample("Raycast&Hit");
         //do raycast, if hit=food bla, else
-        RaycastHit2D hitUp = Physics2D.Raycast(transPos, transPos + trans.forward, 1f, layerMask);
-//        Debug.DrawLine(transPos, hitUp.point, Color.red);
-        if (hitUp.collider != null)
+        RaycastHit2D raycastHit = Physics2D.Raycast(transPos, transPos + trans.forward, 5f, layerMask);
+        if (raycastHit.collider == null)
         {
+            raycastHit = Physics2D.Raycast(transPos + new Vector3(0, -0.3f, 0),
+                transPos + new Vector3(0, -0.3f, 0) + trans.forward + new Vector3(0, -0.3f, 0), 5f, layerMask);
             temp = true;
-            if (hitUp.collider.CompareTag("food") &&
-                hitUp.collider.gameObject.GetComponent<FoodStats>().foodAmountAvailable > 10)
+        }
+
+        Debug.DrawLine(transPos, raycastHit.point, temp ? Color.green : Color.red);
+
+
+        //TODO: Fix Raycast. Should always hit!!!
+        if (raycastHit.collider != null)
+        {
+            if (raycastHit.collider.CompareTag("food") &&
+                raycastHit.collider.gameObject.GetComponent<FoodStats>().foodAmountAvailable > 10)
             {
-                nearestFood = hitUp.collider.gameObject;
+                nearestFood = raycastHit.collider.gameObject;
                 distToNearestFood = Vector3.Distance(transPos, nearestFood.transform.position);
             }
         }
@@ -477,11 +487,12 @@ public class Bibit : MonoBehaviour
         Profiler.EndSample();
 
 //        Profiler.BeginSample("Raycast&NOTHit");
-        if (temp)
+        if (distToNearestFood < 1000000)
         {
+//            updateFoodAvailable();
             for (int i = 0; i < gameObjectsFood.Count; i++)
             {
-                Profiler.BeginSample("DistCalculationDist");
+                Profiler.BeginSample("DistCalculationDist1");
                 float dist = Vector3.Distance(transPos, transformsFood[i]);
                 Profiler.EndSample();
 
@@ -494,6 +505,11 @@ public class Bibit : MonoBehaviour
                     Profiler.BeginSample("nearestFoodAssignment");
                     nearestFood = gameObjectsFood[i];
                     Profiler.EndSample();
+                }
+
+                if (distToNearestFood < 0.5f)
+                {
+                    break;
                 }
             }
         }
@@ -515,6 +531,11 @@ public class Bibit : MonoBehaviour
             {
                 distToNearestPoison = dist;
                 nearestPoison = gameObjectsPoison[i];
+            }
+
+            if (distToNearestPoison <= 0.5f)
+            {
+                break;
             }
         }
 
@@ -540,10 +561,13 @@ public class Bibit : MonoBehaviour
         Profiler.BeginSample("BibitStuff");
         foreach (GameObject go in BibitProducer.getAllBibits())
         {
+            Profiler.BeginSample("BibitStuff-transform.position");
             Vector3 goPos = go.transform.position;
             float dist = Vector3.Distance(transPos, goPos);
+            Profiler.EndSample();
             if (dist < 9)
             {
+                Profiler.BeginSample("BibitStuff-nullifyCondition");
                 if (go != gameObject)
                 {
                     numberOfBibitsNear++;
@@ -554,6 +578,8 @@ public class Bibit : MonoBehaviour
                         nearestBibit = go;
                     }
                 }
+
+                Profiler.EndSample();
             }
         }
 
@@ -605,7 +631,8 @@ public class Bibit : MonoBehaviour
 
     private void updateFoodAvailable()
     {
-        Profiler.BeginSample("UpdateFoodAmountInvokeRepeating");
+        Profiler.BeginSample("updateFoodAvailable");
+        transformsFood.Clear();
         foreach (GameObject go in FoodProducer.getAllFoods())
         {
             transformsFood.Add(go.transform.position);

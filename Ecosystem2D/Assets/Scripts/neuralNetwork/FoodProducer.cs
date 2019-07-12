@@ -8,8 +8,8 @@ public class FoodProducer : MonoBehaviour
     public GameObject prefab1;
     public GameObject prefab2;
 
-    private float width;
-    private float height;
+    public int width;
+    public int height;
     public static Vector3 lu;
     public static Vector3 lo;
     public static Vector3 ru;
@@ -20,6 +20,9 @@ public class FoodProducer : MonoBehaviour
     private static List<GameObject> allFoods;
 
     private static List<GameObject> allPoisons;
+    private static List<GameObject> allFoodsAndPoisons;
+    public List<int> foodIndices;
+
 
 //    GameObject spawnFab;
     private Camera mainCam;
@@ -28,26 +31,33 @@ public class FoodProducer : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        Application.targetFrameRate = 300;
         mainCam = Camera.main;
         lu = mainCam.ViewportToWorldPoint(new Vector3(0, 0, 0));
         lo = mainCam.ViewportToWorldPoint(new Vector3(0, 1, 0));
         ru = mainCam.ViewportToWorldPoint(new Vector3(1, 0, 0));
-        width = Vector3.Distance(lu, ru);
-        height = Vector3.Distance(lu, lo);
+        width = (int) Vector3.Distance(lu, ru);
+        height = (int) Vector3.Distance(lu, lo);
+
+//        height = mainCam.orthographicSize * 2;
+//        width = height / 9 * 16;
 
         allFoods = new List<GameObject>();
         allPoisons = new List<GameObject>();
+        allFoodsAndPoisons = new List<GameObject>();
+        foodIndices = new List<int>();
         fillWholeWorld();
         addFoodsToParent();
     }
 
     private void Update()
     {
+        updateFertileStatus();
         if (Input.GetKeyDown(KeyCode.Keypad0))
         {
             foreach (GameObject go in allFoods)
             {
-                if (go.CompareTag("food") && go.GetComponent<FoodStats>().isFertileNear())
+                if (go.CompareTag("food") && go.GetComponent<FoodStats>().fertileStatus)
                 {
                     go.GetComponent<FoodStats>().foodAmountAvailable = 70;
                 }
@@ -55,8 +65,15 @@ public class FoodProducer : MonoBehaviour
 
 //        }
         }
+    }
 
-        
+    private void updateFertileStatus()
+    {
+        for (int i = 0; i < foodIndices.Count; i++)
+        {
+            allFoodsAndPoisons[foodIndices[i]].GetComponent<FoodStats>().fertileStatus = 
+                getFertileStatus(foodIndices[i]);
+        }
     }
 
 
@@ -65,6 +82,7 @@ public class FoodProducer : MonoBehaviour
         if (parent == null)
         {
             parent = new GameObject("Foods");
+            parent.AddComponent<childCounter>();
         }
 
         foreach (GameObject go in allFoods)
@@ -80,17 +98,8 @@ public class FoodProducer : MonoBehaviour
 
     private void fillWholeWorld()
     {
-        float randX = (Random.value * 2 - 1)*Random.value*100;
-        float randY = (Random.value * 2 - 1)*Random.value*100;
-//        Debug.Log(Mathf.PerlinNoise(-0.1f, -0.1f));
-//        Debug.Log(Mathf.PerlinNoise(-0.1f, 0));
-//        Debug.Log(Mathf.PerlinNoise(-0.1f, 0.1f));
-//        Debug.Log(Mathf.PerlinNoise(0, -0.1f));
-//        Debug.Log(Mathf.PerlinNoise(0, 0));
-//        Debug.Log(Mathf.PerlinNoise(0, 0.1f));
-//        Debug.Log(Mathf.PerlinNoise(0.1f, -0.1f));
-//        Debug.Log(Mathf.PerlinNoise(0.1f, 0));
-//        Debug.Log(Mathf.PerlinNoise(0.1f, 0.1f));
+        float randX = (Random.value * 2 - 1) * Random.value * 100;
+        float randY = (Random.value * 2 - 1) * Random.value * 100;
         int waterpools = 0;
         for (int y = (int) (height / 2) + 1; y >= (int) -height / 2 - 1; y--)
         {
@@ -114,17 +123,20 @@ public class FoodProducer : MonoBehaviour
 //                {
 //                    spawnPrefab = prefab1;
 //                }
-                spawnPrefab = Mathf.PerlinNoise(x  / 10f+randX, y / 10f+randY) < 0.55f ? prefab1 : prefab2;
+                spawnPrefab = Mathf.PerlinNoise(x / 10f + randX, y / 10f + randY) < 0.6f ? prefab1 : prefab2;
 
                 GameObject newObj = Instantiate(spawnPrefab, new Vector3(x, y), Quaternion.identity);
                 newObj.GetComponent<FoodStats>().foodAmountAvailable = 0;
                 if (spawnPrefab == prefab1)
                 {
                     allFoods.Add(newObj);
+                    allFoodsAndPoisons.Add(newObj);
+                    foodIndices.Add(allFoodsAndPoisons.Count-1);
                 }
                 else
                 {
                     allPoisons.Add(newObj);
+                    allFoodsAndPoisons.Add(newObj);
                 }
             }
         }
@@ -157,7 +169,7 @@ public class FoodProducer : MonoBehaviour
 
     public static double eatPoison(double eatWish)
     {
-        return -3*eatWish * Time.deltaTime;
+        return -3 * eatWish * Time.deltaTime;
     }
 
     public static double eatFood(GameObject eatenFood, double eatWish)
@@ -192,5 +204,62 @@ public class FoodProducer : MonoBehaviour
     public static GameObject getRandomFood()
     {
         return allFoods[Random.Range(0, allFoods.Count)];
+    }
+
+    public bool getFertileStatus(int i)
+    {
+        //check for self fertile
+        if (getFoodAmountAt(i) > 70 || getFoodAmountAt(i) < -95)
+        {
+            return true;
+        }
+
+        int newWidth = width + 2;
+        //check above:
+        if (i - newWidth >= 0)
+        {
+            if (getFoodAmountAt(i - newWidth) > 70 || getFoodAmountAt(i - newWidth) < -95)
+            {
+                return true;
+            }
+        }
+
+        //check below:
+        if (i + newWidth < allFoodsAndPoisons.Count)
+        {
+            if (getFoodAmountAt(i + newWidth) > 70 || getFoodAmountAt(i + newWidth) < -95)
+            {
+                return true;
+            }
+        }
+
+        //check Left:
+        if (i % newWidth != 0)
+        {
+            if (getFoodAmountAt(i - 1) > 70 || getFoodAmountAt(i - 1) < -95)
+            {
+                return true;
+            }
+        }
+
+        if (i % newWidth < newWidth - 1)
+        {
+            if (getFoodAmountAt(i + 1) > 70 || getFoodAmountAt(i + 1) < -95)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public float getFoodAmountAt(int i)
+    {
+        if (i < allFoodsAndPoisons.Count)
+        {
+            return allFoodsAndPoisons[i].GetComponent<FoodStats>().foodAmountAvailable;
+        }
+
+        return 0;
     }
 }
