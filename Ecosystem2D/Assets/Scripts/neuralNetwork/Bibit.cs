@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using DefaultNamespace;
+using Unity.Burst;
+using Unity.Jobs;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Profiling;
 using Random = UnityEngine.Random;
@@ -113,6 +116,7 @@ public class Bibit : MonoBehaviour
     private List<Vector3> transformsPoison;
     private List<GameObject> gameObjectsFood;
     private List<GameObject> gameObjectsPoison;
+    private JobHandle jobHandle;
 
 
     private void Start()
@@ -246,9 +250,9 @@ public class Bibit : MonoBehaviour
         r += Random.value * 0.1f - 0.05f;
         g += Random.value * 0.1f - 0.05f;
         b += Random.value * 0.1f - 0.05f;
-        r = Mathf.Clamp(r, 0, 1);
-        g = Mathf.Clamp(g, 0, 1);
-        b = Mathf.Clamp(b, 0, 1);
+        r = math.clamp(r, 0, 1);
+        g = math.clamp(g, 0, 1);
+        b = math.clamp(b, 0, 1);
 
         color = new Color(r, g, b);
     }
@@ -284,8 +288,8 @@ public class Bibit : MonoBehaviour
                 ageModifier += ageModifier * Time.deltaTime * 0.1f;
             }
             */
-            ageModifier = (float) (-(3 / Math.Pow(Math.E, 0.1 * age - 10) + 1) + 3);
-            ageModifier = Mathf.Clamp(ageModifier, 0.001f, 200);
+            ageModifier = (float) (-(3 / math.pow(math.E, 0.1 * age - 10) + 1) + 3);
+            ageModifier = math.clamp(ageModifier, 0.001f, 200);
 
             Profiler.BeginSample("readSensors");
             readSensors();
@@ -296,6 +300,7 @@ public class Bibit : MonoBehaviour
             Profiler.BeginSample("executeAction");
             executeAction();
             Profiler.EndSample();
+            jobHandle.Complete();
         }
     }
 
@@ -324,14 +329,14 @@ public class Bibit : MonoBehaviour
         geneticDifferenceToAttackedBibit = 0;
         if (angleToNearestBibit != null &&
             (Vector3.Distance(transform.position, attackedBibit.transform.position) < 0.3f * 0.3f &&
-             Math.Abs((float) angleToNearestBibit) < 70))
+             math.abs((float) angleToNearestBibit) < 70))
         {
             geneticDifferenceToAttackedBibit +=
-                Math.Abs(color.r - attackedBibit.GetComponent<SpriteRenderer>().color.r);
+                math.abs(color.r - attackedBibit.GetComponent<SpriteRenderer>().color.r);
             geneticDifferenceToAttackedBibit +=
-                Math.Abs(color.g - attackedBibit.GetComponent<SpriteRenderer>().color.g);
+                math.abs(color.g - attackedBibit.GetComponent<SpriteRenderer>().color.g);
             geneticDifferenceToAttackedBibit +=
-                Math.Abs(color.b - attackedBibit.GetComponent<SpriteRenderer>().color.b);
+                math.abs(color.b - attackedBibit.GetComponent<SpriteRenderer>().color.b);
             if (geneticDifferenceToAttackedBibit > 0.2f)
             {
                 {
@@ -400,6 +405,8 @@ public class Bibit : MonoBehaviour
 //        }
 
 //        rb.AddForce(forceToAdd*Vector3.up.normalized);
+
+
         rb.AddForce(forceToAdd);
 
         energy -= forceToAdd.magnitude / SPEED / 10f * ageModifier * moveCost;
@@ -415,7 +422,7 @@ public class Bibit : MonoBehaviour
         rotateForce = outRotate.getValue() * 15 * Time.deltaTime;
 
         rb.SetRotation(rb.rotation + (float) rotateForce * FORCE);
-        energy -= Mathf.Abs((float) (rotateForce * ageModifier * rotationCost));
+        energy -= math.abs((float) (rotateForce * ageModifier * rotationCost));
     }
 
     private void updateBrain()
@@ -663,11 +670,23 @@ public class Bibit : MonoBehaviour
 
         transformsPoison = new List<Vector3>();
         gameObjectsPoison = new List<GameObject>();
-        //todo: getAllPoisonStats();
         foreach (GameObject go in FoodProducer.getAllPoisons())
         {
             transformsPoison.Add(go.transform.position);
             gameObjectsPoison.Add(go);
         }
+    }
+}
+
+[BurstCompile]
+public struct MoveBibitJob : IJob
+{
+    public float3 position;
+    public Rigidbody2D rb;
+    public Vector2 addForce;
+
+    public void Execute()
+    {
+        rb.AddForce(addForce);
     }
 }

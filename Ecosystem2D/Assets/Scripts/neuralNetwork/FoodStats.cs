@@ -1,4 +1,5 @@
 ﻿using System;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Profiling;
 
@@ -43,7 +44,7 @@ public class FoodStats : MonoBehaviour
 //            color = isNearestFoodOfABibit ? Color.red : Color.white;
 
 
-            color.a = Mathf.Abs(foodAmountAvailable) / 100;
+            color.a = math.abs(foodAmountAvailable) / 100;
             GetComponent<SpriteRenderer>().color = color;
             Profiler.EndSample();
             Profiler.EndSample();
@@ -63,7 +64,7 @@ public class FoodStats : MonoBehaviour
 
     private void updateFoodAmount()
     {
-        foodAmountAvailable = Mathf.Clamp(foodAmountAvailable, 0, 100);
+        foodAmountAvailable = math.clamp(foodAmountAvailable, 0, 100);
         if (fertileStatus)
         {
             foodAmountAvailable += Time.deltaTime * 0.5f;
