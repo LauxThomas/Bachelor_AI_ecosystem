@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 5642873682668932530}
   - component: {fileID: 3526975268856522149}
   - component: {fileID: -8206785892022786906}
+  - component: {fileID: 2455348987209104799}
   m_Layer: 8
   m_Name: food
   m_TagString: food
@@ -47,10 +48,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   foodAmountAvailable: 100
-  hasFood: 0
-  iAmFertile: 0
-  fertileIsNear: 0
-  isNearestFoodOfABibit: 0
+  fertileStatus: 1
 --- !u!212 &5642873682668932530
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -147,3 +145,15 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!114 &2455348987209104799
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8949193621168767084}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5bf10cdea1344482e91a4f2b58506b77, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

@@ -10,6 +10,8 @@ using Random = UnityEngine.Random;
 public class BibitProducer : MonoBehaviour
 {
     public static GameObject bibitPrefab;
+    [SerializeField] private int initialNumberOfBibits=200;
+    [SerializeField] private int minimumNumberOfBibits=10;
 
     public List<String> followerNames;
 //    public List<Sprite> sprites;
@@ -41,7 +43,7 @@ public class BibitProducer : MonoBehaviour
         parent.AddComponent<childCounter>();
         initLists();
         respawns = -2 * followerNames.Count;
-        for (int i = 0; i < 200; i++)
+        for (int i = 0; i < initialNumberOfBibits; i++)
 //        for (int i = 0; i < 1; i++)
         {
             initBibits();
@@ -71,7 +73,7 @@ public class BibitProducer : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
-        if (allBibits.Count < 10)
+        if (allBibits.Count < minimumNumberOfBibits)
         {
             initBibits();
         }

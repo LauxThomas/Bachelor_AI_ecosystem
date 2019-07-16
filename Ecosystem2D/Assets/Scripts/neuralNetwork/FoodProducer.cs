@@ -53,7 +53,7 @@ public class FoodProducer : MonoBehaviour
 
     private void Update()
     {
-        updateFertileStatus();
+//        updateFertileStatus();
         if (Input.GetKeyDown(KeyCode.Keypad0))
         {
             foreach (GameObject go in allFoods)

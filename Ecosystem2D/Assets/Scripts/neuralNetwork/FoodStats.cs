@@ -1,24 +1,42 @@
 ﻿using System;
+using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Profiling;
+using UnityScript.Macros;
 
 public class FoodStats : MonoBehaviour
 {
-    public float foodAmountAvailable = 100;
-    private Color color;
-    private bool alreadyFed;
+    public float foodAmountAvailable = 0;
+
+    public bool fertileStatus = false;
+    public bool growFoodStatus = false;
+
+    public int x;
+
+    public int y;
+
+    public FoodStats aboveNeighbour;
+    public FoodStats belowNeighbour;
+    public FoodStats leftNeighbour;
+
+    public FoodStats rightNeighbour;
+    /*
+    #region commentingOut
+
+    public Color color;
     public bool hasFood;
-    public bool fertileStatus = true;
+
+
 //    public bool fertileIsNear;
     public bool isNearestFoodOfABibit;
-    private LayerMask layerMask;
+//    private LayerMask layerMask;
 
     // Start is called before the first frame update
     private void Start()
     {
         color = GetComponent<SpriteRenderer>().color;
-        layerMask = LayerMask.GetMask("poison", "food");
+//        layerMask = LayerMask.GetMask("poison", "food");
 //        InvokeRepeating("checkBools", 0, 3);
     }
 
@@ -27,17 +45,11 @@ public class FoodStats : MonoBehaviour
     {
         if (CompareTag("poison"))
         {
-            Profiler.BeginSample("FoodStatsUpdate-100");
             foodAmountAvailable = -100f;
-            Profiler.EndSample();
         }
         else
         {
-            Profiler.BeginSample("FoodStatsUpdate-elsefall");
-            Profiler.BeginSample("FoodStatsUpdate-checkBools");
 //            checkBools();
-            Profiler.EndSample();
-            Profiler.BeginSample("FoodStatsUpdate-rest");
             hasFood = foodAmountAvailable > 0.5f;
             updateFoodAmount();
             color = fertileStatus ? Color.green : Color.white;
@@ -46,8 +58,6 @@ public class FoodStats : MonoBehaviour
 
             color.a = math.abs(foodAmountAvailable) / 100;
             GetComponent<SpriteRenderer>().color = color;
-            Profiler.EndSample();
-            Profiler.EndSample();
         }
     }
 
@@ -158,4 +168,107 @@ public class FoodStats : MonoBehaviour
 //    {
 //        return CompareTag("poison") || foodAmountAvailable > 70;
 //    }
+
+    #endregion
+*/
+}
+
+
+public class FoodStatsSystem : ComponentSystem
+{
+    protected override void OnStartRunning()
+    {
+        Entities.ForEach((Entity entity, FoodStats fs, SpriteRenderer sr, Transform transform) =>
+        {
+            fs.x = (int) transform.position.x;
+            fs.y = (int) transform.position.y;
+            fs.growFoodStatus = false;
+            fs.fertileStatus = false;
+            //calculateNeighbours:
+        });
+        Entities.ForEach((Entity entity, FoodStats fs, SpriteRenderer sr, Transform transform) =>
+        {
+            Entities.ForEach((FoodStats currentFood) =>
+            {
+                //left
+                if (fs.x == currentFood.x - 1 && fs.y == currentFood.y)
+                {
+                    currentFood.leftNeighbour = fs;
+                }
+
+                //right
+                if (fs.x == currentFood.x + 1 && fs.y == currentFood.y)
+                {
+                    currentFood.rightNeighbour = fs;
+                }
+
+                //above
+                if (fs.y == currentFood.y + 1 && fs.x == currentFood.x)
+                {
+                    currentFood.aboveNeighbour = fs;
+                }
+
+                //below
+                if (fs.y == currentFood.y - 1 && fs.x == currentFood.x)
+                {
+                    currentFood.belowNeighbour = fs;
+                }
+            });
+        });
+    }
+
+    protected override void OnUpdate()
+    {
+        float dt = Time.deltaTime;
+        Entities.ForEach((Entity entity, FoodStats fs, SpriteRenderer sr, Transform transform) =>
+        {
+            //checkNeighbours:
+            if (fs.aboveNeighbour != null && fs.aboveNeighbour.fertileStatus ||
+                fs.belowNeighbour != null && fs.belowNeighbour.fertileStatus ||
+                fs.leftNeighbour != null && fs.leftNeighbour.fertileStatus ||
+                fs.rightNeighbour != null && fs.rightNeighbour.fertileStatus)
+            {
+                fs.growFoodStatus = true;
+            }
+            else
+            {
+                fs.growFoodStatus = false;
+            }
+
+
+            //checkFertilityAndUpdateValue:
+            if (transform.CompareTag("food"))
+            {
+                if (fs.fertileStatus)
+                {
+                    fs.growFoodStatus = true;
+                }
+
+                if (fs.foodAmountAvailable < 100f && fs.growFoodStatus)
+                {
+                    fs.foodAmountAvailable += 1f * dt;
+                }
+
+                if (fs.foodAmountAvailable > 70)
+                {
+                    sr.color = new Color(Color.green.r, Color.green.g, Color.green.b,
+                        math.abs(fs.foodAmountAvailable) / 100);
+                    fs.fertileStatus = true;
+                }
+                else
+                {
+                    sr.color = new Color(Color.white.r, Color.white.g, Color.white.b,
+                        math.abs(fs.foodAmountAvailable) / 100);
+                    fs.fertileStatus = false;
+                }
+            }
+            else
+            {
+                fs.foodAmountAvailable = -100;
+                fs.fertileStatus = true;
+                fs.growFoodStatus = true;
+                sr.color = Color.blue;
+            }
+        });
+    }
 }

@@ -259,7 +259,7 @@ public class Bibit : MonoBehaviour
 
     private void Update()
     {
-        rb.AddForce(Vector3.up * Time.deltaTime);
+//        rb.AddForce(Vector3.up * Time.deltaTime);
         energy -= Time.deltaTime * ageModifier;
 
         //Kill if necessary:
@@ -678,15 +678,15 @@ public class Bibit : MonoBehaviour
     }
 }
 
-[BurstCompile]
-public struct MoveBibitJob : IJob
-{
-    public float3 position;
-    public Rigidbody2D rb;
-    public Vector2 addForce;
-
-    public void Execute()
-    {
-        rb.AddForce(addForce);
-    }
-}
+//[BurstCompile]
+//public struct MoveBibitJob : IJob
+//{
+//    public float3 position;
+//    public Rigidbody2D rb;
+//    public Vector2 addForce;
+//
+//    public void Execute()
+//    {
+//        rb.AddForce(addForce);
+//    }
+//}
