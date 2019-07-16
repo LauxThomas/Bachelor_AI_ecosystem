@@ -4,6 +4,7 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Profiling;
 using UnityScript.Macros;
+using Random = System.Random;
 
 public class FoodStats : MonoBehaviour
 {
@@ -11,6 +12,7 @@ public class FoodStats : MonoBehaviour
 
     public bool fertileStatus = false;
     public bool growFoodStatus = false;
+    public bool isFood;
 
     public int x;
 
@@ -178,15 +180,24 @@ public class FoodStatsSystem : ComponentSystem
 {
     protected override void OnStartRunning()
     {
-        Entities.ForEach((Entity entity, FoodStats fs, SpriteRenderer sr, Transform transform) =>
+        Entities.ForEach((FoodStats fs, Transform transform, SpriteRenderer sr) =>
         {
             fs.x = (int) transform.position.x;
             fs.y = (int) transform.position.y;
             fs.growFoodStatus = false;
             fs.fertileStatus = false;
+            fs.isFood = transform.CompareTag("food");
             //calculateNeighbours:
+            if (fs.isFood)
+            {
+                sr.color = Color.clear;
+            }
+            else
+            {
+                sr.color = Color.blue;
+            }
         });
-        Entities.ForEach((Entity entity, FoodStats fs, SpriteRenderer sr, Transform transform) =>
+        Entities.ForEach((FoodStats fs) =>
         {
             Entities.ForEach((FoodStats currentFood) =>
             {
@@ -219,56 +230,63 @@ public class FoodStatsSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
-        float dt = Time.deltaTime;
-        Entities.ForEach((Entity entity, FoodStats fs, SpriteRenderer sr, Transform transform) =>
+//        if (UnityEngine.Random.value < 1 / 3f)
         {
-            //checkNeighbours:
-            if (fs.aboveNeighbour != null && fs.aboveNeighbour.fertileStatus ||
-                fs.belowNeighbour != null && fs.belowNeighbour.fertileStatus ||
-                fs.leftNeighbour != null && fs.leftNeighbour.fertileStatus ||
-                fs.rightNeighbour != null && fs.rightNeighbour.fertileStatus)
+            float dt = Time.deltaTime;
+            Entities.ForEach((FoodStats fs, SpriteRenderer sr) =>
             {
-                fs.growFoodStatus = true;
-            }
-            else
-            {
-                fs.growFoodStatus = false;
-            }
-
-
-            //checkFertilityAndUpdateValue:
-            if (transform.CompareTag("food"))
-            {
-                if (fs.fertileStatus)
+                //checkNeighbours:
+                if (fs.aboveNeighbour != null && fs.aboveNeighbour.fertileStatus ||
+                    fs.belowNeighbour != null && fs.belowNeighbour.fertileStatus ||
+                    fs.leftNeighbour != null && fs.leftNeighbour.fertileStatus ||
+                    fs.rightNeighbour != null && fs.rightNeighbour.fertileStatus)
                 {
                     fs.growFoodStatus = true;
                 }
-
-                if (fs.foodAmountAvailable < 100f && fs.growFoodStatus)
+                else
                 {
-                    fs.foodAmountAvailable += 1f * dt;
+                    fs.growFoodStatus = false;
                 }
 
-                if (fs.foodAmountAvailable > 70)
+                //checkFertilityAndUpdateValue:
+                if (fs.isFood)
                 {
-                    sr.color = new Color(Color.green.r, Color.green.g, Color.green.b,
-                        math.abs(fs.foodAmountAvailable) / 100);
-                    fs.fertileStatus = true;
+                    if (fs.fertileStatus)
+                    {
+                        fs.growFoodStatus = true;
+                    }
+
+                    if (fs.foodAmountAvailable < 100f && fs.growFoodStatus)
+                    {
+                        fs.foodAmountAvailable += 1f * dt;
+                    }
+
+                    fs.fertileStatus = fs.foodAmountAvailable > 70;
+
                 }
                 else
                 {
-                    sr.color = new Color(Color.white.r, Color.white.g, Color.white.b,
-                        math.abs(fs.foodAmountAvailable) / 100);
-                    fs.fertileStatus = false;
+                    {
+                        fs.foodAmountAvailable = -100;
+                        fs.fertileStatus = true;
+                        fs.growFoodStatus = true;
+                    }
                 }
-            }
-            else
-            {
-                fs.foodAmountAvailable = -100;
-                fs.fertileStatus = true;
-                fs.growFoodStatus = true;
-                sr.color = Color.blue;
-            }
-        });
+
+                if (UnityEngine.Random.value < 0.3f)
+                {
+                    if (fs.isFood)
+                    {
+                        sr.color = new Color(Color.white.r, Color.white.g, Color.white.b,
+                            math.abs(fs.foodAmountAvailable) / 100);
+                    }
+                    else
+                    {
+                        sr.color = Color.blue;
+                    }
+                }
+
+            });
+        }
     }
 }

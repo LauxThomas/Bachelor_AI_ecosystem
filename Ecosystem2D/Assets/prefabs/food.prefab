@@ -49,6 +49,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   foodAmountAvailable: 100
   fertileStatus: 1
+  growFoodStatus: 0
+  isFood: 0
+  x: 0
+  y: 0
+  aboveNeighbour: {fileID: 0}
+  belowNeighbour: {fileID: 0}
+  leftNeighbour: {fileID: 0}
+  rightNeighbour: {fileID: 0}
 --- !u!212 &5642873682668932530
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -126,7 +134,7 @@ BoxCollider2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8949193621168767084}
-  m_Enabled: 1
+  m_Enabled: 0
   m_Density: 1
   m_Material: {fileID: 0}
   m_IsTrigger: 1
