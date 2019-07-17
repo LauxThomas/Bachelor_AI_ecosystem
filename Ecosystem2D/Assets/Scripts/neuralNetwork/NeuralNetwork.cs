@@ -7,8 +7,8 @@ namespace DefaultNamespace
     public class NeuralNetwork
     {
         private List<InputNeuron> inputNeurons = new List<InputNeuron>();
-        private List<WorkingNeuron> hiddenNeurons = new List<WorkingNeuron>();
-        private List<WorkingNeuron> outputNeurons = new List<WorkingNeuron>();
+        public List<WorkingNeuron> hiddenNeurons = new List<WorkingNeuron>();
+        public List<WorkingNeuron> outputNeurons = new List<WorkingNeuron>();
         private bool fullMeshGenerated = false;
         private bool debugged;
 

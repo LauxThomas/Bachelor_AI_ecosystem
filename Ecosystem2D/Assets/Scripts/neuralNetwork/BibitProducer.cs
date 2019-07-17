@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -32,6 +33,8 @@ public class BibitProducer : MonoBehaviour
     // Start is called before the first frame update
     private void Start()
     {
+        StreamWriter writer = new StreamWriter("Assets/Resources/test.txt", false);
+        
         bibitPrefab = (GameObject) Resources.Load("Bibit");
         InvokeRepeating("readGenerations", 3, 2);
         CameraSize = Camera.main.orthographicSize;
@@ -73,6 +76,14 @@ public class BibitProducer : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
+        if (Input.GetKey(KeyCode.Space))
+        {
+            for (int i = 0; i < 10; i++)
+            {
+            initBibits();
+            }
+        }
+
         if (allBibits.Count < minimumNumberOfBibits)
         {
             initBibits();

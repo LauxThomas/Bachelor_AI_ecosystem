@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Linq;
 using DefaultNamespace;
 using Unity.Burst;
 using Unity.Jobs;
@@ -204,6 +206,19 @@ public class Bibit : MonoBehaviour
         color = new Color(Random.value, Random.value, Random.value);
     }
 
+    private void writeStuff(Bibit mother, NeuralNetwork myBrain)
+    {
+        StreamWriter writer = new StreamWriter("Assets/Resources/test.txt", true);
+        String printString = "";
+
+        
+        //TODO: tweak!
+        printString += myBrain.outputNeurons[0].connections[0].weight + "";
+        Debug.Log(printString);
+        writer.WriteLine(printString);
+        writer.Close();
+    }
+
     public void pseudoConstructor2(Bibit mother)
     {
         transform.position = mother.transform.position;
@@ -255,6 +270,7 @@ public class Bibit : MonoBehaviour
         b = math.clamp(b, 0, 1);
 
         color = new Color(r, g, b);
+//        writeStuff(mother, brain);
     }
 
     private void Update()
