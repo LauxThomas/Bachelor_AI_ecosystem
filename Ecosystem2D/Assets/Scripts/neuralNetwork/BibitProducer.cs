@@ -33,7 +33,7 @@ public class BibitProducer : MonoBehaviour
     // Start is called before the first frame update
     private void Start()
     {
-        StreamWriter writer = new StreamWriter("Assets/Resources/test.txt", false);
+//        StreamWriter writer = new StreamWriter("Assets/Resources/test.txt", false);
         
         bibitPrefab = (GameObject) Resources.Load("Bibit");
         InvokeRepeating("readGenerations", 3, 2);

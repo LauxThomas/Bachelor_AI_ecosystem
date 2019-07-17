@@ -72,7 +72,7 @@ public class FoodProducer : MonoBehaviour
     {
         for (int i = 0; i < foodIndices.Count; i++)
         {
-            allFoodsAndPoisons[foodIndices[i]].GetComponent<FoodStats>().fertileStatus = 
+            allFoodsAndPoisons[foodIndices[i]].GetComponent<FoodStats>().fertileStatus =
                 getFertileStatus(foodIndices[i]);
         }
     }
@@ -132,7 +132,7 @@ public class FoodProducer : MonoBehaviour
                 {
                     allFoods.Add(newObj);
                     allFoodsAndPoisons.Add(newObj);
-                    foodIndices.Add(allFoodsAndPoisons.Count-1);
+                    foodIndices.Add(allFoodsAndPoisons.Count - 1);
                 }
                 else
                 {
@@ -262,5 +262,16 @@ public class FoodProducer : MonoBehaviour
         }
 
         return 0;
+    }
+
+    public static List<FoodStats> getAllFoodsAndPoisonsAsFoodStats()
+    {
+        List<FoodStats> returnList = new List<FoodStats>();
+        foreach (GameObject go in allFoodsAndPoisons)
+        {
+            returnList.Add(go.GetComponent<FoodStats>());
+        }
+
+        return returnList;
     }
 }
