@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 8952680034314405632}
   - component: {fileID: 8952680034314405644}
   - component: {fileID: -5422324355683653508}
+  - component: {fileID: 149727024847868789}
   m_Layer: 10
   m_Name: Bibit
   m_TagString: Untagged
@@ -52,6 +53,7 @@ MonoBehaviour:
   generation: 0
   displayName: 
   debugValue: 0
+  moveCost: 0
 --- !u!212 &8952680034314405632
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -138,3 +140,15 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!114 &149727024847868789
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8952680034314405633}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5bf10cdea1344482e91a4f2b58506b77, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

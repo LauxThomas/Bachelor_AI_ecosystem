@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using DefaultNamespace;
 using Unity.Burst;
+using Unity.Collections;
+using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
@@ -23,8 +25,8 @@ public class Bibit : MonoBehaviour
 
     private NeuralNetwork brain;
 
-    private const float STARTENERGY = 150f;
-    private const float MINIMUMSURVIVALENERGY = 100f;
+    public const float STARTENERGY = 150f;
+    public const float MINIMUMSURVIVALENERGY = 100f;
 
     private const String NAME_IN_BIAS = "bias";
     private const String NAME_IN_ENERGY = "Current Energy";
@@ -75,22 +77,22 @@ public class Bibit : MonoBehaviour
     public WorkingNeuron outMemory = new WorkingNeuron();
     public WorkingNeuron outAttack = new WorkingNeuron();
 
-    private Color color;
+    public Color color;
 
     private float rotation;
-    private const float SPEED = 5;
-    private const float FORCE = 5;
+    public const float SPEED = 5;
+    public const float FORCE = 5;
     private FoodProducer foodProducer;
     private BibitProducer bibitProducer;
-    private Vector3 lu;
-    private Vector3 lo;
-    private Vector3 ru;
-    private float distToNearestFood;
+    public Vector3 lu;
+    public Vector3 lo;
+    public Vector3 ru;
+    public float distToNearestFood;
 
-    private GameObject nearestFood;
+    public GameObject nearestFood;
 
     public double debugValue;
-    private float distToNearestPoison;
+    public float distToNearestPoison;
     private GameObject nearestPoison;
     private Vector3 vecToNearestFood;
     private Vector3 vecToNearestPoison;
@@ -105,13 +107,16 @@ public class Bibit : MonoBehaviour
     private double amountOfMaxFoodBlockAround;
     private int numberOfBibitsNear;
     private double distToNearestBibit;
-    private double? angleToNearestBibit;
-    private GameObject nearestBibit;
+    public double? angleToNearestBibit;
+    public GameObject nearestBibit;
     private float geneticDifferenceToAttackedBibit;
     private Rigidbody2D rb;
     private SpriteRenderer sr;
     private int layerMask;
-    private float rotationCost, moveCost, birthCost, eatCost, attackCost;
+    public float rotationCost;
+    public float moveCost;
+    public float birthCost;
+    public float eatCost, attackCost;
     private List<double> foodAmountAvailableAllFoods;
     private List<FoodStats> foodStatsPoison;
     private List<Vector3> transformsFood;
@@ -211,7 +216,7 @@ public class Bibit : MonoBehaviour
         StreamWriter writer = new StreamWriter("Assets/Resources/test.txt", true);
         String printString = "";
 
-        
+
         //TODO: tweak!
         printString += myBrain.outputNeurons[0].connections[0].weight + "";
         Debug.Log(printString);
@@ -287,7 +292,7 @@ public class Bibit : MonoBehaviour
 
         else
         {
-            flipIfNecessary();
+//            flipIfNecessary();
             color.a = (float) ((energy - MINIMUMSURVIVALENERGY) /
                                (STARTENERGY - MINIMUMSURVIVALENERGY)); //set coloralpha to healthpercentage
             sr.color = color;
@@ -323,14 +328,14 @@ public class Bibit : MonoBehaviour
     private void executeAction()
     {
         bool isOnPoison = distToNearestPoison < distToNearestFood;
-        actRotate(rotationCost, isOnPoison);
-        actMove(moveCost, isOnPoison);
-        actBirth(birthCost, isOnPoison);
-        actEat(eatCost, isOnPoison);
-        if (nearestBibit)
-        {
-            actAttack(nearestBibit, attackCost, isOnPoison);
-        }
+//        actRotate(rotationCost, isOnPoison);
+//        actMove(moveCost, isOnPoison);
+//        actBirth(birthCost, isOnPoison);
+//        actEat(eatCost, isOnPoison);
+//        if (nearestBibit)
+//        {
+//            actAttack(nearestBibit, attackCost, isOnPoison);
+//        }
 
         age += Time.deltaTime;
     }
@@ -672,7 +677,6 @@ public class Bibit : MonoBehaviour
         private List<Vector3> transformsFood;
         private List<Vector3> transformsPoison;
           */
-        //todo: getAllFoodStats();
         foodAmountAvailableAllFoods = new List<double>();
         transformsFood = new List<Vector3>();
         gameObjectsFood = new List<GameObject>();
@@ -694,15 +698,163 @@ public class Bibit : MonoBehaviour
     }
 }
 
-//[BurstCompile]
-//public struct MoveBibitJob : IJob
-//{
-//    public float3 position;
-//    public Rigidbody2D rb;
-//    public Vector2 addForce;
-//
-//    public void Execute()
-//    {
-//        rb.AddForce(addForce);
-//    }
-//}
+
+public class BibitMovementSystem : ComponentSystem
+{
+    protected override void OnUpdate()
+    {
+        float dt = Time.deltaTime;
+        Entities.ForEach((Bibit bibit, Transform transform, Rigidbody2D rb) =>
+        {
+            //move:
+            float speedForce = (float) bibit.outForward.getValue();
+            Vector3 forceToAdd = Bibit.SPEED * speedForce * speedForce * 15 * dt * transform.up.normalized;
+            rb.AddForce(forceToAdd);
+            bibit.energy -= forceToAdd.magnitude / Bibit.SPEED / 10f * bibit.ageModifier * bibit.moveCost;
+
+            //rotate:
+            float rotateForce = (float) (bibit.outRotate.getValue() * 15 * dt);
+
+            rb.SetRotation(rb.rotation + (float) rotateForce * Bibit.FORCE);
+            bibit.energy -= math.abs((float) (rotateForce * bibit.ageModifier * bibit.rotationCost));
+        });
+    }
+}
+
+public class BibitReproductionSystem : ComponentSystem
+{
+    public List<GameObject> bibitsToSpawn;
+
+    protected override void OnStartRunning()
+    {
+        bibitsToSpawn = new List<GameObject>();
+    }
+
+    protected override void OnUpdate()
+    {
+        Entities.ForEach((Bibit bibit) =>
+        {
+            //birth:
+            float birthWish = (float) bibit.outBirth.getValue();
+            if (birthWish > 0)
+            {
+                if (bibit.energy > Bibit.STARTENERGY + Bibit.MINIMUMSURVIVALENERGY * bibit.birthCost * 1.15f)
+                {
+                    bibitsToSpawn.Add(bibit.gameObject);
+
+                    bibit.energy -= Bibit.STARTENERGY * bibit.birthCost;
+                }
+            }
+        });
+        //spawnChildren:
+        foreach (GameObject child in bibitsToSpawn)
+        {
+            BibitProducer.spawnChild(child);
+        }
+
+        bibitsToSpawn.Clear();
+    }
+}
+
+public class BibitEatingSystem : ComponentSystem
+{
+    protected override void OnStartRunning()
+    {
+    }
+
+    protected override void OnUpdate()
+    {
+        Entities.ForEach((Bibit bibit, Transform transform, Rigidbody2D rb) =>
+        {
+            float eatWish = (float) (bibit.outEat.getValue() * 30);
+            if (eatWish <= 0) return;
+
+            if (bibit.distToNearestFood < bibit.distToNearestPoison && bibit.distToNearestFood < 1)
+            {
+                bibit.energy += FoodProducer.eatFood(bibit.nearestFood, eatWish);
+            }
+            else if (bibit.distToNearestPoison < 1)
+            {
+                bibit.energy += FoodProducer.eatPoison(eatWish);
+            }
+        });
+    }
+}
+
+public class BibitAttackingSystem : ComponentSystem
+{
+    protected override void OnUpdate()
+    {
+        Entities.ForEach((Bibit bibit, Transform transform, Rigidbody2D rb) =>
+        {
+            if (bibit.nearestBibit)
+            {
+                float geneticDifferenceToAttackedBibit = 0;
+                if (bibit.angleToNearestBibit != null &&
+                    (Vector3.Distance(transform.position, bibit.nearestBibit.transform.position) < 0.3f * 0.3f &&
+                     math.abs((float) bibit.angleToNearestBibit) < 70))
+                {
+                    geneticDifferenceToAttackedBibit +=
+                        math.abs(bibit.color.r - bibit.nearestBibit.GetComponent<SpriteRenderer>().color.r);
+                    geneticDifferenceToAttackedBibit +=
+                        math.abs(bibit.color.g - bibit.nearestBibit.GetComponent<SpriteRenderer>().color.g);
+                    geneticDifferenceToAttackedBibit +=
+                        math.abs(bibit.color.b - bibit.nearestBibit.GetComponent<SpriteRenderer>().color.b);
+                    if (geneticDifferenceToAttackedBibit > 0.2f)
+                    {
+                        {
+                            double attackWish = bibit.outAttack.getValue() * Time.deltaTime * 30;
+
+                            bibit.nearestBibit.GetComponent<Bibit>().energy -= attackWish;
+                            bibit.energy += attackWish / bibit.attackCost;
+                        }
+                    }
+                }
+            }
+        });
+    }
+}
+
+public class BibitFlippingSystem : ComponentSystem
+{
+    protected override void OnUpdate()
+    {
+        Entities.ForEach((Bibit bibit, Transform transform) =>
+        {
+            Vector3 pos = transform.position;
+            if (pos.x > bibit.ru.x)
+            {
+                pos.x = bibit.lu.x;
+            }
+            else if (pos.x < bibit.lu.x)
+            {
+                pos.x = bibit.ru.x;
+            }
+
+            else if (pos.y > bibit.lo.y)
+            {
+                pos.y = bibit.lu.y;
+            }
+            else if (pos.y < bibit.lu.y)
+            {
+                pos.y = bibit.lo.y;
+            }
+
+            if (pos != transform.position)
+            {
+                transform.position = pos;
+            }
+        });
+    }
+}
+
+public class BibitSensorreadingSystem : ComponentSystem
+{
+    protected override void OnUpdate()
+    {
+        Entities.ForEach((Bibit bibit, Transform transform) =>
+        {
+            
+        });
+    }
+}
