@@ -773,12 +773,10 @@ public class BibitEatingSystem : ComponentSystem
                 bibit.distToNearestFood < 1)
             {
                 bibit.energy += FoodProducer.eatFood(bibit.nearestFood, eatWish);
-                Debug.Log("EATEN!");
             }
             else if (bibit.distToNearestPoison < 1)
             {
                 bibit.energy += FoodProducer.eatPoison(eatWish);
-                Debug.Log("poison eaten!");
             }
         });
     }
@@ -810,6 +808,7 @@ public class BibitAttackingSystem : ComponentSystem
 
                             bibit.nearestBibit.GetComponent<Bibit>().energy -= attackWish;
                             bibit.energy += attackWish / bibit.attackCost;
+                            Debug.Log("ATTACKED");
                         }
                     }
                 }
@@ -868,13 +867,14 @@ public class BibitFieldMeasurementSystem : ComponentSystem
         neighbours = new List<FoodStats>();
         offsetX = math.abs(Mathf.RoundToInt(fields[0, 0].transform.position.x));
         offsetY = math.abs(Mathf.RoundToInt(fields[0, 0].transform.position.y));
-        Debug.Log("Offsets X / Y: " + offsetX + " / " + offsetY);
     }
 
     protected override void OnUpdate()
     {
         Entities.ForEach((Bibit bibit, Transform transform) =>
         {
+            Profiler.BeginSample("foods vergleichen");
+
             //resetToDefaults:
             bibit.distToNearestPoison = float.PositiveInfinity;
             bibit.distToNearestFood = float.PositiveInfinity;
@@ -889,8 +889,9 @@ public class BibitFieldMeasurementSystem : ComponentSystem
             Vector3 transPos = transform.position;
             int transPosX = Mathf.RoundToInt(transPos.x + offsetX) + 1;
             int transPosY = Mathf.RoundToInt(offsetY - transPos.y) + 1;
-            Debug.Log("transX/Y: " + transPosX + " / " + transPosY);
 
+
+            //todo: mehrere Iterationen einbauen, for loop, sichtradius vererben
 
             if (transPosX <= widthBounds && transPosY <= heightBounds &&
                 transPosX >= 0 && transPosY > 0)
@@ -979,6 +980,39 @@ public class BibitFieldMeasurementSystem : ComponentSystem
                         Vector3.SignedAngle(transform.up, neighbourPos - transPos, transform.forward);
                 }
             }
+
+            Profiler.EndSample();
+
+            Profiler.BeginSample("bibits vergleichen");
+            bibit.numberOfBibitsNear = 0;
+            bibit.distToNearestBibit = float.PositiveInfinity;
+            Bibit nearestBibit = null;
+            bibit.angleToNearestBibit = null;
+            bibit.angleToNearestBibit = null;
+            Entities.ForEach((Bibit compareBibit, Transform compareTransform) =>
+            {
+                if (compareBibit != bibit)
+                {
+                    float dist = (transPos - compareTransform.position).magnitude;
+                    if (dist < 10)
+                    {
+                        bibit.numberOfBibitsNear++;
+                        if (dist < bibit.distToNearestBibit)
+                        {
+                            bibit.distToNearestBibit = dist;
+                            nearestBibit = compareBibit;
+                        }
+                    }
+                }
+            });
+            if (nearestBibit != null)
+            {
+                bibit.angleToNearestBibit =
+                    Vector3.SignedAngle(transform.up, nearestBibit.transform.position - transPos, transform.forward);
+                bibit.nearestBibit = nearestBibit.gameObject;
+            }
+
+            Profiler.EndSample();
         });
     }
 }

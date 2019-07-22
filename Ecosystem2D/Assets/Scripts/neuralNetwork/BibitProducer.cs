@@ -80,10 +80,10 @@ public class BibitProducer : MonoBehaviour
             initBibits(1);
         }
 
-//        if (allBibits.Count == 0)
-//        {
-//            initBibits(10);
-//        }
+        if (allBibits.Count < minimumNumberOfBibits)
+        {
+            initBibits(1);
+        }
     }
 
     private void initBibits(int amount)
