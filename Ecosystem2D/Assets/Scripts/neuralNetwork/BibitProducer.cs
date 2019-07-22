@@ -11,8 +11,8 @@ using Random = UnityEngine.Random;
 public class BibitProducer : MonoBehaviour
 {
     public static GameObject bibitPrefab;
-    [SerializeField] private int initialNumberOfBibits = 200;
-    [SerializeField] private int minimumNumberOfBibits = 10;
+    [SerializeField] public int initialNumberOfBibits = 200;
+    [SerializeField] public int minimumNumberOfBibits = 10;
     private static int maximumNumberOfBibits = 2000;
 
     public List<String> followerNames;
@@ -27,6 +27,8 @@ public class BibitProducer : MonoBehaviour
     public static int respawns;
     private static String maxGenAnc;
     private static String maxCurrGenAnc;
+    public float wiff;
+    public float h8;
 
     [SerializeField] private static List<GameObject> allBibits;
     private static GameObject parent;
@@ -44,6 +46,8 @@ public class BibitProducer : MonoBehaviour
         lu = FoodProducer.lu;
         lo = FoodProducer.lo;
         ru = FoodProducer.ru;
+        wiff = Camera.main.orthographicSize * Screen.width / Screen.height;
+        h8 = (Camera.main.orthographicSize * Screen.height / Screen.width)*2;
         allBibits = new List<GameObject>();
         parent = new GameObject("Bibits");
         parent.AddComponent<childCounter>();
@@ -124,7 +128,7 @@ public class BibitProducer : MonoBehaviour
     private void spawnBibit(string displayName)
     {
         maxCurrentGeneration = 0;
-        Vector3 spawnPos = new Vector3(Random.Range(lu.x, ru.x), Random.Range(lu.y, lo.y));
+        Vector3 spawnPos = new Vector3(Random.Range(-wiff,wiff), Random.Range(-h8,h8));
         GameObject newBibit = Instantiate(bibitPrefab, spawnPos, Quaternion.identity);
         newBibit.GetComponent<Bibit>().pseudoConstructor1();
         addBibit(newBibit);

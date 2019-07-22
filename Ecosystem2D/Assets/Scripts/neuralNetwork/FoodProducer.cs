@@ -16,7 +16,7 @@ public class FoodProducer : MonoBehaviour
     public static Vector3 ru;
     private GameObject parent;
     [SerializeField] [Range(0, 1f)] private float offset = 0;
-    [SerializeField] [Range(5, 100f)] private float zoom = 50;
+    [SerializeField] [Range(5, 100f)] public float zoom = 50;
 
 //    private static List<GameObject> allFoodsAndPoisons;
     private static List<GameObject> allFoods;
