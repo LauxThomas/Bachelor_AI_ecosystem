@@ -11,8 +11,8 @@ using Random = UnityEngine.Random;
 public class BibitProducer : MonoBehaviour
 {
     public static GameObject bibitPrefab;
-    [SerializeField] private int initialNumberOfBibits=200;
-    [SerializeField] private int minimumNumberOfBibits=10;
+    [SerializeField] private int initialNumberOfBibits = 200;
+    [SerializeField] private int minimumNumberOfBibits = 10;
 
     public List<String> followerNames;
 //    public List<Sprite> sprites;
@@ -34,9 +34,9 @@ public class BibitProducer : MonoBehaviour
     private void Start()
     {
 //        StreamWriter writer = new StreamWriter("Assets/Resources/test.txt", false);
-        
+
         bibitPrefab = (GameObject) Resources.Load("Bibit");
-        InvokeRepeating("readGenerations", 3, 2);
+//        InvokeRepeating("readGenerations", 3, 2);
         CameraSize = Camera.main.orthographicSize;
         lu = FoodProducer.lu;
         lo = FoodProducer.lo;
@@ -47,7 +47,6 @@ public class BibitProducer : MonoBehaviour
         initLists();
         respawns = -2 * followerNames.Count;
         for (int i = 0; i < initialNumberOfBibits; i++)
-//        for (int i = 0; i < 1; i++)
         {
             initBibits();
         }
@@ -78,23 +77,23 @@ public class BibitProducer : MonoBehaviour
     {
         if (Input.GetKey(KeyCode.Space))
         {
-            for (int i = 0; i < 10; i++)
-            {
-            initBibits();
-            }
+            initBibits(1);
         }
 
-        if (allBibits.Count < minimumNumberOfBibits)
+//        if (allBibits.Count == 0)
+//        {
+//            initBibits(10);
+//        }
+    }
+
+    private void initBibits(int amount)
+    {
+        for (int i = 0; i < amount; i++)
         {
-            initBibits();
+            spawnBibit(followerNames[Random.Range(0, followerNames.Count)]);
         }
 
-        if (allBibits.Count > 500)
-        {
-//            Debug.LogError("EXIT APPLICATION, TOO MANY BIBITS");
-//            EditorApplication.isPlaying = false;
-//            Application.Quit(1);
-        }
+        respawns += amount;
     }
 
     private void readGenerations()

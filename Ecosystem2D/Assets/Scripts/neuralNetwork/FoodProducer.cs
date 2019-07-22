@@ -22,11 +22,13 @@ public class FoodProducer : MonoBehaviour
 
     private static List<GameObject> allPoisons;
     private static List<GameObject> allFoodsAndPoisons;
+    public static FoodStats[,] fieldsArray;
     public List<int> foodIndices;
 
 
 //    GameObject spawnFab;
     private Camera mainCam;
+    public int percentageOfGrassSpots=60;
 
 
     // Start is called before the first frame update
@@ -47,9 +49,11 @@ public class FoodProducer : MonoBehaviour
         allPoisons = new List<GameObject>();
         allFoodsAndPoisons = new List<GameObject>();
         foodIndices = new List<int>();
+
         fillWholeWorld();
         addFoodsToParent();
     }
+
 
     private void Update()
     {
@@ -102,6 +106,10 @@ public class FoodProducer : MonoBehaviour
         float randX = (Random.value * 2 - 1) * Random.value * 100;
         float randY = (Random.value * 2 - 1) * Random.value * 100;
         int waterpools = 0;
+        int newWidth = math.abs((-width / 2) - 1 - width / 2 + 1) + 3;
+        int newHeight = (height / 2) + 1 - (-height / 2 - 1) + 1;
+        int newX = 0, newY = 0;
+        fieldsArray = new FoodStats[newWidth, newHeight];
         for (int y = (int) (height / 2) + 1; y >= (int) -height / 2 - 1; y--)
         {
             for (int x = (int) (-width / 2) - 1; x <= (int) width / 2 + 1; x++)
@@ -124,7 +132,7 @@ public class FoodProducer : MonoBehaviour
 //                {
 //                    spawnPrefab = prefab1;
 //                }
-                spawnPrefab = Mathf.PerlinNoise(x / 10f + randX, y / 10f + randY) < 0.6f ? prefab1 : prefab2;
+                spawnPrefab = Mathf.PerlinNoise(x / 10f + randX, y / 10f + randY) < percentageOfGrassSpots/100f ? prefab1 : prefab2;
 
                 GameObject newObj = Instantiate(spawnPrefab, new Vector3(x, y), Quaternion.identity);
                 newObj.GetComponent<FoodStats>().foodAmountAvailable = 0;
@@ -139,7 +147,14 @@ public class FoodProducer : MonoBehaviour
                     allPoisons.Add(newObj);
                     allFoodsAndPoisons.Add(newObj);
                 }
+
+                fieldsArray[newX, newY] = newObj.GetComponent<FoodStats>();
+                newX++;
+                newX %= newWidth;
             }
+
+            newY++;
+            newY %= newHeight;
         }
 
 //        if (waterpools < mainCam.orthographicSize / 2)

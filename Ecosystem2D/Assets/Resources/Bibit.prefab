@@ -52,8 +52,26 @@ MonoBehaviour:
   ageModifier: 0
   generation: 0
   displayName: 
+  color: {r: 0, g: 0, b: 0, a: 0}
+  lu: {x: 0, y: 0, z: 0}
+  lo: {x: 0, y: 0, z: 0}
+  ru: {x: 0, y: 0, z: 0}
+  distToNearestFood: 0
+  nearestFood: {fileID: 0}
   debugValue: 0
+  distToNearestPoison: 0
+  foodAmountAtCurrentBlock: 0
+  foodAmountInSightRadius: 0
+  distToMaxFoodBlockAround: 0
+  amountOfMaxFoodBlockAround: 0
+  numberOfBibitsNear: 0
+  distToNearestBibit: 0
+  nearestBibit: {fileID: 0}
+  rotationCost: 0
   moveCost: 0
+  birthCost: 0
+  eatCost: 0
+  attackCost: 0
 --- !u!212 &8952680034314405632
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -110,7 +128,7 @@ CircleCollider2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8952680034314405633}
-  m_Enabled: 1
+  m_Enabled: 0
   m_Density: 1
   m_Material: {fileID: 0}
   m_IsTrigger: 1

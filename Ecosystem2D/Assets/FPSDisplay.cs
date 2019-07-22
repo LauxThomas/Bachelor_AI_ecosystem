@@ -27,6 +27,10 @@ public class FPSDisplay : MonoBehaviour
         {
             Time.timeScale = 25;
         }
+        if (Input.GetKeyDown(KeyCode.Keypad8))
+        {
+            Time.timeScale *= 2;
+        }
         if (Input.GetKeyDown(KeyCode.Keypad9))
         {
             Time.timeScale /= 2;

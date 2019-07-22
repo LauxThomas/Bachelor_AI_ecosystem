@@ -312,15 +312,15 @@ public class Bibit : MonoBehaviour
             ageModifier = (float) (-(3 / math.pow(math.E, 0.1 * age - 10) + 1) + 3);
             ageModifier = math.clamp(ageModifier, 0.001f, 200);
 
-            Profiler.BeginSample("readSensors");
+//            Profiler.BeginSample("readSensors");
             readSensors();
-            Profiler.EndSample();
-            Profiler.BeginSample("updateBrain");
+//            Profiler.EndSample();
+//            Profiler.BeginSample("updateBrain");
             updateBrain();
-            Profiler.EndSample();
-            Profiler.BeginSample("executeAction");
+//            Profiler.EndSample();
+//            Profiler.BeginSample("executeAction");
             executeAction();
-            Profiler.EndSample();
+//            Profiler.EndSample();
             jobHandle.Complete();
         }
     }
@@ -349,7 +349,7 @@ public class Bibit : MonoBehaviour
 
         geneticDifferenceToAttackedBibit = 0;
         if (angleToNearestBibit != null &&
-            (Vector3.Distance(transform.position, attackedBibit.transform.position) < 0.3f * 0.3f &&
+            (Vector2.Distance(transform.position, attackedBibit.transform.position) < 0.3f * 0.3f &&
              math.abs((float) angleToNearestBibit) < 70))
         {
             geneticDifferenceToAttackedBibit +=
@@ -470,132 +470,135 @@ public class Bibit : MonoBehaviour
 
     private void readSensors()
     {
-        distToNearestPoison = float.PositiveInfinity;
-        angleToNearestPoison = null;
-        foodAmountAtCurrentBlock = 0;
-
-        distToNearestFood = float.PositiveInfinity;
-        angleToNearestFood = null;
-
-        foodAmountInSightRadius = 0;
-        distToMaxFoodBlockAround = float.PositiveInfinity;
-        angleToMaxFoodBlockAround = null;
-        amountOfMaxFoodBlockAround = 0;
-
-
+//        distToNearestPoison = float.PositiveInfinity;
+//        angleToNearestPoison = null;
+//        foodAmountAtCurrentBlock = 0;
+//
+//        distToNearestFood = float.PositiveInfinity;
+//        angleToNearestFood = null;
+//
+//        foodAmountInSightRadius = 0;
+//        distToMaxFoodBlockAround = float.PositiveInfinity;
+//        angleToMaxFoodBlockAround = null;
+//        amountOfMaxFoodBlockAround = 0;
+//
+//
         Transform trans = transform;
         Vector3 transPos = trans.position;
 //        transPos.z = -0.3f;
-
-        bool temp = false;
-        Profiler.BeginSample("Raycast&Hit");
-        //do raycast, if hit=food bla, else
-        RaycastHit2D raycastHit = Physics2D.Raycast(transPos, transPos + trans.forward, 5f, layerMask);
-        if (raycastHit.collider == null)
-        {
-            raycastHit = Physics2D.Raycast(transPos + new Vector3(0, -0.3f, 0),
-                transPos + new Vector3(0, -0.3f, 0) + trans.forward + new Vector3(0, -0.3f, 0), 5f, layerMask);
-            temp = true;
-        }
-
-        Debug.DrawLine(transPos, raycastHit.point, temp ? Color.green : Color.red);
-
-
-        //TODO: Fix Raycast. Should always hit!!!
-        if (raycastHit.collider != null)
-        {
-            if (raycastHit.collider.CompareTag("food") &&
-                raycastHit.collider.gameObject.GetComponent<FoodStats>().foodAmountAvailable > 10)
-            {
-                nearestFood = raycastHit.collider.gameObject;
-                distToNearestFood = Vector3.Distance(transPos, nearestFood.transform.position);
-            }
-        }
-
-        Profiler.EndSample();
-
-//        Profiler.BeginSample("Raycast&NOTHit");
-        if (distToNearestFood < 1000000)
-        {
-//            updateFoodAvailable();
-            for (int i = 0; i < gameObjectsFood.Count; i++)
-            {
-                Profiler.BeginSample("DistCalculationDist1");
-                float dist = Vector3.Distance(transPos, transformsFood[i]);
-                Profiler.EndSample();
-
-                if (dist < distToNearestFood && foodAmountAvailableAllFoods[i] > 10)
-                {
-                    Profiler.BeginSample("distAssignment");
-                    distToNearestFood = dist;
-                    Profiler.EndSample();
-
-                    Profiler.BeginSample("nearestFoodAssignment");
-                    nearestFood = gameObjectsFood[i];
-                    Profiler.EndSample();
-                }
-
-                if (distToNearestFood < 0.5f)
-                {
-                    break;
-                }
-            }
-        }
-
+//
+//        bool temp = false;
+//        Profiler.BeginSample("Raycast&Hit");
+//        //do raycast, if hit=food bla, else
+//        RaycastHit2D raycastHit = Physics2D.Raycast(transPos, transPos + trans.forward, 5f, layerMask);
+//        if (raycastHit.collider == null)
+//        {
+//            raycastHit = Physics2D.Raycast(transPos + new Vector3(0, -0.3f, 0),
+//                transPos + new Vector3(0, -0.3f, 0) + trans.forward + new Vector3(0, -0.3f, 0), 5f, layerMask);
+//            temp = true;
+//        }
+//
+//        Debug.DrawLine(transPos, raycastHit.point, temp ? Color.green : Color.red);
+//
+//
+//        //TODO: Fix Raycast. Should always hit!!!
+//        if (raycastHit.collider != null)
+//        {
+//            if (raycastHit.collider.CompareTag("food") &&
+//                raycastHit.collider.gameObject.GetComponent<FoodStats>().foodAmountAvailable > 10)
+//            {
+//                nearestFood = raycastHit.collider.gameObject;
+//                distToNearestFood = Vector2.Distance(transPos, nearestFood.transform.position);
+//            }
+//        }
+//
 //        Profiler.EndSample();
+//
+////        Profiler.BeginSample("Raycast&NOTHit");
+//        if (distToNearestFood < 1000000)
+//        {
+////            updateFoodAvailable();
+//            for (int i = 0; i < gameObjectsFood.Count; i++)
+//            {
+//                Profiler.BeginSample("DistCalculationDist1");
+//                float dist = Vector2.Distance(transPos, transformsFood[i]);
+//                Profiler.EndSample();
+//
+//                if (dist < distToNearestFood && foodAmountAvailableAllFoods[i] > 10)
+//                {
+//                    Profiler.BeginSample("distAssignment");
+//                    distToNearestFood = dist;
+//                    Profiler.EndSample();
+//
+//                    Profiler.BeginSample("nearestFoodAssignment");
+//                    nearestFood = gameObjectsFood[i];
+//                    Profiler.EndSample();
+//                }
+//
+//                if (distToNearestFood < 0.5f)
+//                {
+//                    break;
+//                }
+//            }
+//        }
+//
+////        Profiler.EndSample();
+//
+//        if (nearestFood)
+//        {
+//            angleToNearestFood = Vector3.SignedAngle(trans.up, nearestFood.transform.position - transPos,
+//                trans.forward);
+//        }
+//
+//
+//        Profiler.BeginSample("PoisonStuff");
+//
+//
+//        for (int i = 0; i < gameObjectsPoison.Count; i++)
+//        {
+//            float dist = Vector2.Distance(transPos, transformsPoison[i]);
+//            if (dist < distToNearestPoison)
+//            {
+//                distToNearestPoison = dist;
+//                nearestPoison = gameObjectsPoison[i];
+//            }
+//
+//            if (distToNearestPoison <= 0.5f)
+//            {
+//                break;
+//            }
+//        }
+//
+//        Profiler.EndSample();
+//
+//        if (nearestPoison)
+//        {
+//            angleToNearestPoison = Vector3.SignedAngle(trans.up, nearestPoison.transform.position - transPos,
+//                trans.forward);
+//        }
+//
+//        if (distToNearestFood < distToNearestPoison)
+//        {
+//            foodAmountAtCurrentBlock = nearestFood.GetComponent<FoodStats>().foodAmountAvailable;
+//        }
 
-        if (nearestFood)
-        {
-            angleToNearestFood = Vector3.SignedAngle(trans.up, nearestFood.transform.position - transPos,
-                trans.forward);
-        }
-
-
-        Profiler.BeginSample("PoisonStuff");
-        for (int i = 0; i < gameObjectsPoison.Count; i++)
-        {
-            float dist = Vector3.Distance(transPos, transformsPoison[i]);
-            if (dist < distToNearestPoison)
-            {
-                distToNearestPoison = dist;
-                nearestPoison = gameObjectsPoison[i];
-            }
-
-            if (distToNearestPoison <= 0.5f)
-            {
-                break;
-            }
-        }
-
-        Profiler.EndSample();
-
-        if (nearestPoison)
-        {
-            angleToNearestPoison = Vector3.SignedAngle(trans.up, nearestPoison.transform.position - transPos,
-                trans.forward);
-        }
-
-        if (distToNearestFood < distToNearestPoison)
-        {
-            foodAmountAtCurrentBlock = nearestFood.GetComponent<FoodStats>().foodAmountAvailable;
-        }
-
+        Profiler.BeginSample("Bibitstuff"); /*
         numberOfBibitsNear = 0;
         distToNearestBibit = float.PositiveInfinity;
         angleToNearestBibit = 0;
         angleToNearestBibit = null;
 
 
-        Profiler.BeginSample("BibitStuff");
+//        Profiler.BeginSample("BibitStuff");
         foreach (GameObject go in BibitProducer.getAllBibits())
         {
-            Profiler.BeginSample("BibitStuff-transform.position");
+//            Profiler.BeginSample("BibitStuff-transform.position");
             Vector3 goPos = go.transform.position;
-            float dist = Vector3.Distance(transPos, goPos);
-            Profiler.EndSample();
+            float dist = Vector2.Distance(transPos, goPos);
+//            Profiler.EndSample();
             if (dist < 9)
             {
-                Profiler.BeginSample("BibitStuff-nullifyCondition");
+//                Profiler.BeginSample("BibitStuff-nullifyCondition");
                 if (go != gameObject)
                 {
                     numberOfBibitsNear++;
@@ -607,17 +610,18 @@ public class Bibit : MonoBehaviour
                     }
                 }
 
-                Profiler.EndSample();
+//                Profiler.EndSample();
             }
         }
 
-        Profiler.EndSample();
+//        Profiler.EndSample();
         if (nearestBibit != null)
         {
             angleToNearestBibit = Vector3.SignedAngle(trans.up,
                 nearestBibit.transform.position - transPos, trans.forward);
         }
-
+*/
+        Profiler.EndSample();
 
 //        Debug.DrawLine(transform.position, transform.position + vecToNearestFood, Color.green);
 //        Debug.DrawLine(transform.position, transform.position + vecToNearestPoison, Color.red);
@@ -659,14 +663,14 @@ public class Bibit : MonoBehaviour
 
     private void updateFoodAvailable()
     {
-        Profiler.BeginSample("updateFoodAvailable");
+//        Profiler.BeginSample("updateFoodAvailable");
         transformsFood.Clear();
         foreach (GameObject go in FoodProducer.getAllFoods())
         {
             transformsFood.Add(go.transform.position);
         }
 
-        Profiler.EndSample();
+//        Profiler.EndSample();
     }
 
     private void getAllFieldStats()
@@ -756,26 +760,25 @@ public class BibitReproductionSystem : ComponentSystem
     }
 }
 
+[UpdateAfter(typeof(BibitFieldMeasurementSystem))]
 public class BibitEatingSystem : ComponentSystem
 {
-    protected override void OnStartRunning()
-    {
-    }
-
     protected override void OnUpdate()
     {
-        Entities.ForEach((Bibit bibit, Transform transform, Rigidbody2D rb) =>
+        Entities.ForEach((Bibit bibit, Transform transform) =>
         {
             float eatWish = (float) (bibit.outEat.getValue() * 30);
             if (eatWish <= 0) return;
-
-            if (bibit.distToNearestFood < bibit.distToNearestPoison && bibit.distToNearestFood < 1)
+            if (bibit.nearestFood != null && bibit.distToNearestFood < bibit.distToNearestPoison &&
+                bibit.distToNearestFood < 1)
             {
                 bibit.energy += FoodProducer.eatFood(bibit.nearestFood, eatWish);
+                Debug.Log("EATEN!");
             }
             else if (bibit.distToNearestPoison < 1)
             {
                 bibit.energy += FoodProducer.eatPoison(eatWish);
+                Debug.Log("poison eaten!");
             }
         });
     }
@@ -791,7 +794,7 @@ public class BibitAttackingSystem : ComponentSystem
             {
                 float geneticDifferenceToAttackedBibit = 0;
                 if (bibit.angleToNearestBibit != null &&
-                    (Vector3.Distance(transform.position, bibit.nearestBibit.transform.position) < 0.3f * 0.3f &&
+                    (Vector2.Distance(transform.position, bibit.nearestBibit.transform.position) < 0.3f * 0.3f &&
                      math.abs((float) bibit.angleToNearestBibit) < 70))
                 {
                     geneticDifferenceToAttackedBibit +=
@@ -843,6 +846,138 @@ public class BibitFlippingSystem : ComponentSystem
             if (pos != transform.position)
             {
                 transform.position = pos;
+            }
+        });
+    }
+}
+
+public class BibitFieldMeasurementSystem : ComponentSystem
+{
+    private FoodStats[,] fields;
+    private List<FoodStats> neighbours;
+    private int offsetX;
+    private int offsetY;
+    private int widthBounds;
+    private int heightBounds;
+
+    protected override void OnStartRunning()
+    {
+        fields = FoodProducer.fieldsArray;
+        widthBounds = fields.GetUpperBound(0);
+        heightBounds = fields.GetUpperBound(1);
+        neighbours = new List<FoodStats>();
+        offsetX = math.abs(Mathf.RoundToInt(fields[0, 0].transform.position.x));
+        offsetY = math.abs(Mathf.RoundToInt(fields[0, 0].transform.position.y));
+        Debug.Log("Offsets X / Y: " + offsetX + " / " + offsetY);
+    }
+
+    protected override void OnUpdate()
+    {
+        Entities.ForEach((Bibit bibit, Transform transform) =>
+        {
+            //resetToDefaults:
+            bibit.distToNearestPoison = float.PositiveInfinity;
+            bibit.distToNearestFood = float.PositiveInfinity;
+            bibit.distToNearestBibit = float.PositiveInfinity;
+            bibit.angleToNearestPoison = null;
+            bibit.angleToNearestFood = null;
+            bibit.angleToNearestBibit = null;
+            bibit.nearestFood = null;
+            bibit.nearestBibit = null;
+            neighbours.Clear();
+
+            Vector3 transPos = transform.position;
+            int transPosX = Mathf.RoundToInt(transPos.x + offsetX) + 1;
+            int transPosY = Mathf.RoundToInt(offsetY - transPos.y) + 1;
+            Debug.Log("transX/Y: " + transPosX + " / " + transPosY);
+
+
+            if (transPosX <= widthBounds && transPosY <= heightBounds &&
+                transPosX >= 0 && transPosY > 0)
+            {
+                FoodStats currentField = fields[transPosX, transPosY];
+                neighbours.Add(currentField);
+            }
+
+            if (transPosX <= widthBounds && transPosY + 1 <= heightBounds &&
+                transPosX >= 0 && transPosY + 1 > 0)
+            {
+                FoodStats aboveField = fields[transPosX, transPosY + 1];
+                neighbours.Add(aboveField);
+            }
+
+            if (transPosX <= widthBounds && transPosY - 1 <= heightBounds &&
+                transPosX >= 0 && transPosY - 1 > 0)
+            {
+                FoodStats belowField = fields[transPosX, transPosY - 1];
+                neighbours.Add(belowField);
+            }
+
+            if (transPosX - 1 <= widthBounds && transPosY <= heightBounds &&
+                transPosX - 1 >= 0 && transPosY > 0)
+            {
+                FoodStats leftField = fields[transPosX - 1, transPosY];
+                neighbours.Add(leftField);
+            }
+
+            if (transPosX + 1 <= widthBounds && transPosY <= heightBounds &&
+                transPosX + 1 >= 0 && transPosY > 0)
+            {
+                FoodStats rightField = fields[transPosX + 1, transPosY];
+                neighbours.Add(rightField);
+            }
+
+
+            if (transPosX + 1 <= widthBounds && transPosY + 1 <= heightBounds &&
+                transPosX + 1 >= 0 && transPosY + 1 > 0)
+            {
+                FoodStats rightAboveField = fields[transPosX + 1, transPosY + 1];
+                neighbours.Add(rightAboveField);
+            }
+
+            if (transPosX + 1 <= widthBounds && transPosY - 1 <= heightBounds &&
+                transPosX + 1 >= 0 && transPosY - 1 > 0)
+            {
+                FoodStats rightBelowField = fields[transPosX + 1, transPosY - 1];
+                neighbours.Add(rightBelowField);
+            }
+
+            if (transPosX - 1 <= widthBounds && transPosY + 1 <= heightBounds &&
+                transPosX - 1 >= 0 && transPosY + 1 > 0)
+            {
+                FoodStats leftAboveField = fields[transPosX - 1, transPosY + 1];
+                neighbours.Add(leftAboveField);
+            }
+
+            if (transPosX - 1 <= widthBounds && transPosY - 1 <= heightBounds &&
+                transPosX - 1 >= 0 && transPosY - 1 > 0)
+            {
+                FoodStats leftBelowField = fields[transPosX - 1, transPosY - 1];
+                neighbours.Add(leftBelowField);
+            }
+
+
+            foreach (FoodStats f in neighbours)
+            {
+                if (f.CompareTag("poison"))
+                {
+                    Vector3 neighbourPos = f.transform.position;
+                    bibit.distToNearestPoison = Vector2.Distance(transPos, neighbourPos);
+                    bibit.angleToNearestPoison =
+                        Vector3.SignedAngle(transform.up, neighbourPos - transPos, transform.forward);
+                }
+            }
+
+            foreach (FoodStats f in neighbours)
+            {
+                if (f.CompareTag("food"))
+                {
+                    bibit.nearestFood = f.gameObject;
+                    Vector3 neighbourPos = f.transform.position;
+                    bibit.distToNearestFood = Vector2.Distance(transPos, neighbourPos);
+                    bibit.angleToNearestFood =
+                        Vector3.SignedAngle(transform.up, neighbourPos - transPos, transform.forward);
+                }
             }
         });
     }
@@ -908,7 +1043,7 @@ public class BibitSensorreadingSystem : ComponentSystem
                 {
                     bibit.nearestFood = n.gameObject;
                     var neighbourPos = n.transform.position;
-                    bibit.distToNearestFood = Vector3.Distance(transPos, neighbourPos);
+                    bibit.distToNearestFood = Vector2.Distance(transPos, neighbourPos);
                     bibit.angleToNearestFood = Vector3.SignedAngle(trans.up, neighbourPos - transPos, trans.forward);
                     return;
                 }
@@ -919,7 +1054,7 @@ public class BibitSensorreadingSystem : ComponentSystem
                 if (n.CompareTag("poison"))
                 {
                     var neighbourPos = n.transform.position;
-                    bibit.distToNearestPoison = Vector3.Distance(transPos, neighbourPos);
+                    bibit.distToNearestPoison = Vector2.Distance(transPos, neighbourPos);
                     bibit.angleToNearestPoison = Vector3.SignedAngle(trans.up, neighbourPos - transPos, trans.forward);
                     return;
                 }
@@ -974,7 +1109,7 @@ public class BibitSensorreadingSystem : ComponentSystem
 //raycastHit.collider.gameObject.GetComponent<FoodStats>().foodAmountAvailable > 10)
 //{
 //    nearestFood = raycastHit.collider.gameObject;
-//    distToNearestFood = Vector3.Distance(transPos, nearestFood.transform.position);
+//    distToNearestFood = Vector2.Distance(transPos, nearestFood.transform.position);
 //}
 //}
 //
@@ -988,7 +1123,7 @@ public class BibitSensorreadingSystem : ComponentSystem
 //i++)
 //{
 //    Profiler.BeginSample("DistCalculationDist1");
-//    float dist = Vector3.Distance(transPos, transformsFood[i]);
+//    float dist = Vector2.Distance(transPos, transformsFood[i]);
 //    Profiler.EndSample();
 //
 //    if (dist < distToNearestFood && foodAmountAvailableAllFoods[i] > 10)
@@ -1020,7 +1155,7 @@ public class BibitSensorreadingSystem : ComponentSystem
 //Profiler.BeginSample("PoisonStuff");
 //for (int i = 0; i < gameObjectsPoison.Count; i++)
 //{
-//float dist = Vector3.Distance(transPos, transformsPoison[i]);
+//float dist = Vector2.Distance(transPos, transformsPoison[i]);
 //    if (dist<distToNearestPoison)
 //{
 //    distToNearestPoison = dist;
@@ -1053,7 +1188,7 @@ public class BibitSensorreadingSystem : ComponentSystem
 //{
 //Profiler.BeginSample("BibitStuff-transform.position");
 //Vector3 goPos = go.transform.position;
-//float dist = Vector3.Distance(transPos, goPos);
+//float dist = Vector2.Distance(transPos, goPos);
 //Profiler.EndSample();
 //if (dist< 9)
 //{
