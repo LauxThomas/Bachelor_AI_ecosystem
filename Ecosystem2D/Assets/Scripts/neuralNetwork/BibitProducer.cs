@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using Unity.Entities;
 using UnityEditor;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -37,6 +38,9 @@ public class BibitProducer : MonoBehaviour
     // Start is called before the first frame update
     private void Start()
     {
+        World.Active.GetExistingSystem<BibitFieldMeasurementSystem>().Enabled = true;
+        Debug.Log("BibitFieldMeasurementSystem reactivated");
+
 //        StreamWriter writer = new StreamWriter("Assets/Resources/test.txt", false);
         bigBibit = new Vector3(2, 2, 2);
         smallBibit = new Vector3(0.5f, 0.5f, 0.5f);
