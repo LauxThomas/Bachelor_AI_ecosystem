@@ -13,6 +13,7 @@ public class BibitProducer : MonoBehaviour
     public static GameObject bibitPrefab;
     [SerializeField] private int initialNumberOfBibits = 200;
     [SerializeField] private int minimumNumberOfBibits = 10;
+    private static int maximumNumberOfBibits = 2000;
 
     public List<String> followerNames;
 //    public List<Sprite> sprites;
@@ -20,6 +21,7 @@ public class BibitProducer : MonoBehaviour
     private static Vector3 lu;
     private static Vector3 lo;
     private static Vector3 ru;
+    private static Vector3 bigBibit, smallBibit;
     public static int maxGeneration;
     public static int maxCurrentGeneration;
     public static int respawns;
@@ -34,7 +36,8 @@ public class BibitProducer : MonoBehaviour
     private void Start()
     {
 //        StreamWriter writer = new StreamWriter("Assets/Resources/test.txt", false);
-
+        bigBibit = new Vector3(2, 2, 2);
+        smallBibit = new Vector3(0.5f, 0.5f, 0.5f);
         bibitPrefab = (GameObject) Resources.Load("Bibit");
 //        InvokeRepeating("readGenerations", 3, 2);
         CameraSize = Camera.main.orthographicSize;
@@ -120,6 +123,7 @@ public class BibitProducer : MonoBehaviour
 
     private void spawnBibit(string displayName)
     {
+        maxCurrentGeneration = 0;
         Vector3 spawnPos = new Vector3(Random.Range(lu.x, ru.x), Random.Range(lu.y, lo.y));
         GameObject newBibit = Instantiate(bibitPrefab, spawnPos, Quaternion.identity);
         newBibit.GetComponent<Bibit>().pseudoConstructor1();
@@ -140,7 +144,7 @@ public class BibitProducer : MonoBehaviour
 
     public static void spawnChild(GameObject o)
     {
-        if (allBibits.Count < 500)
+        if (allBibits.Count < maximumNumberOfBibits)
         {
             Vector3 spawnPos = new Vector3(Random.Range(lu.x, ru.x), Random.Range(lu.y, lo.y));
             GameObject newBibit = Instantiate(bibitPrefab, spawnPos, Quaternion.identity);
@@ -168,5 +172,29 @@ public class BibitProducer : MonoBehaviour
     public static int getNumberOfBibits()
     {
         return allBibits.Count;
+    }
+
+    public static void updateGeneration(int generation)
+    {
+        if (maxGeneration < generation)
+        {
+            maxGeneration = generation;
+        }
+    }
+
+    public static void updateMaxGeneration(int generation, Bibit bibit)
+    {
+        if (generation > 0)
+        {
+            if (generation >= maxCurrentGeneration)
+            {
+                maxCurrentGeneration = generation;
+                bibit.transform.localScale = bigBibit;
+            }
+            else
+            {
+                bibit.transform.localScale = smallBibit;
+            }
+        }
     }
 }

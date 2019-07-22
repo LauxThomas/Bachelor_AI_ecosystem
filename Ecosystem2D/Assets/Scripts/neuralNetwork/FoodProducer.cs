@@ -16,6 +16,7 @@ public class FoodProducer : MonoBehaviour
     public static Vector3 ru;
     private GameObject parent;
     [SerializeField] [Range(0, 1f)] private float offset = 0;
+    [SerializeField] [Range(5, 100f)] private float zoom = 50;
 
 //    private static List<GameObject> allFoodsAndPoisons;
     private static List<GameObject> allFoods;
@@ -132,7 +133,7 @@ public class FoodProducer : MonoBehaviour
 //                {
 //                    spawnPrefab = prefab1;
 //                }
-                spawnPrefab = Mathf.PerlinNoise(x / 10f + randX, y / 10f + randY) < percentageOfGrassSpots/100f ? prefab1 : prefab2;
+                spawnPrefab = Mathf.PerlinNoise(x / zoom + randX, y / zoom + randY) < percentageOfGrassSpots/100f ? prefab1 : prefab2;
 
                 GameObject newObj = Instantiate(spawnPrefab, new Vector3(x, y), Quaternion.identity);
                 newObj.GetComponent<FoodStats>().foodAmountAvailable = 0;

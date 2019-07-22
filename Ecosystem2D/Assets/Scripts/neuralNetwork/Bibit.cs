@@ -11,6 +11,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Profiling;
+using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
 
 [SuppressMessage("ReSharper", "IdentifierTypo")]
@@ -256,7 +257,7 @@ public class Bibit : MonoBehaviour
         outEat = brain.getOutputNeuronFromName(NAME_OUT_EAT);
         outMemory = brain.getOutputNeuronFromName(NAME_OUT_MEMORY);
         outAttack = brain.getOutputNeuronFromName(NAME_OUT_ATTACK);
-
+        BibitProducer.updateGeneration(generation);
 //            CalculateFeelerPos();
         for (int i = 0; i < 10; i++)
         {
@@ -282,6 +283,7 @@ public class Bibit : MonoBehaviour
     {
 //        rb.AddForce(Vector3.up * Time.deltaTime);
         energy -= Time.deltaTime * ageModifier;
+        BibitProducer.updateMaxGeneration(generation,this);
 
         //Kill if necessary:
         if (energy < 100)
@@ -808,7 +810,6 @@ public class BibitAttackingSystem : ComponentSystem
 
                             bibit.nearestBibit.GetComponent<Bibit>().energy -= attackWish;
                             bibit.energy += attackWish / bibit.attackCost;
-                            Debug.Log("ATTACKED");
                         }
                     }
                 }
@@ -849,9 +850,9 @@ public class BibitFlippingSystem : ComponentSystem
         });
     }
 }
-
 public class BibitFieldMeasurementSystem : ComponentSystem
 {
+    
     private FoodStats[,] fields;
     private List<FoodStats> neighbours;
     private int offsetX;

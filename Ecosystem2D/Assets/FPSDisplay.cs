@@ -4,6 +4,7 @@ public class FPSDisplay : MonoBehaviour
 {
     
     float deltaTime = 0.0f;
+    private int maxGen;
  
     void Update()
     {
