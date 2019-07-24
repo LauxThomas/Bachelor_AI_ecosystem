@@ -30,6 +30,7 @@ public class BibitProducer : MonoBehaviour
     private static String maxCurrGenAnc;
     public float wiff;
     public float h8;
+    private GameObject fpsDisplay;
 
     [SerializeField] private static List<GameObject> allBibits;
     private static GameObject parent;
@@ -39,6 +40,7 @@ public class BibitProducer : MonoBehaviour
     private void Start()
     {
         World.Active.GetExistingSystem<BibitFieldMeasurementSystem>().Enabled = true;
+        fpsDisplay = GameObject.Find("PFSCounter");
 
 //        StreamWriter writer = new StreamWriter("Assets/Resources/test.txt", false);
         bigBibit = new Vector3(2, 2, 2);
@@ -50,7 +52,7 @@ public class BibitProducer : MonoBehaviour
         lo = FoodProducer.lo;
         ru = FoodProducer.ru;
         wiff = Camera.main.orthographicSize * Screen.width / Screen.height;
-        h8 = (Camera.main.orthographicSize * Screen.height / Screen.width)*2;
+        h8 = (Camera.main.orthographicSize * Screen.height / Screen.width) * 2;
         allBibits = new List<GameObject>();
         parent = new GameObject("Bibits");
         parent.AddComponent<childCounter>();
@@ -89,8 +91,8 @@ public class BibitProducer : MonoBehaviour
         {
             initBibits(1);
         }
-        
-        if (Input.GetKey(KeyCode.Space)&&Input.GetKey(KeyCode.LeftShift))
+
+        if (Input.GetKey(KeyCode.Space) && Input.GetKey(KeyCode.LeftShift))
         {
             initBibits(25);
         }
@@ -98,6 +100,16 @@ public class BibitProducer : MonoBehaviour
         if (allBibits.Count < minimumNumberOfBibits)
         {
             initBibits(1);
+        }
+
+        if (Input.GetKeyDown(KeyCode.I))
+        {
+            fpsDisplay.GetComponent<FPSDisplay>().enabled = false;
+        }
+
+        if (Input.GetKeyDown(KeyCode.O))
+        {
+            fpsDisplay.GetComponent<FPSDisplay>().enabled = true;
         }
     }
 
@@ -136,7 +148,7 @@ public class BibitProducer : MonoBehaviour
     private void spawnBibit(string displayName)
     {
         maxCurrentGeneration = 0;
-        Vector3 spawnPos = new Vector3(Random.Range(-wiff,wiff), Random.Range(-h8,h8));
+        Vector3 spawnPos = new Vector3(Random.Range(-wiff, wiff), Random.Range(-h8, h8));
         GameObject newBibit = Instantiate(bibitPrefab, spawnPos, Quaternion.identity);
         newBibit.GetComponent<Bibit>().pseudoConstructor1();
         addBibit(newBibit);

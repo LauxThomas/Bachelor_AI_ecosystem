@@ -36,10 +36,7 @@ public class FPSDisplay : MonoBehaviour
         {
             Time.timeScale /= 2;
         }
-        if (Input.GetKeyDown(KeyCode.I))
-        {
-            //TODO: disable HUD
-        }
+        
         if (Input.GetKeyDown(KeyCode.Return))
         {
             Application.LoadLevel(Application.loadedLevel);

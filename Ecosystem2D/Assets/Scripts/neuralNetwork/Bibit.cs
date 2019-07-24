@@ -474,7 +474,6 @@ public class BibitColoringSystem : ComponentSystem
     {
         Entities.ForEach((Bibit bibit, SpriteRenderer sr) =>
         {
-            //TODO: auslagern in eigenes CS
             bibit.color.a = (float) ((bibit.energy - Bibit.MINIMUMSURVIVALENERGY) /
                                      (Bibit.STARTENERGY - Bibit.MINIMUMSURVIVALENERGY)
                 ); //set coloralpha to healthpercentage
