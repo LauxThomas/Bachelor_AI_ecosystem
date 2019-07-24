@@ -16,7 +16,7 @@ public class BibitProducer : MonoBehaviour
     [SerializeField] public int minimumNumberOfBibits = 10;
     private static int maximumNumberOfBibits = 2000;
 
-    public List<String> followerNames;
+    public List<String> bibitNames;
 //    public List<Sprite> sprites;
 
     private static Vector3 lu;
@@ -39,7 +39,6 @@ public class BibitProducer : MonoBehaviour
     private void Start()
     {
         World.Active.GetExistingSystem<BibitFieldMeasurementSystem>().Enabled = true;
-        Debug.Log("BibitFieldMeasurementSystem reactivated");
 
 //        StreamWriter writer = new StreamWriter("Assets/Resources/test.txt", false);
         bigBibit = new Vector3(2, 2, 2);
@@ -56,7 +55,7 @@ public class BibitProducer : MonoBehaviour
         parent = new GameObject("Bibits");
         parent.AddComponent<childCounter>();
         initLists();
-        respawns = -2 * followerNames.Count;
+        respawns = -2 * bibitNames.Count;
         for (int i = 0; i < initialNumberOfBibits; i++)
         {
             initBibits();
@@ -69,18 +68,18 @@ public class BibitProducer : MonoBehaviour
 //        {
 //            spawnBibit(followerNames[i % followerNames.Count]);
 //        }
-        spawnBibit(followerNames[Random.Range(0, followerNames.Count)]);
+        spawnBibit(bibitNames[Random.Range(0, bibitNames.Count)]);
         respawns++;
     }
 
     private void initLists()
     {
-        followerNames.Add("Stoney0815");
-        followerNames.Add("Altay1010");
-        followerNames.Add("smoomorli94");
-        followerNames.Add("losemymindyesterday");
-        followerNames.Add("SporkCodes");
-        followerNames.Add("TinkyOwO");
+        bibitNames.Add("Hans-Werner");
+        bibitNames.Add("Frauke");
+        bibitNames.Add("Michael");
+        bibitNames.Add("Markus");
+        bibitNames.Add("Phil");
+        bibitNames.Add("Peter");
     }
 
     // Update is called once per frame
@@ -89,6 +88,11 @@ public class BibitProducer : MonoBehaviour
         if (Input.GetKey(KeyCode.Space))
         {
             initBibits(1);
+        }
+        
+        if (Input.GetKey(KeyCode.Space)&&Input.GetKey(KeyCode.LeftShift))
+        {
+            initBibits(25);
         }
 
         if (allBibits.Count < minimumNumberOfBibits)
@@ -101,7 +105,7 @@ public class BibitProducer : MonoBehaviour
     {
         for (int i = 0; i < amount; i++)
         {
-            spawnBibit(followerNames[Random.Range(0, followerNames.Count)]);
+            spawnBibit(bibitNames[Random.Range(0, bibitNames.Count)]);
         }
 
         respawns += amount;

@@ -10,31 +10,35 @@ public class FPSDisplay : MonoBehaviour
     {
         deltaTime += (Time.unscaledDeltaTime - deltaTime) * 0.1f;
         
-        if (Input.GetKeyDown(KeyCode.Keypad1))
+        if (Input.GetKeyDown(KeyCode.Keypad1)||Input.GetKeyDown(KeyCode.Alpha1))
         {
             Time.timeScale = 1;
         }
 
-        if (Input.GetKeyDown(KeyCode.Keypad2))
+        if (Input.GetKeyDown(KeyCode.Keypad2)||Input.GetKeyDown(KeyCode.Alpha2))
         {
             Time.timeScale += 1;
         }
 
-        if (Input.GetKeyDown(KeyCode.Keypad3))
+        if (Input.GetKeyDown(KeyCode.Keypad3)||Input.GetKeyDown(KeyCode.Alpha3))
         {
             Time.timeScale = 10;
         }
-        if (Input.GetKeyDown(KeyCode.Keypad4))
+        if (Input.GetKeyDown(KeyCode.Keypad4)||Input.GetKeyDown(KeyCode.Alpha4))
         {
             Time.timeScale = 25;
         }
-        if (Input.GetKeyDown(KeyCode.Keypad8))
+        if (Input.GetKeyDown(KeyCode.Keypad8)||Input.GetKeyDown(KeyCode.Alpha8))
         {
             Time.timeScale = 100;
         }
-        if (Input.GetKeyDown(KeyCode.Keypad9))
+        if (Input.GetKeyDown(KeyCode.Keypad9)||Input.GetKeyDown(KeyCode.Alpha9))
         {
             Time.timeScale /= 2;
+        }
+        if (Input.GetKeyDown(KeyCode.I))
+        {
+            //TODO: disable HUD
         }
         if (Input.GetKeyDown(KeyCode.Return))
         {

@@ -15,15 +15,18 @@ public class SettingsMenu : MonoBehaviour
 
     public TMP_Text landmassConnectionText;
     public Slider landmassConnectionSlider;
-    
+
     public TMP_Text grassPercentageSliderText;
     public Slider grassPercentageSlider;
-    
+
     public TMP_Text numberOfInitialBibitsSliderText;
     public Slider numberOfInitialBibitsSlider;
-    
+
     public TMP_Text minimumNumberOfBibitsSliderText;
     public Slider minimumNumberOfBibitsSlider;
+
+    private Resolution[] resolutions;
+    public TMP_Dropdown resolutionDropdown;
 
     public void Start()
     {
@@ -32,6 +35,20 @@ public class SettingsMenu : MonoBehaviour
         grassPercentageSliderText.text = "GRASSPERCENTAGE: " + grassPercentageSlider.value + "%";
         numberOfInitialBibitsSliderText.text = "#INITIAL BIBITS: " + numberOfInitialBibitsSlider.value;
         minimumNumberOfBibitsSliderText.text = "#MINIMUM BIBITS: " + minimumNumberOfBibitsSlider.value;
+
+
+        //create resolutionsarray
+        resolutions = Screen.resolutions;
+        resolutionDropdown.ClearOptions();
+        List<String> options = new List<string>();
+        int currentResIndex = 0;
+        foreach (var res in resolutions)
+        {
+            String o = res.width + " x " + res.width;
+            options.Add(o);
+        }
+
+        resolutionDropdown.AddOptions(options);
     }
 
     public void SetWorldSize()
@@ -62,5 +79,21 @@ public class SettingsMenu : MonoBehaviour
     {
         minimumNumberOfBibitsSliderText.text = "#MINIMUM BIBITS: " + minimumNumberOfBibitsSlider.value;
         spawner.GetComponent<BibitProducer>().minimumNumberOfBibits = (int) minimumNumberOfBibitsSlider.value;
+    }
+
+    public void setQuality(int qualityIndex)
+    {
+        QualitySettings.SetQualityLevel(qualityIndex);
+    }
+
+    public void setFullscreen(bool isFullscreen)
+    {
+        Screen.fullScreen = isFullscreen;
+    }
+
+    public void setResolution(int resIndex)
+    {
+        Resolution res = resolutions[resIndex];
+        Screen.SetResolution(res.width, res.height, Screen.fullScreen);
     }
 }
