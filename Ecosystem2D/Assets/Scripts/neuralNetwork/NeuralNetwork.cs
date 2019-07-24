@@ -197,12 +197,6 @@ namespace DefaultNamespace
         }
 
 
-//        public NeuralNetwork clone()
-//        {
-//            //TODO:
-//            return null;
-//        }
-
         public void RandomMutation(float mutationRate)
         {
 //            int index = Random.Range(0, hiddenNeurons.Count - 1 + outputNeurons.Count - 1);

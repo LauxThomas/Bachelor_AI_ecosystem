@@ -127,6 +127,7 @@ public class Bibit : MonoBehaviour
     private JobHandle jobHandle;
     public bool isDead;
     public bool isOnPoison;
+    public int poisonModifier = 2;
 
 
     private void Start()
@@ -348,7 +349,16 @@ public class BibitMovementSystem : ComponentSystem
             float rotateForce = (float) (bibit.outRotate.getValue() * 15 * dt);
 
             rb.SetRotation(rb.rotation + (float) rotateForce * Bibit.FORCE);
+
+            if (bibit.isOnPoison)
+            {
+            bibit.energy -= math.abs((float) (rotateForce * bibit.ageModifier * bibit.rotationCost*bibit.poisonModifier));
+                
+            }
+            else
+            {
             bibit.energy -= math.abs((float) (rotateForce * bibit.ageModifier * bibit.rotationCost));
+            }
         });
     }
 }
@@ -368,8 +378,6 @@ public class BibitReproductionSystem : ComponentSystem
         {
             if (!bibit.isDead)
             {
-                bibit.isOnPoison = bibit.distToNearestPoison < bibit.distToNearestFood;
-                //TODO: implementing isOnPoison modifier 
                 //energyupdate and generationupdate
                 bibit.energy -= Time.deltaTime * bibit.ageModifier;
                 BibitProducer.updateMaxGeneration(bibit.generation, bibit);
@@ -390,7 +398,14 @@ public class BibitReproductionSystem : ComponentSystem
                     {
                         bibitsToSpawn.Add(bibit.gameObject);
 
-                        bibit.energy -= Bibit.STARTENERGY * bibit.birthCost;
+                        if (bibit.isOnPoison)
+                        {
+                            bibit.energy -= Bibit.STARTENERGY * bibit.birthCost;
+                        }
+                        else
+                        {
+                            bibit.energy -= Bibit.STARTENERGY * bibit.birthCost * bibit.poisonModifier;
+                        }
                     }
                 }
             }
@@ -422,7 +437,14 @@ public class BibitEatingSystem : ComponentSystem
             if (bibit.nearestFood != null && bibit.distToNearestFood < bibit.distToNearestPoison &&
                 bibit.distToNearestFood < 1)
             {
-                bibit.energy += FoodProducer.eatFood(bibit.nearestFood, eatWish);
+                if (bibit.isOnPoison)
+                {
+                    bibit.energy += FoodProducer.eatFood(bibit.nearestFood, eatWish) / (bibit.eatCost * bibit.poisonModifier);
+                }
+                else
+                {
+                    bibit.energy += FoodProducer.eatFood(bibit.nearestFood, eatWish) / bibit.eatCost;
+                }
             }
             else if (bibit.distToNearestPoison < 1)
             {
@@ -457,7 +479,15 @@ public class BibitAttackingSystem : ComponentSystem
                             double attackWish = bibit.outAttack.getValue() * Time.deltaTime * 30;
 
                             bibit.nearestBibit.GetComponent<Bibit>().energy -= attackWish;
-                            bibit.energy += attackWish / bibit.attackCost;
+                            if (bibit.isOnPoison)
+                            {
+                                bibit.energy += attackWish / (bibit.attackCost * bibit.poisonModifier);
+                            }
+                            else
+                            {
+                                bibit.energy += attackWish / bibit.attackCost;
+                            }
+
                             Debug.Log("ATTACKED!");
                         }
                     }
@@ -628,9 +658,13 @@ public class BibitFieldMeasurementSystem : ComponentSystem
                 if (f.CompareTag("poison"))
                 {
                     Vector3 neighbourPos = f.transform.position;
-                    bibit.distToNearestPoison = Vector2.Distance(transPos, neighbourPos);
-                    bibit.angleToNearestPoison =
-                        Vector3.SignedAngle(transform.up, neighbourPos - transPos, transform.forward);
+                    float newDist = Vector2.Distance(transPos, neighbourPos);
+                    if (newDist < bibit.distToNearestPoison)
+                    {
+                        bibit.distToNearestPoison = newDist;
+                        bibit.angleToNearestPoison =
+                            Vector3.SignedAngle(transform.up, neighbourPos - transPos, transform.forward);
+                    }
                 }
             }
 
@@ -638,11 +672,15 @@ public class BibitFieldMeasurementSystem : ComponentSystem
             {
                 if (f.CompareTag("food"))
                 {
-                    bibit.nearestFood = f.gameObject;
                     Vector3 neighbourPos = f.transform.position;
-                    bibit.distToNearestFood = Vector2.Distance(transPos, neighbourPos);
-                    bibit.angleToNearestFood =
-                        Vector3.SignedAngle(transform.up, neighbourPos - transPos, transform.forward);
+                    float newDist = Vector2.Distance(transPos, neighbourPos);
+                    if (newDist < bibit.distToNearestFood)
+                    {
+                        bibit.nearestFood = f.gameObject;
+                        bibit.distToNearestFood = Vector2.Distance(transPos, neighbourPos);
+                        bibit.angleToNearestFood =
+                            Vector3.SignedAngle(transform.up, neighbourPos - transPos, transform.forward);
+                    }
                 }
             }
 
@@ -697,24 +735,20 @@ public class BibitFieldMeasurementSystem : ComponentSystem
             Profiler.EndSample();
             #endregion
 */
+
+            bibit.isOnPoison = bibit.distToNearestPoison < bibit.distToNearestFood;
         });
     }
 }
 
-[UpdateAfter(typeof(BibitFieldMeasurementSystem))]
+[UpdateBefore(typeof(BibitFieldMeasurementSystem))]
 public class BibitNeuralNetworkSystem : ComponentSystem
 {
-    protected override void OnStartRunning()
-    {
-        base.OnStartRunning();
-    }
-
     protected override void OnUpdate()
     {
         Entities.ForEach((Bibit bibit) =>
         {
             Profiler.BeginSample("Update Brain");
-            //todo: incomponentsystem auslagern
             bibit.brain.invalidate();
             bibit.inBias.setValue(1);
             bibit.inEnergy.setValue(bibit.energy);
@@ -860,7 +894,6 @@ public class BibitSensorreadingSystem : ComponentSystem
 //
 //Debug.DrawLine(transPos, raycastHit.point, temp ? Color.green : Color.red);
 //
-////TODO: Fix Raycast. Should always hit!!!
 //if (raycastHit.collider != null)
 //{
 //if (raycastHit.collider.CompareTag("food") &&

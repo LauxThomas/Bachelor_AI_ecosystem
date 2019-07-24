@@ -25,7 +25,6 @@ namespace DefaultNamespace
 
         private void calculate()
         {
-            //TODO: CHECK
             double value = 0;
             foreach (Connection c in connections)
             {

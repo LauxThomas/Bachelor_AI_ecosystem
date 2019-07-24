@@ -5,6 +5,7 @@ using Random = UnityEngine.Random;
 
 namespace DefaultNamespace
 {
+    //TODO aufräumen ...
     public class Creature : MonoBehaviour
     {
         private const float CONST_EAT = 0.1f;
@@ -164,24 +165,22 @@ namespace DefaultNamespace
 
         public void ReadSensors()
         {
-            //todo: tiling!
             brain.invalidate();
             inBias.setValue(1);
 
-            inFoodValuePosition.setValue(0); //todo
-            inFoodValueFeeler.setValue(0); //todo
-            inOcclusionFeeler.setValue(0); //todo
+            inFoodValuePosition.setValue(0);
+            inFoodValueFeeler.setValue(0); 
+            inOcclusionFeeler.setValue(0); 
             inEnergy.setValue((energy - MINIMUMSURVIVALENERGY) / (STARTENERGY - MINIMUMSURVIVALENERGY));
             inAge.setValue(age);
-            inGeneticDifference.setValue(0); //todo
-            inWasAttacked.setValue(0); //todo
-            inWaterOnFeeler.setValue(0); //todo:
-            inWaterOnCreature.setValue(0); //todo
+            inGeneticDifference.setValue(0);
+            inWasAttacked.setValue(0); 
+            inWaterOnFeeler.setValue(0); 
+            inWaterOnCreature.setValue(0); 
         }
 
         public void Act()
         {
-            //todo:
 //            Tile t = new Tile(Tile.Type.Grass);
 //            Tile t = Tilemap.getTileAtWorldPosition(pos):
 //            float costMult = createCostMultiplier(t);
