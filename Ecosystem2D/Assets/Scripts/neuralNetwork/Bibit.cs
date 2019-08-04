@@ -33,6 +33,7 @@ public class Bibit : MonoBehaviour
     private const String NAME_IN_ENERGY = "Current Energy";
     private const String NAME_IN_AGE = "Current Age";
     private const String NAME_IN_MEMORY = "My in Memory";
+    private const String NAME_IN_MEMORY2 = "My in Memory2";
     private const String NAME_IN_DISTTONEARESTPOISON = "Distance to nearest poison aka. water";
     private const String NAME_IN_ANGLETONEARESTPOISON = "Angle to nearest poison aka. water";
     private const String NAME_IN_FOODAMOUNTATCURRENTBLOCK = "Amount of food at current block";
@@ -52,12 +53,14 @@ public class Bibit : MonoBehaviour
     private const String NAME_OUT_FORWARD = "Forward";
     private const String NAME_OUT_EAT = "Eat";
     private const String NAME_OUT_MEMORY = "My out Memory";
+    private const String NAME_OUT_MEMORY2 = "My out Memory2";
     private const String NAME_OUT_ATTACK = "Attack";
 
     public InputNeuron inBias = new InputNeuron();
     public InputNeuron inEnergy = new InputNeuron();
     public InputNeuron inAge = new InputNeuron();
     public InputNeuron inMemory = new InputNeuron();
+    public InputNeuron inMemory2 = new InputNeuron();
     public InputNeuron inDistToNearestPoison = new InputNeuron();
     public InputNeuron inAngleToNearestPoison = new InputNeuron();
     public InputNeuron inFoodAmountAtCurrentBlock = new InputNeuron();
@@ -76,6 +79,7 @@ public class Bibit : MonoBehaviour
     public WorkingNeuron outRotate = new WorkingNeuron();
     public WorkingNeuron outForward = new WorkingNeuron();
     public WorkingNeuron outMemory = new WorkingNeuron();
+    public WorkingNeuron outMemory2 = new WorkingNeuron();
     public WorkingNeuron outAttack = new WorkingNeuron();
 
     public Color color;
@@ -160,6 +164,7 @@ public class Bibit : MonoBehaviour
         inEnergy.setName(NAME_IN_ENERGY);
         inAge.setName(NAME_IN_AGE);
         inMemory.setName(NAME_IN_MEMORY);
+        inMemory2.setName(NAME_IN_MEMORY2);
         inDistToNearestPoison.setName(NAME_IN_DISTTONEARESTPOISON);
         inAngleToNearestPoison.setName(NAME_IN_ANGLETONEARESTPOISON);
         inFoodAmountAtCurrentBlock.setName(NAME_IN_FOODAMOUNTATCURRENTBLOCK);
@@ -178,6 +183,7 @@ public class Bibit : MonoBehaviour
         outForward.setName(NAME_OUT_FORWARD);
         outEat.setName(NAME_OUT_EAT);
         outMemory.setName(NAME_OUT_MEMORY);
+        outMemory2.setName(NAME_OUT_MEMORY2);
         outAttack.setName(NAME_OUT_ATTACK);
 
         brain = new NeuralNetwork();
@@ -187,6 +193,7 @@ public class Bibit : MonoBehaviour
         brain.addInputNeuron(inEnergy);
         brain.addInputNeuron(inAge);
         brain.addInputNeuron(inMemory);
+        brain.addInputNeuron(inMemory2);
         brain.addInputNeuron(inDistToNearestPoison);
         brain.addInputNeuron(inAngleToNearestPoison);
         brain.addInputNeuron(inFoodAmountAtCurrentBlock);
@@ -207,6 +214,7 @@ public class Bibit : MonoBehaviour
         brain.addOutputNeuron(outForward);
         brain.addOutputNeuron(outEat);
         brain.addOutputNeuron(outMemory);
+        brain.addOutputNeuron(outMemory2);
         brain.addOutputNeuron(outAttack);
 
 
@@ -343,10 +351,11 @@ public class BibitMovementSystem : ComponentSystem
             float speedForce = (float) bibit.outForward.getValue();
             Vector3 forceToAdd = Bibit.SPEED * speedForce * 15 * dt * transform.up.normalized;
             bibit.energy -= forceToAdd.magnitude / Bibit.SPEED / 10f * bibit.ageModifier * bibit.moveCost;
-            if (speedForce<0)
+            if (speedForce < 0)
             {
                 forceToAdd *= 0.75f;
             }
+
             rb.AddForce(forceToAdd);
 
             //rotate:
@@ -356,12 +365,12 @@ public class BibitMovementSystem : ComponentSystem
 
             if (bibit.isOnPoison)
             {
-            bibit.energy -= math.abs((float) (rotateForce * bibit.ageModifier * bibit.rotationCost*bibit.poisonModifier));
-                
+                bibit.energy -=
+                    math.abs((float) (rotateForce * bibit.ageModifier * bibit.rotationCost * bibit.poisonModifier));
             }
             else
             {
-            bibit.energy -= math.abs((float) (rotateForce * bibit.ageModifier * bibit.rotationCost));
+                bibit.energy -= math.abs((float) (rotateForce * bibit.ageModifier * bibit.rotationCost));
             }
         });
     }
@@ -429,35 +438,6 @@ public class BibitReproductionSystem : ComponentSystem
     }
 }
 
-[UpdateAfter(typeof(BibitFieldMeasurementSystem))]
-public class BibitEatingSystem : ComponentSystem
-{
-    protected override void OnUpdate()
-    {
-        Entities.ForEach((Bibit bibit, Transform transform) =>
-        {
-            float eatWish = (float) (bibit.outEat.getValue() * 30);
-            if (eatWish <= 0) return;
-            if (bibit.nearestFood != null && bibit.distToNearestFood < bibit.distToNearestPoison &&
-                bibit.distToNearestFood < 1)
-            {
-                if (bibit.isOnPoison)
-                {
-                    bibit.energy += FoodProducer.eatFood(bibit.nearestFood, eatWish) / (bibit.eatCost * bibit.poisonModifier);
-                }
-                else
-                {
-                    bibit.energy += FoodProducer.eatFood(bibit.nearestFood, eatWish) / bibit.eatCost;
-                }
-            }
-            else if (bibit.distToNearestPoison < 1)
-            {
-                bibit.energy += FoodProducer.eatPoison(eatWish);
-            }
-        });
-    }
-}
-
 public class BibitAttackingSystem : ComponentSystem
 {
     protected override void OnUpdate()
@@ -501,21 +481,6 @@ public class BibitAttackingSystem : ComponentSystem
     }
 }
 
-[UpdateAfter(typeof(BibitFieldMeasurementSystem))]
-public class BibitColoringSystem : ComponentSystem
-{
-    protected override void OnUpdate()
-    {
-        Entities.ForEach((Bibit bibit, SpriteRenderer sr) =>
-        {
-            bibit.color.a = (float) ((bibit.energy - Bibit.MINIMUMSURVIVALENERGY) /
-                                     (Bibit.STARTENERGY - Bibit.MINIMUMSURVIVALENERGY)
-                ); //set coloralpha to healthpercentage
-            bibit.GetComponent<SpriteRenderer>().color = bibit.color;
-        });
-    }
-}
-
 public class BibitFlippingSystem : ComponentSystem
 {
     protected override void OnUpdate()
@@ -545,6 +510,41 @@ public class BibitFlippingSystem : ComponentSystem
             {
                 transform.position = pos;
             }
+        });
+    }
+}
+
+[UpdateBefore(typeof(BibitFieldMeasurementSystem))]
+public class BibitNeuralNetworkSystem : ComponentSystem
+{
+    protected override void OnUpdate()
+    {
+        Entities.ForEach((Bibit bibit) =>
+        {
+            Profiler.BeginSample("Update Brain");
+            bibit.brain.invalidate();
+            bibit.inBias.setValue(1);
+            bibit.inEnergy.setValue(bibit.energy);
+            bibit.inAge.setValue(bibit.age);
+            bibit.inMemory.setValue(bibit.outMemory.getValue());
+            bibit.inMemory2.setValue(bibit.outMemory2.getValue());
+            bibit.inDistToNearestPoison.setValue(bibit.distToNearestPoison);
+            if (bibit.angleToNearestPoison != null)
+                bibit.inAngleToNearestPoison.setValue((float) bibit.angleToNearestPoison);
+            bibit.inFoodAmountAtCurrentBlock.setValue(bibit.foodAmountAtCurrentBlock);
+            bibit.inFoodAmountInSightRadius.setValue(bibit.foodAmountInSightRadius);
+            bibit.inDistToMaxFoodBlockAround.setValue(bibit.distToMaxFoodBlockAround);
+            if (bibit.angleToMaxFoodBlockAround != null)
+                bibit.inAngleToMaxFoodBlockAround.setValue((float) bibit.angleToMaxFoodBlockAround);
+            bibit.inFoodAmountOfMaxFoodBlockAround.setValue(bibit.amountOfMaxFoodBlockAround);
+            bibit.inNumberOfBibitsNear.setValue(bibit.numberOfBibitsNear);
+            bibit.inDistToNearestBibit.setValue(bibit.distToNearestBibit);
+            if (bibit.angleToNearestBibit != null)
+                bibit.inAngleToNearestBibit.setValue((double) bibit.angleToNearestBibit);
+            Transform trans = bibit.transform;
+            bibit.inCenterPosition.setValue(Vector3.SignedAngle(trans.up, Vector3.zero - trans.position,
+                trans.forward));
+            Profiler.EndSample();
         });
     }
 }
@@ -745,39 +745,51 @@ public class BibitFieldMeasurementSystem : ComponentSystem
     }
 }
 
-[UpdateBefore(typeof(BibitFieldMeasurementSystem))]
-public class BibitNeuralNetworkSystem : ComponentSystem
+[UpdateAfter(typeof(BibitFieldMeasurementSystem))]
+public class BibitColoringSystem : ComponentSystem
 {
     protected override void OnUpdate()
     {
-        Entities.ForEach((Bibit bibit) =>
+        Entities.ForEach((Bibit bibit, SpriteRenderer sr) =>
         {
-            Profiler.BeginSample("Update Brain");
-            bibit.brain.invalidate();
-            bibit.inBias.setValue(1);
-            bibit.inEnergy.setValue(bibit.energy);
-            bibit.inAge.setValue(bibit.age);
-            bibit.inMemory.setValue(bibit.outMemory.getValue());
-            bibit.inDistToNearestPoison.setValue(bibit.distToNearestPoison);
-            if (bibit.angleToNearestPoison != null)
-                bibit.inAngleToNearestPoison.setValue((float) bibit.angleToNearestPoison);
-            bibit.inFoodAmountAtCurrentBlock.setValue(bibit.foodAmountAtCurrentBlock);
-            bibit.inFoodAmountInSightRadius.setValue(bibit.foodAmountInSightRadius);
-            bibit.inDistToMaxFoodBlockAround.setValue(bibit.distToMaxFoodBlockAround);
-            if (bibit.angleToMaxFoodBlockAround != null)
-                bibit.inAngleToMaxFoodBlockAround.setValue((float) bibit.angleToMaxFoodBlockAround);
-            bibit.inFoodAmountOfMaxFoodBlockAround.setValue(bibit.amountOfMaxFoodBlockAround);
-            bibit.inNumberOfBibitsNear.setValue(bibit.numberOfBibitsNear);
-            bibit.inDistToNearestBibit.setValue(bibit.distToNearestBibit);
-            if (bibit.angleToNearestBibit != null)
-                bibit.inAngleToNearestBibit.setValue((double) bibit.angleToNearestBibit);
-            Transform trans = bibit.transform;
-            bibit.inCenterPosition.setValue(Vector3.SignedAngle(trans.up, Vector3.zero - trans.position,
-                trans.forward));
-            Profiler.EndSample();
+            bibit.color.a = (float) ((bibit.energy - Bibit.MINIMUMSURVIVALENERGY) /
+                                     (Bibit.STARTENERGY - Bibit.MINIMUMSURVIVALENERGY)
+                ); //set coloralpha to healthpercentage
+            bibit.GetComponent<SpriteRenderer>().color = bibit.color;
         });
     }
 }
+
+[UpdateAfter(typeof(BibitFieldMeasurementSystem))]
+public class BibitEatingSystem : ComponentSystem
+{
+    protected override void OnUpdate()
+    {
+        Entities.ForEach((Bibit bibit, Transform transform) =>
+        {
+            float eatWish = (float) (bibit.outEat.getValue() * 30);
+            if (eatWish <= 0) return;
+            if (bibit.nearestFood != null && bibit.distToNearestFood < bibit.distToNearestPoison &&
+                bibit.distToNearestFood < 1)
+            {
+                if (bibit.isOnPoison)
+                {
+                    bibit.energy += FoodProducer.eatFood(bibit.nearestFood, eatWish) /
+                                    (bibit.eatCost * bibit.poisonModifier);
+                }
+                else
+                {
+                    bibit.energy += FoodProducer.eatFood(bibit.nearestFood, eatWish) / bibit.eatCost;
+                }
+            }
+            else if (bibit.distToNearestPoison < 1)
+            {
+                bibit.energy += FoodProducer.eatPoison(eatWish);
+            }
+        });
+    }
+}
+
 
 /*
 public class BibitSensorreadingSystem : ComponentSystem

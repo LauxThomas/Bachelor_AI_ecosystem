@@ -5,6 +5,7 @@ using System.IO;
 using Unity.Entities;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
 
 [SuppressMessage("ReSharper", "StringLiteralTypo")]
@@ -110,6 +111,11 @@ public class BibitProducer : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.O))
         {
             fpsDisplay.GetComponent<FPSDisplay>().enabled = true;
+        }
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            
+            SceneManager.LoadScene("MainMenu");
         }
     }
 

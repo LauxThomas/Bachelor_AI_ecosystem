@@ -7,6 +7,8 @@ using UnityEngine.UI;
 
 public class SettingsMenu : MonoBehaviour
 {
+    public MyScriptableObjectClass myScriptableObject;
+    
     public GameObject mainGameCamera;
     public GameObject spawner;
 
@@ -54,7 +56,7 @@ public class SettingsMenu : MonoBehaviour
     public void SetWorldSize()
     {
         worldSizeText.text = "WORLDSIZE: " + worldSizeSlider.value;
-        mainGameCamera.GetComponent<Camera>().orthographicSize = worldSizeSlider.value;
+        myScriptableObject.cameraSize = (int) worldSizeSlider.value;
     }
 
     public void SetLandmassConnection()

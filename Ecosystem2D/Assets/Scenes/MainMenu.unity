@@ -3554,7 +3554,7 @@ RectTransform:
   m_GameObject: {fileID: 986466212}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_Children:
   - {fileID: 909280491}
   - {fileID: 1261905224}
@@ -3569,10 +3569,10 @@ RectTransform:
   m_Father: {fileID: 1003037778}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1818.9, y: 969.8}
+  m_SizeDelta: {x: 706.9, y: 345.8}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &986466214
 MonoBehaviour:
@@ -3586,6 +3586,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd40990f5c11f49478849f085c95d081, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  myScriptableObject: {fileID: 11400000, guid: 2b490085cc0cd7241831942a31a09ebc, type: 2}
   mainGameCamera: {fileID: 4597783823751392487, guid: 021de25f51024cf44b6403910fc7832e,
     type: 3}
   spawner: {fileID: 7226747222696369793, guid: 61458157b4ecc5d4086d95792ec998c8, type: 3}
@@ -5604,7 +5605,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1499525769
 RectTransform:
   m_ObjectHideFlags: 0
@@ -6489,7 +6490,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1663288241
 RectTransform:
   m_ObjectHideFlags: 0
