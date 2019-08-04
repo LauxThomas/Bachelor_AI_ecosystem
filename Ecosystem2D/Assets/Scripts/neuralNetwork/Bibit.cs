@@ -144,7 +144,7 @@ public class Bibit : MonoBehaviour
         moveCost = 1.1f;
         birthCost = 0.8f;
         eatCost = 1.0f;
-        attackCost = 0.8f;
+        attackCost = 1.05f;
 
         Profiler.BeginSample("MySampleGetAllFieldStats");
         getAllFieldStats();
@@ -200,7 +200,7 @@ public class Bibit : MonoBehaviour
         brain.addInputNeuron(inGeneticDifferenceToNearestBibit);
         brain.addInputNeuron(inCenterPosition);
 
-        brain.generateHiddenNeurons(20);
+        brain.generateHiddenNeurons(25);
 
         brain.addOutputNeuron(outBirth);
         brain.addOutputNeuron(outRotate);
