@@ -9,9 +9,6 @@ public class SettingsMenu : MonoBehaviour
 {
     public MyScriptableObjectClass myScriptableObject;
     
-    public GameObject mainGameCamera;
-    public GameObject spawner;
-
     public TMP_Text worldSizeText;
     public Slider worldSizeSlider;
 
@@ -62,25 +59,25 @@ public class SettingsMenu : MonoBehaviour
     public void SetLandmassConnection()
     {
         landmassConnectionText.text = "LANDMASSCONNECTION: " + landmassConnectionSlider.value;
-        spawner.GetComponent<FoodProducer>().zoom = landmassConnectionSlider.value;
+        myScriptableObject.landMassConnection = (int) landmassConnectionSlider.value;
     }
 
     public void SetGrassPercentage()
     {
         grassPercentageSliderText.text = "GRASSPERCENTAGE: " + grassPercentageSlider.value + "%";
-        spawner.GetComponent<FoodProducer>().percentageOfGrassSpots = (int) grassPercentageSlider.value;
+        myScriptableObject.grassPercentage = (int) grassPercentageSlider.value;
     }
 
     public void SetNumberOfInitialNumberOfBibits()
     {
         numberOfInitialBibitsSliderText.text = "#INITIAL BIBITS: " + numberOfInitialBibitsSlider.value;
-        spawner.GetComponent<BibitProducer>().initialNumberOfBibits = (int) numberOfInitialBibitsSlider.value;
+        myScriptableObject.initialBibits = (int) numberOfInitialBibitsSlider.value;
     }
 
     public void SetNumberOfMinimalBibits()
     {
         minimumNumberOfBibitsSliderText.text = "#MINIMUM BIBITS: " + minimumNumberOfBibitsSlider.value;
-        spawner.GetComponent<BibitProducer>().minimumNumberOfBibits = (int) minimumNumberOfBibitsSlider.value;
+        myScriptableObject.minimumBibits = (int) minimumNumberOfBibitsSlider.value;
     }
 
     public void setQuality(int qualityIndex)

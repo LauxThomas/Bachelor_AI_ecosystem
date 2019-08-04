@@ -348,7 +348,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: beb469538aec66549afd3bbd08cf1031, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  myScriptableObject: {fileID: 11400000, guid: 2b490085cc0cd7241831942a31a09ebc, type: 2}
+  myScriptableObject: {fileID: 11400000, guid: d9c2b50d5d2946c0bff801be7fb9c692, type: 2}
 --- !u!1001 &7226747223161210511
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -422,5 +422,17 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 3115772188068675734, guid: b31ba3f294d73c34a8365ba1e8853052,
         type: 3}
+    - target: {fileID: 7226747222696369822, guid: 61458157b4ecc5d4086d95792ec998c8,
+        type: 3}
+      propertyPath: myScriptableObject
+      value: 
+      objectReference: {fileID: 11400000, guid: d9c2b50d5d2946c0bff801be7fb9c692,
+        type: 2}
+    - target: {fileID: 7226747222696369792, guid: 61458157b4ecc5d4086d95792ec998c8,
+        type: 3}
+      propertyPath: myScriptableObject
+      value: 
+      objectReference: {fileID: 11400000, guid: d9c2b50d5d2946c0bff801be7fb9c692,
+        type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 61458157b4ecc5d4086d95792ec998c8, type: 3}

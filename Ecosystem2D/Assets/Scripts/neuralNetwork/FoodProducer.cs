@@ -6,6 +6,7 @@ using Random = UnityEngine.Random;
 
 public class FoodProducer : MonoBehaviour
 {
+    public MyScriptableObjectClass myScriptableObject;
     public GameObject prefab1;
     public GameObject prefab2;
 
@@ -16,7 +17,7 @@ public class FoodProducer : MonoBehaviour
     public static Vector3 ru;
     private GameObject parent;
     [SerializeField] [Range(0, 1f)] private float offset = 0;
-    [SerializeField] [Range(5, 100f)] public float zoom = 50;
+    [SerializeField] [Range(5, 100f)] public float landmassConnection = 50;
 
 //    private static List<GameObject> allFoodsAndPoisons;
     private static List<GameObject> allFoods;
@@ -35,6 +36,8 @@ public class FoodProducer : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        percentageOfGrassSpots = myScriptableObject.grassPercentage;
+        landmassConnection = myScriptableObject.landMassConnection;
         Application.targetFrameRate = 300;
         mainCam = Camera.main;
         lu = mainCam.ViewportToWorldPoint(new Vector3(0, 0, 0));
@@ -133,7 +136,7 @@ public class FoodProducer : MonoBehaviour
 //                {
 //                    spawnPrefab = prefab1;
 //                }
-                spawnPrefab = Mathf.PerlinNoise(x / zoom + randX, y / zoom + randY) < percentageOfGrassSpots/100f ? prefab1 : prefab2;
+                spawnPrefab = Mathf.PerlinNoise(x / landmassConnection + randX, y / landmassConnection + randY) < percentageOfGrassSpots/100f ? prefab1 : prefab2;
 
                 GameObject newObj = Instantiate(spawnPrefab, new Vector3(x, y), Quaternion.identity);
                 newObj.GetComponent<FoodStats>().foodAmountAvailable = 0;

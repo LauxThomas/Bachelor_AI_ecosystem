@@ -3586,10 +3586,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd40990f5c11f49478849f085c95d081, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  myScriptableObject: {fileID: 11400000, guid: 2b490085cc0cd7241831942a31a09ebc, type: 2}
-  mainGameCamera: {fileID: 4597783823751392487, guid: 021de25f51024cf44b6403910fc7832e,
-    type: 3}
-  spawner: {fileID: 7226747222696369793, guid: 61458157b4ecc5d4086d95792ec998c8, type: 3}
+  myScriptableObject: {fileID: 11400000, guid: d9c2b50d5d2946c0bff801be7fb9c692, type: 2}
   worldSizeText: {fileID: 1182045976}
   worldSizeSlider: {fileID: 2095659881}
   landmassConnectionText: {fileID: 2060216102}

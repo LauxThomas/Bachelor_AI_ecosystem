@@ -12,6 +12,7 @@ using Random = UnityEngine.Random;
 [SuppressMessage("ReSharper", "IdentifierTypo")]
 public class BibitProducer : MonoBehaviour
 {
+    public MyScriptableObjectClass myScriptableObject;
     public static GameObject bibitPrefab;
     [SerializeField] public int initialNumberOfBibits = 200;
     [SerializeField] public int minimumNumberOfBibits = 10;
@@ -42,6 +43,8 @@ public class BibitProducer : MonoBehaviour
     {
         World.Active.GetExistingSystem<BibitFieldMeasurementSystem>().Enabled = true;
         fpsDisplay = GameObject.Find("PFSCounter");
+        initialNumberOfBibits = myScriptableObject.initialBibits;
+        minimumNumberOfBibits = myScriptableObject.minimumBibits;
 
 //        StreamWriter writer = new StreamWriter("Assets/Resources/test.txt", false);
         bigBibit = new Vector3(2, 2, 2);
