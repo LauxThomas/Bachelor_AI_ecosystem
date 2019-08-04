@@ -342,8 +342,12 @@ public class BibitMovementSystem : ComponentSystem
             //move:
             float speedForce = (float) bibit.outForward.getValue();
             Vector3 forceToAdd = Bibit.SPEED * speedForce * 15 * dt * transform.up.normalized;
-            rb.AddForce(forceToAdd);
             bibit.energy -= forceToAdd.magnitude / Bibit.SPEED / 10f * bibit.ageModifier * bibit.moveCost;
+            if (speedForce<0)
+            {
+                forceToAdd *= 0.75f;
+            }
+            rb.AddForce(forceToAdd);
 
             //rotate:
             float rotateForce = (float) (bibit.outRotate.getValue() * 15 * dt);
