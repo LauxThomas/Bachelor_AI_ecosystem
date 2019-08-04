@@ -133,14 +133,14 @@ public class BibitProducer : MonoBehaviour
             {
                 maxGeneration = gen;
                 maxGenAnc = go.name;
-                maxGenAnc = maxGenAnc.Substring(0, maxGenAnc.IndexOf(",", StringComparison.Ordinal));
+//                maxGenAnc = maxGenAnc.Substring(0, maxGenAnc.IndexOf(",", StringComparison.Ordinal));
             }
 
             if (gen > maxCurrentGeneration)
             {
                 maxCurrentGeneration = gen;
                 maxCurrGenAnc = go.name;
-                maxCurrGenAnc = maxCurrGenAnc.Substring(0, maxCurrGenAnc.IndexOf(",", StringComparison.Ordinal));
+//                maxCurrGenAnc = maxCurrGenAnc.Substring(0, maxCurrGenAnc.IndexOf(",", StringComparison.Ordinal));
             }
         }
     }
@@ -188,8 +188,8 @@ public class BibitProducer : MonoBehaviour
         return "\n" +
                "running: " + (int) Time.timeSinceLevelLoad + " @ " + Time.timeScale + " \n" +
                "Deaths: " + respawns + " \n" +
-               "maxGeneration: " + maxGeneration + " @ " + maxGenAnc + " \n" +
-               "maxCurrentGeneration: " + maxCurrentGeneration + " @ " + maxCurrGenAnc + " \n" +
+               "maxGeneration: " + maxGeneration + " \n" +
+               "maxCurrentGeneration: " + maxCurrentGeneration + " \n" +
                "numberOfBibits: " + allBibits.Count;
     }
 
