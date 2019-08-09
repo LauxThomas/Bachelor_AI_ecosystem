@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 304536bfbe8a917449e4de7fe5c6a4da, type: 3}
   m_Name: SettingsObject
   m_EditorClassIdentifier: 
-  objectName: New MyScriptableObject
-  cameraSize: 30
-  colorIsRandom: 0
-  thisColor: {r: 1, g: 1, b: 1, a: 1}
-  spawnPoints: []
+  cameraSize: 59
+  landMassConnection: 80
+  grassPercentage: 63
+  initialBibits: 80
+  minimumBibits: 10
