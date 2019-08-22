@@ -3,17 +3,17 @@ namespace DefaultNamespace
     public class Connection
     {
         public double weight;
-        private Neuron entrieNeuron;
+        private Neuron usedNeuron;
 
         public Connection(Neuron neuron, double weight)
         {
             this.weight = weight;
-            this.entrieNeuron = neuron;
+            this.usedNeuron = neuron;
         }
 
         public double getValue()
         {
-            return weight * entrieNeuron.getValue();
+            return weight * usedNeuron.getValue();
         }
     }
 }

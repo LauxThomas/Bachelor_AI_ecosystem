@@ -84,10 +84,6 @@ namespace DefaultNamespace
             }
         }
 
-        public InputNeuron getInputNeuronFromIndex(int index)
-        {
-            return inputNeurons[index];
-        }
 
         public InputNeuron getInputNeuronFromName(String name)
         {
@@ -102,28 +98,7 @@ namespace DefaultNamespace
             return null;
         }
 
-        public WorkingNeuron getHiddenNeuronFromIndex(int index)
-        {
-            return hiddenNeurons[index];
-        }
 
-        public WorkingNeuron getHiddenNeuronFromName(String name)
-        {
-            foreach (WorkingNeuron neuron in hiddenNeurons)
-            {
-                if (name == neuron.getName())
-                {
-                    return neuron;
-                }
-            }
-
-            return null;
-        }
-
-        public WorkingNeuron getOutputNeuronFromIndex(int index)
-        {
-            return outputNeurons[index];
-        }
 
         public WorkingNeuron getOutputNeuronFromName(String name)
         {

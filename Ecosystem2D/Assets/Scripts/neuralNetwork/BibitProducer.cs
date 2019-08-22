@@ -16,7 +16,7 @@ public class BibitProducer : MonoBehaviour
     public static GameObject bibitPrefab;
     [SerializeField] public int initialNumberOfBibits = 200;
     [SerializeField] public int minimumNumberOfBibits = 10;
-    private static int maximumNumberOfBibits = 2000;
+    private static int maximumNumberOfBibits = 5000;
 
     public List<String> bibitNames;
 //    public List<Sprite> sprites;
@@ -30,6 +30,7 @@ public class BibitProducer : MonoBehaviour
     public static int respawns;
     private static String maxGenAnc;
     private static String maxCurrGenAnc;
+    private static String maxGenBibitName;
     public float wiff;
     public float h8;
     private GameObject fpsDisplay;
@@ -93,17 +94,17 @@ public class BibitProducer : MonoBehaviour
     {
         if (Input.GetKey(KeyCode.Space))
         {
-            initBibits(1);
+            initBibits(25);
         }
 
         if (Input.GetKey(KeyCode.Space) && Input.GetKey(KeyCode.LeftShift))
         {
-            initBibits(25);
+            initBibitsUntil(1000);
         }
 
         if (allBibits.Count < minimumNumberOfBibits)
         {
-            initBibits(1);
+            initBibits(25);
         }
 
         if (Input.GetKeyDown(KeyCode.I))
@@ -130,6 +131,15 @@ public class BibitProducer : MonoBehaviour
         }
 
         respawns += amount;
+    }
+    private void initBibitsUntil(int amount)
+    {
+        while (allBibits.Count<amount)
+        {
+            spawnBibit(bibitNames[Random.Range(0, bibitNames.Count)]);
+            respawns++;
+        }
+
     }
 
     private void readGenerations()
@@ -183,7 +193,7 @@ public class BibitProducer : MonoBehaviour
             GameObject newBibit = Instantiate(bibitPrefab, spawnPos, Quaternion.identity);
             newBibit.GetComponent<Bibit>().pseudoConstructor2(o.GetComponent<Bibit>());
             addBibit(newBibit);
-//            newBibit.GetComponent<Bibit>().displayName = o.GetComponent<Bibit>().displayName;
+            newBibit.GetComponent<Bibit>().displayName = o.GetComponent<Bibit>().displayName;
         }
     }
 
@@ -198,7 +208,7 @@ public class BibitProducer : MonoBehaviour
                "running: " + (int) Time.timeSinceLevelLoad + " @ " + Time.timeScale + " \n" +
                "Deaths: " + respawns + " \n" +
                "maxGeneration: " + maxGeneration + " \n" +
-               "maxCurrentGeneration: " + maxCurrentGeneration + " \n" +
+               "maxCurrentGeneration: " + maxCurrentGeneration + "@ " + maxGenBibitName +  " \n" + 
                "numberOfBibits: " + allBibits.Count;
     }
 
@@ -223,6 +233,8 @@ public class BibitProducer : MonoBehaviour
             {
                 maxCurrentGeneration = generation;
                 bibit.transform.localScale = bigBibit;
+                maxGenBibitName = bibit.name;
+                maxGenBibitName=maxGenBibitName.Substring(0, maxGenBibitName.IndexOf(","));
             }
             else
             {
